@@ -33,13 +33,10 @@ app.get("/", (req: any, res: any) => {
   message(res, OK, "Welcome to tessarus API system");
 });
 
-
 app.all("*", (req: any, res: any) => {
   message(res, NOT_FOUND, "Route does not exist");
 });
 
 app.listen(PORT, () => {
-  console.log(
-    `Tessarus listening on ${PORT}. \nURL:http://localhost:${PORT}`
-  );
+  console.log(`Tessarus listening on ${PORT}. \nURL:http://localhost:${PORT}`);
 });
