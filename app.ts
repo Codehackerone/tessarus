@@ -16,6 +16,7 @@ const connectOptions: any = {
 };
 
 try {
+  mongoose.set("strictQuery", true);
   mongoose.connect(MONGODB_URI, connectOptions);
 } catch (err) {
   console.log(err);
