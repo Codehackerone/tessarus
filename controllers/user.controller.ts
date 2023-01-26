@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import {
-    signUpService,
+  signUpService,
   findUserService,
 } from "../services/user.service";
 import { message, messageCustom, messageError } from "../helpers/message";
@@ -115,7 +115,10 @@ const login = async (req: any, res: any) => {
 
 const sendVerificationMail = async (req: any, res: any) => {
   try {
-
+    let email = req.user.email;    
+    let resMail:any = await sendMail(email, 'Espektro KGEC - Verify your email address', '123456');
+    if(resMail.hasError === true)throw res.error;    
+    message(res, OK, "Verification code sent to your email");
   }
   catch(err: any) {
     if (err.statusObj !== undefined) {
@@ -126,7 +129,6 @@ const sendVerificationMail = async (req: any, res: any) => {
     }
   }
 }
-// sendMail('soumyajitdatta123@gmail.com', 'Verify your account', '123456');
 
 export default{ 
   verifyToken, 
