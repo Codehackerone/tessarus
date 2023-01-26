@@ -22,14 +22,14 @@ const jwt_headers: any = {
   expiresIn: expiry_length,
 };
 
-export const verifyToken = async (req: any, res: any) => {
+const verifyToken = async (req: any, res: any) => {
   let return_object: any = {
     user: req.user,
   };
   messageCustom(res, OK, "Token verified", return_object);
 };
 
-export const signUp = async (req: any, res: any) => {
+const signUp = async (req: any, res: any) => {
   try {
     req.body.espektroId = "E" + getRandomId(10);
     var user: any = await signUpService(req.body);    
@@ -73,7 +73,7 @@ export const signUp = async (req: any, res: any) => {
   }
 };
 
-export const login = async (req: any, res: any) => {
+const login = async (req: any, res: any) => {
   try {
     var email = req.body.email;
     var password = req.body.password;
@@ -113,9 +113,9 @@ export const login = async (req: any, res: any) => {
   }
 };
 
-export const sendVerificationMail = async (req: any, res: any) => {
+const sendVerificationMail = async (req: any, res: any) => {
   try {
-    
+
   }
   catch(err: any) {
     if (err.statusObj !== undefined) {
@@ -127,3 +127,10 @@ export const sendVerificationMail = async (req: any, res: any) => {
   }
 }
 // sendMail('soumyajitdatta123@gmail.com', 'Verify your account', '123456');
+
+export default{ 
+  verifyToken, 
+  signUp, 
+  login, 
+  sendVerificationMail 
+};
