@@ -22,9 +22,16 @@ const updateUserService = async (userId: any, userBody: any) => {
   return user;
 };
 
+const resetPasswordService = async (userId: any, newPassword: any) => {
+  let user: any = await User.findById(userId);
+  user.password = newPassword;
+  await user.save();
+};
+
 export default {
   signUpService,
   findUserService,
   verifyToken,
   updateUserService,
+  resetPasswordService,
 };

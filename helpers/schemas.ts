@@ -24,7 +24,7 @@ const extension = (joi: any) => ({
 
 const Joi = BaseJoi.extend(extension).extend(require("@joi/date"));
 
-export const userSignUpSchema = Joi.object({
+const userSignUpSchema = Joi.object({
   name: Joi.string().required().escapeHTML(),
   email: Joi.string().required().escapeHTML(),
   phone: Joi.string().max(10, "utf-8").required().escapeHTML(),
@@ -37,12 +37,12 @@ export const userSignUpSchema = Joi.object({
   stream: Joi.string(),
 });
 
-export const userLoginSchema = Joi.object({
+const userLoginSchema = Joi.object({
   email: Joi.string().required().escapeHTML(),
   password: Joi.string().required().escapeHTML(),
 });
 
-export const updateUserSchema = Joi.object({
+const updateUserSchema = Joi.object({
   name: Joi.string().required().escapeHTML(),
   gender: Joi.string().valid("Male", "Female", "Others"),
   dateOfBirth: Joi.date().format("YYYY-MM-DD").required(),
@@ -51,3 +51,15 @@ export const updateUserSchema = Joi.object({
   year: Joi.string().valid("1", "2", "3", "4"),
   stream: Joi.string(),
 });
+
+const resetPasswordSchema = Joi.object({
+  password: Joi.string().required().escapeHTML(),
+  resetToken: Joi.string().required().escapeHTML(),
+});
+
+export default {
+  userSignUpSchema,
+  userLoginSchema,
+  updateUserSchema,
+  resetPasswordSchema,
+};

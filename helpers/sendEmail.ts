@@ -3,9 +3,7 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 
-async function sendMail(to: string, subject: string, token: string) {
-  let frontEndUrl: string = String(process.env.FRONTEND_HOSTED_URL);
-  let text: any = " Click here to verify your email: " + frontEndUrl + token;
+async function sendMail(to: string, subject: string, emailContent: string) {
   const options = {
     method: "POST",
     url: "https://rapidprod-sendgrid-v1.p.rapidapi.com/mail/send",
@@ -31,7 +29,7 @@ async function sendMail(to: string, subject: string, token: string) {
             "content": [
               {
                 "type": "text/plain",
-                "value": "${text}"
+                "value": "${emailContent}"
               }
             ]
           }

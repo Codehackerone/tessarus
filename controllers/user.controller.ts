@@ -113,10 +113,15 @@ const login = async (req: any, res: any) => {
 const sendVerificationMail = async (req: any, res: any) => {
   try {
     let email = req.user.email;
+    let frontEndUrl: string = String(process.env.FRONTEND_HOSTED_URL);
+    let text: any =
+      " Click here to verify your email: " +
+      frontEndUrl +
+      req.headers["authorization"].split(" ")[1];
     let resMail: any = await sendMail(
       email,
       "Espektro KGEC - Verify your email address",
-      req.headers["authorization"].split(" ")[1]
+      text
     );
     if (resMail.hasError === true) throw res.error;
     await createLogService({
@@ -206,6 +211,88 @@ const updateProfilePic = async (req: any, res: any) => {
   }
 };
 
+const forgotPassword = async (req: any, res: any) => {
+  try {
+    if (!req.body.email)
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "Email not provided",
+        type: "BAD_REQUEST",
+      };
+    let email = req.body.email;
+    let user: any = await userService.findUserService({ email: email });
+    if (!user)
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "No such user exists",
+        type: "BAD_REQUEST",
+      };
+    let frontEndUrl: string = String(process.env.FRONTEND_HOSTED_URL);
+    const reset_token = jwt.sign(
+      { email: email },
+      String(process.env.JWT_SECRET),
+      jwt_headers
+    );
+    let text =
+      " Click here to reset your password: " + frontEndUrl + reset_token;
+    let resMail: any = await sendMail(
+      email,
+      "Espektro KGEC - Reset your password",
+      text
+    );
+
+    if (resMail.hasError === true) throw res.error;
+    await createLogService({
+      logType: "EMAIL_SENT",
+      userId: new ObjectId(user._id),
+      description: user.name + " requested for password reset",
+    });
+    console.log(reset_token);
+
+    message(res, OK, "Password reset link sent to your email");
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      console.log(err);
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
+};
+
+const resetPassword = async (req: any, res: any) => {
+  try {
+    let resetToken: any = req.body.resetToken;
+    let password: string = req.body.password;
+
+    let decoded: any = jwt.verify(resetToken, String(process.env.JWT_SECRET));
+    let user: any = await userService.findUserService({ email: decoded.email });
+
+    if (!user)
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "No such user exists",
+        type: "BAD_REQUEST",
+      };
+
+    await userService.resetPasswordService(user._id, password);
+    await createLogService({
+      logType: "USER_PASSWORD_RESET",
+      userId: new ObjectId(user._id),
+      description: user.name + " reset password",
+    });
+
+    message(res, OK, "Password reset successfully");
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      console.log(err);
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
+};
+
 export default {
   verifyToken,
   signUp,
@@ -214,4 +301,6 @@ export default {
   updateUser,
   userProfile,
   updateProfilePic,
+  forgotPassword,
+  resetPassword,
 };

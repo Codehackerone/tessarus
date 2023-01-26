@@ -4,6 +4,7 @@ import {
   validateSignUp,
   validateLogin,
   validateUpdateUser,
+  validateResetPassword,
 } from "../middlewares/validator.middleware";
 import { authorize } from "../middlewares/authorization";
 import multer from "multer";
@@ -36,5 +37,9 @@ Router.route("/updateprofilepic").put(
   upload.single("image"),
   userController.updateProfilePic
 );
+
+Router.route("/forgotpassword")
+  .post(userController.forgotPassword)
+  .put(validateResetPassword(), userController.resetPassword);
 
 export default Router;
