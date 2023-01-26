@@ -13,6 +13,7 @@ import {
   SERVER_ERROR,
 } from "../helpers/messageTypes";
 import getRandomId from "../helpers/randomTextGenerator"
+import { createLogService } from "../services/log.service"
 
 const expiry_length = 30 * 86400;
 const jwt_headers: any = {
@@ -40,6 +41,11 @@ export const signUp = async (req: any, res: any) => {
       user: user,
       auth_token: access_token,
     };
+    await createLogService({
+      logType: "USER_SIGNUP",
+      userId: user._id,
+      description: user.name + " signed up",
+    });
     messageCustom(
       res,
       CREATED,
