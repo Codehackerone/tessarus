@@ -24,7 +24,7 @@ const extension = (joi: any) => ({
 
 const Joi = BaseJoi.extend(extension);
 
-export const userRegistrationschema = Joi.object({
+export const userSignUpSchema = Joi.object({
   name: Joi.string().required().escapeHTML(),
   email: Joi.string().required().escapeHTML(),
   phone: Joi.string().required().escapeHTML(),
@@ -35,4 +35,9 @@ export const userRegistrationschema = Joi.object({
   degree: Joi.string().valid("B.Tech", "M.Tech", "MCA"),
   year: Joi.string(),
   stream: Joi.string(),
+});
+
+export const userLoginSchema = Joi.object({
+  email: Joi.string().required().escapeHTML(),  
+  password: Joi.string().required().escapeHTML(),
 });
