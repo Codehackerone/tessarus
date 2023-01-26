@@ -28,7 +28,9 @@ export const authorize = () => {
           authorizationHeaderArray[1],
           String(process.env.JWT_SECRET)
         );
-        let user: any = await userService.findUserService({ email: decoded.email });
+        let user: any = await userService.findUserService({
+          email: decoded.email,
+        });
         if (
           user.verified === false &&
           req.url != "/sendmail" &&

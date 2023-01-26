@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import { ObjectId } from "mongodb";
 import userService from "../services/user.service";
 import { message, messageCustom, messageError } from "../helpers/message";
 import {
@@ -9,8 +10,8 @@ import {
   CONFLICT,
   SERVER_ERROR,
 } from "../helpers/messageTypes";
-import getRandomId from "../helpers/randomTextGenerator"
-import { createLogService } from "../services/log.service"
+import getRandomId from "../helpers/randomTextGenerator";
+import { createLogService } from "../services/log.service";
 import sendMail from "../helpers/sendEmail";
 
 const expiry_length = 30 * 86400;
@@ -22,7 +23,7 @@ const jwt_headers: any = {
 const signUp = async (req: any, res: any) => {
   try {
     req.body.espektroId = "E" + getRandomId(10);
-    var user: any = await userService.signUpService(req.body);    
+    var user: any = await userService.signUpService(req.body);
     const access_token = jwt.sign(
       { email: user.email, user_id: user._id },
       String(process.env.JWT_SECRET),
@@ -34,7 +35,7 @@ const signUp = async (req: any, res: any) => {
     };
     await createLogService({
       logType: "USER_SIGNUP",
-      userId: user._id,
+      userId: new ObjectId(user._id),
       description: user.name + " signed up",
     });
     messageCustom(
@@ -105,17 +106,20 @@ const login = async (req: any, res: any) => {
 
 const sendVerificationMail = async (req: any, res: any) => {
   try {
-    let email = req.user.email;    
-    let resMail:any = await sendMail(email, 'Espektro KGEC - Verify your email address', req.headers["authorization"].split(" ")[1]);
-    if(resMail.hasError === true)throw res.error;    
+    let email = req.user.email;
+    let resMail: any = await sendMail(
+      email,
+      "Espektro KGEC - Verify your email address",
+      req.headers["authorization"].split(" ")[1]
+    );
+    if (resMail.hasError === true) throw res.error;
     await createLogService({
       logType: "EMAIL_SENT",
-      userId: req.user.user_id,
+      userId: new ObjectId(req.user._id),
       description: req.user.name + " requested for email verification",
     });
-    message(res, OK, "Verification code sent to your email");    
-  }
-  catch(err: any) {
+    message(res, OK, "Verification code sent to your email");
+  } catch (err: any) {
     if (err.statusObj !== undefined) {
       messageError(res, err.statusObj, err.name, err.type);
     } else {
@@ -123,16 +127,21 @@ const sendVerificationMail = async (req: any, res: any) => {
       messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
     }
   }
-}
+};
 
 const verifyToken = async (req: any, res: any) => {
   var user: any = await userService.verifyToken(req.user);
+  await createLogService({
+    logType: "USER_VERIFIED",
+    userId: new ObjectId(user._id),
+    description: req.user.name + " verified email",
+  });
   message(res, OK, "User verified Successfully");
 };
 
-export default{ 
-  verifyToken, 
-  signUp, 
-  login, 
-  sendVerificationMail 
+export default {
+  verifyToken,
+  signUp,
+  login,
+  sendVerificationMail,
 };

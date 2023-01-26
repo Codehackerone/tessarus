@@ -10,15 +10,15 @@ const findUserService = async (param: any) => {
   return user;
 };
 
-const verifyToken = async (userBody:any) => {
-  let user:any  = await User.findByIdAndUpdate(userBody._id, {
+const verifyToken = async (userBody: any) => {
+  let user: any = await User.findByIdAndUpdate(userBody._id, {
     verified: true,
   });
   return user;
-}
+};
 
 export default {
   signUpService,
   findUserService,
-  verifyToken
-}
+  verifyToken,
+};

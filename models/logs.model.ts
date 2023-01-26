@@ -6,24 +6,32 @@ const logSchema = new Schema(
     logType: {
       type: String,
       enum: [
-                "USER_SIGNUP", "USER_VERIFIED", "USER_LOGIN", "EVENT_CREATED",
-                "EVENT_UPDATED", "EVENT_DELETED", "TICKET_CREATED", "CHECKED_IN",
-                "PAYMENT", "COINS_UPDATED", "EMAIL_SENT"
-            ],
+        "USER_SIGNUP",
+        "USER_VERIFIED",
+        "USER_LOGIN",
+        "EVENT_CREATED",
+        "EVENT_UPDATED",
+        "EVENT_DELETED",
+        "TICKET_CREATED",
+        "CHECKED_IN",
+        "PAYMENT",
+        "COINS_UPDATED",
+        "EMAIL_SENT",
+      ],
       required: true,
     },
-    user_id:{
-        type: Schema.Types.ObjectId,
-        ref: "User",        
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
     },
-    volunteer_id:{
-        type: Schema.Types.ObjectId,
-        ref: "Volunteer",
+    volunteerId: {
+      type: Schema.Types.ObjectId,
+      ref: "Volunteer",
     },
     description: {
-        type: String,
-        required: true,
-    }
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,
