@@ -14,6 +14,7 @@ import {
 } from "../helpers/messageTypes";
 import getRandomId from "../helpers/randomTextGenerator"
 import { createLogService } from "../services/log.service"
+import sendMail from "../helpers/sendEmail";
 
 const expiry_length = 30 * 86400;
 const jwt_headers: any = {
@@ -111,3 +112,18 @@ export const login = async (req: any, res: any) => {
     }
   }
 };
+
+export const sendVerificationMail = async (req: any, res: any) => {
+  try {
+    
+  }
+  catch(err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      console.log(err);
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
+}
+// sendMail('soumyajitdatta123@gmail.com', 'Verify your account', '123456');
