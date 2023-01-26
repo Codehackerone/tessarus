@@ -17,8 +17,14 @@ const verifyToken = async (userBody: any) => {
   return user;
 };
 
+const updateUserService = async (userId: any, userBody: any) => {
+  let user: any = await User.findByIdAndUpdate(userId, userBody);
+  return user;
+};
+
 export default {
   signUpService,
   findUserService,
   verifyToken,
+  updateUserService,
 };

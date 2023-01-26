@@ -41,3 +41,13 @@ export const userLoginSchema = Joi.object({
   email: Joi.string().required().escapeHTML(),
   password: Joi.string().required().escapeHTML(),
 });
+
+export const updateUserSchema = Joi.object({
+  name: Joi.string().required().escapeHTML(),
+  gender: Joi.string().valid("Male", "Female", "Others"),
+  dateOfBirth: Joi.date().format("YYYY-MM-DD").required(),
+  college: Joi.string().required().escapeHTML(),
+  degree: Joi.string().valid("B.Tech", "M.Tech", "MCA"),
+  year: Joi.string().valid("1", "2", "3", "4"),
+  stream: Joi.string(),
+});

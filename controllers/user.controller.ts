@@ -92,7 +92,13 @@ const login = async (req: any, res: any) => {
     );
     var return_object: any = {};
     return_object.auth_token = access_token;
+    delete user.password;
     return_object.user = user;
+    await createLogService({
+      logType: "USER_LOGIN",
+      userId: new ObjectId(user._id),
+      description: user.name + " logged in",
+    });
     messageCustom(res, OK, "Successfully logged in", return_object);
   } catch (err: any) {
     if (err.statusObj !== undefined) {
@@ -130,6 +136,10 @@ const sendVerificationMail = async (req: any, res: any) => {
 };
 
 const verifyToken = async (req: any, res: any) => {
+  if (req.user.verified) {
+    message(res, OK, "User already verified");
+    return;
+  }
   var user: any = await userService.verifyToken(req.user);
   await createLogService({
     logType: "USER_VERIFIED",
@@ -139,9 +149,30 @@ const verifyToken = async (req: any, res: any) => {
   message(res, OK, "User verified Successfully");
 };
 
+const updateUser = async (req: any, res: any) => {
+  try {
+    var user: any = await userService.updateUserService(req.user._id, req.body);
+    delete user.password;
+    await createLogService({
+      logType: "USER_UPDATED",
+      userId: new ObjectId(user._id),
+      description: user.name + " updated profile",
+    });
+    message(res, OK, "User updated Successfully");
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      console.log(err);
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
+};
+
 export default {
   verifyToken,
   signUp,
   login,
   sendVerificationMail,
+  updateUser,
 };

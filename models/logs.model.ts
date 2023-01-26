@@ -9,6 +9,7 @@ const logSchema = new Schema(
         "USER_SIGNUP",
         "USER_VERIFIED",
         "USER_LOGIN",
+        "USER_UPDATED",
         "EVENT_CREATED",
         "EVENT_UPDATED",
         "EVENT_DELETED",

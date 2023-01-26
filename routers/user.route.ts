@@ -3,6 +3,7 @@ import userController from "../controllers/user.controller";
 import {
   validateSignUp,
   validateLogin,
+  validateUpdateUser,
 } from "../middlewares/validator.middleware";
 import { authorize } from "../middlewares/authorization";
 
@@ -17,6 +18,12 @@ Router.route("/sendmail").post(
   userController.sendVerificationMail
 );
 
-Router.route("/verifytoken").all(authorize(), userController.verifyToken);
+Router.route("/verifytoken").post(authorize(), userController.verifyToken);
+
+Router.route("/update").post(
+  authorize(),
+  validateUpdateUser(),
+  userController.updateUser
+);
 
 export default Router;
