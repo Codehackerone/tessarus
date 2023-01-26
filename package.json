@@ -10,6 +10,7 @@
     "start": "nodemon app.ts"
   },
   "dependencies": {
+    "@joi/date": "^2.1.0",
     "@types/cors": "^2.8.12",
     "@types/joi": "^17.2.3",
     "@types/sanitize-html": "^2.3.2",

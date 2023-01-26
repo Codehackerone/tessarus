@@ -12,6 +12,7 @@ import {
   CONFLICT,
   SERVER_ERROR,
 } from "../helpers/messageTypes";
+import getRandomId from "../helpers/randomTextGenerator"
 
 const expiry_length = 30 * 86400;
 const jwt_headers: any = {
@@ -28,7 +29,8 @@ export const verifyToken = async (req: any, res: any) => {
 
 export const signUp = async (req: any, res: any) => {
   try {
-    var user: any = await signUpService(req.body);
+    req.body.espektroId = "E" + getRandomId(10);
+    var user: any = await signUpService(req.body);    
     const access_token = jwt.sign(
       { email: user.email, user_id: user._id },
       String(process.env.JWT_SECRET),

@@ -22,18 +22,18 @@ const extension = (joi: any) => ({
   },
 });
 
-const Joi = BaseJoi.extend(extension);
+const Joi = BaseJoi.extend(extension).extend(require('@joi/date'));
 
 export const userSignUpSchema = Joi.object({
   name: Joi.string().required().escapeHTML(),
   email: Joi.string().required().escapeHTML(),
-  phone: Joi.string().required().escapeHTML(),
+  phone: Joi.string().max(10, 'utf-8').required().escapeHTML(),
   password: Joi.string().required().escapeHTML(),
   gender: Joi.string().valid("Male", "Female", "Others"),
-  dateOfBirth: Joi.date(),
+  dateOfBirth: Joi.date().format('YYYY-MM-DD').required(),
   college: Joi.string().required().escapeHTML(),
   degree: Joi.string().valid("B.Tech", "M.Tech", "MCA"),
-  year: Joi.string(),
+  year: Joi.string().valid("1", "2", "3", "4"),
   stream: Joi.string(),
 });
 
