@@ -4,6 +4,7 @@ import { config } from "dotenv";
 import { message } from "./helpers/message";
 import { OK, NOT_FOUND } from "./helpers/messageTypes";
 import mongoose from "mongoose";
+import userRouter from "./routers/user.route";
 
 config();
 
@@ -33,6 +34,8 @@ mongoose.connection.once("open", () => {
 app.get("/", (req: any, res: any) => {
   message(res, OK, "Welcome to tessarus API system");
 });
+
+app.use("/api/users", userRouter);
 
 app.all("*", (req: any, res: any) => {
   message(res, NOT_FOUND, "Route does not exist");
