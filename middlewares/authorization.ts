@@ -36,6 +36,7 @@ export const authorize = () => {
           "/verifytoken",
           "/profile",
           "/update",
+          "/updateprofilepic",
         ];
 
         if (user.verified === false && urlsToSkip.includes(req.originalUrl)) {

@@ -188,6 +188,24 @@ const userProfile = async (req: any, res: any) => {
   }
 };
 
+const updateProfilePic = async (req: any, res: any) => {
+  try {
+    var path = req.file["path"];
+    var user: any = await userService.updateUserService(req.user._id, {
+      profileImageUrl: path,
+    });
+
+    message(res, OK, "Profile picture updated successfully");
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      console.log(err);
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
+};
+
 export default {
   verifyToken,
   signUp,
@@ -195,4 +213,5 @@ export default {
   sendVerificationMail,
   updateUser,
   userProfile,
+  updateProfilePic,
 };

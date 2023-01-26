@@ -13,14 +13,18 @@
     "@joi/date": "^2.1.0",
     "@types/cors": "^2.8.12",
     "@types/joi": "^17.2.3",
+    "@types/multer": "^1.4.7",
     "@types/sanitize-html": "^2.3.2",
     "axios": "^1.2.4",
     "bcryptjs": "^2.4.3",
+    "cloudinary": "^1.33.0",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.0.2",
+    "multer": "^1.4.5-lts.1",
+    "multer-storage-cloudinary": "^4.0.0",
     "sanitize-html": "^2.4.0"
   },
   "devDependencies": {
