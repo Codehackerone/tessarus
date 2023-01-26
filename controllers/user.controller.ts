@@ -92,8 +92,8 @@ const login = async (req: any, res: any) => {
     );
     var return_object: any = {};
     return_object.auth_token = access_token;
-    delete user.password;
-    return_object.user = user;
+    return_object.user = Object.assign({}, user)["_doc"];
+    delete return_object.user.password;
     await createLogService({
       logType: "USER_LOGIN",
       userId: new ObjectId(user._id),
@@ -169,10 +169,30 @@ const updateUser = async (req: any, res: any) => {
   }
 };
 
+const userProfile = async (req: any, res: any) => {
+  try {
+    let user: any = req.user;
+
+    let return_object: any = {};
+    return_object.user = Object.assign({}, user)["_doc"];
+    return_object.user.qrText = req.user._id + "-" + user.espektroId;
+    delete return_object.user.password;
+    messageCustom(res, OK, "User Profile fetched successfully", return_object);
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      console.log(err);
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
+};
+
 export default {
   verifyToken,
   signUp,
   login,
   sendVerificationMail,
   updateUser,
+  userProfile,
 };

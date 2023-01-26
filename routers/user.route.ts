@@ -26,4 +26,6 @@ Router.route("/update").post(
   userController.updateUser
 );
 
+Router.route("/profile").get(authorize(), userController.userProfile);
+
 export default Router;

@@ -31,21 +31,25 @@ export const authorize = () => {
         let user: any = await userService.findUserService({
           email: decoded.email,
         });
-        if (
-          user.verified === false &&
-          req.url != "/sendmail" &&
-          req.url != "/verifytoken"
-        ) {
+        let urlsToSkip: Array<String> = [
+          "/sendmail",
+          "/verifytoken",
+          "/profile",
+          "/update",
+        ];
+
+        if (user.verified === false && urlsToSkip.includes(req.originalUrl)) {
           return messageError(
             res,
-            401,
-            "not verified. verify first.",
+            UNAUTHORIZED,
+            "User not verified.",
             "AuthenticationError"
           );
         }
         req.user = user;
         next();
       } catch (err) {
+        console.log(err);
         return messageError(
           res,
           UNAUTHORIZED,
