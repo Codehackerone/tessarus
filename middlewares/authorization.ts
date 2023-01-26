@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import { BAD_REQUEST, UNAUTHORIZED } from "../helpers/messageTypes";
-import { findUserService } from "../services/user.service";
+import userService from "../services/user.service";
 import { messageError } from "../helpers/message";
 
 export const authorize = () => {
@@ -28,7 +28,7 @@ export const authorize = () => {
           authorizationHeaderArray[1],
           String(process.env.JWT_SECRET)
         );
-        let user: any = await findUserService({ email: decoded.email });
+        let user: any = await userService.findUserService({ email: decoded.email });
         if (
           user.verified === false &&
           req.url != "/sendmail" &&

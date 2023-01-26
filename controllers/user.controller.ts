@@ -1,9 +1,6 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import {
-  signUpService,
-  findUserService,
-} from "../services/user.service";
+import userService from "../services/user.service";
 import { message, messageCustom, messageError } from "../helpers/message";
 import {
   OK,
@@ -22,17 +19,10 @@ const jwt_headers: any = {
   expiresIn: expiry_length,
 };
 
-const verifyToken = async (req: any, res: any) => {
-  let return_object: any = {
-    user: req.user,
-  };
-  messageCustom(res, OK, "Token verified", return_object);
-};
-
 const signUp = async (req: any, res: any) => {
   try {
     req.body.espektroId = "E" + getRandomId(10);
-    var user: any = await signUpService(req.body);    
+    var user: any = await userService.signUpService(req.body);    
     const access_token = jwt.sign(
       { email: user.email, user_id: user._id },
       String(process.env.JWT_SECRET),
@@ -77,7 +67,7 @@ const login = async (req: any, res: any) => {
   try {
     var email = req.body.email;
     var password = req.body.password;
-    const user: any = await findUserService({ email });
+    const user: any = await userService.findUserService({ email });
     if (!user) {
       var err: any = {
         statusObj: BAD_REQUEST,
@@ -116,9 +106,14 @@ const login = async (req: any, res: any) => {
 const sendVerificationMail = async (req: any, res: any) => {
   try {
     let email = req.user.email;    
-    let resMail:any = await sendMail(email, 'Espektro KGEC - Verify your email address', '123456');
+    let resMail:any = await sendMail(email, 'Espektro KGEC - Verify your email address', req.headers["authorization"].split(" ")[1]);
     if(resMail.hasError === true)throw res.error;    
-    message(res, OK, "Verification code sent to your email");
+    await createLogService({
+      logType: "EMAIL_SENT",
+      userId: req.user.user_id,
+      description: req.user.name + " requested for email verification",
+    });
+    message(res, OK, "Verification code sent to your email");    
   }
   catch(err: any) {
     if (err.statusObj !== undefined) {
@@ -129,6 +124,11 @@ const sendVerificationMail = async (req: any, res: any) => {
     }
   }
 }
+
+const verifyToken = async (req: any, res: any) => {
+  var user: any = await userService.verifyToken(req.user);
+  message(res, OK, "User verified Successfully");
+};
 
 export default{ 
   verifyToken, 

@@ -8,7 +8,7 @@ const logSchema = new Schema(
       enum: [
                 "USER_SIGNUP", "USER_VERIFIED", "USER_LOGIN", "EVENT_CREATED",
                 "EVENT_UPDATED", "EVENT_DELETED", "TICKET_CREATED", "CHECKED_IN",
-                "PAYMENT", "COINS_UPDATED"
+                "PAYMENT", "COINS_UPDATED", "EMAIL_SENT"
             ],
       required: true,
     },

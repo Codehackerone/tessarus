@@ -1,11 +1,24 @@
 import User from "../models/user.model";
 
-export const signUpService = async (userBody: any) => {
+const signUpService = async (userBody: any) => {
   const user = await User.create(userBody);
   return user;
 };
 
-export const findUserService = async (param: any) => {
+const findUserService = async (param: any) => {
   var user = await User.findOne(param);
   return user;
 };
+
+const verifyToken = async (userBody:any) => {
+  let user:any  = await User.findByIdAndUpdate(userBody._id, {
+    verified: true,
+  });
+  return user;
+}
+
+export default {
+  signUpService,
+  findUserService,
+  verifyToken
+}
