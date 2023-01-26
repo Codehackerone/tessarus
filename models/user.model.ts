@@ -11,7 +11,7 @@ const userSchema = new Schema({
     type: Boolean,
     default: false,
   },
-  espektro_id: {
+  espektroId: {
     type: String,
     required: true,
   },
