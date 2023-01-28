@@ -17,7 +17,7 @@ const ticketSchema = new Schema(
       type: String,
       required: true,
     },
-    isActive: {
+    checkedIn: {
       type: Boolean,
       default: true,
     },

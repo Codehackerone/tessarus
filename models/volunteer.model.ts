@@ -25,16 +25,16 @@ const volunteerSchema = new Schema(
         ref: "Event",
       },
     ],
-    userType: {
-      type: String,
-      enum: ["Volunteer", "Treasurer", "Admin"],
-    },
+    accessLevel:{
+      type: Number,
+      default: 1    
+    }
   },
   {
     timestamps: true,
   }
 );
 
-const Volunteer = mongoose.model("Ticket", volunteerSchema);
+const Volunteer = mongoose.model("Volunteer", volunteerSchema);
 
 export default Volunteer;
