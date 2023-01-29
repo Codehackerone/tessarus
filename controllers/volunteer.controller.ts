@@ -218,6 +218,14 @@ const updateVolunteer = async (req: any, res: any) => {
     let return_object: any = {};
     return_object.volunteer = Object.assign({}, updatedVolunteer)["_doc"];
     delete return_object.volunteer.password;
+
+    await createLogService({
+      logType: "VOLUNTEER_UPDATED",
+      userId: new ObjectId(req.volunteer._id),
+      description:
+        req.volunteer.name + " updated Volunteer " + updatedVolunteer.name,
+    });
+
     messageCustom(res, OK, "Volunteer updated successfully", return_object);
   } catch (err: any) {
     if (err.statusObj !== undefined) {
@@ -301,6 +309,13 @@ const deleteVolunteer = async (req: any, res: any) => {
     let deletedVolunteer: any = await volunteerService.deleteVolunteerService(
       volunteerId
     );
+
+    await createLogService({
+      logType: "VOLUNTEER_DELETED",
+      userId: new ObjectId(req.volunteer._id),
+      description:
+        req.volunteer.name + " deleted Volunteer " + deletedVolunteer.name,
+    });
 
     message(res, OK, "Volunteer deleted successfully");
   } catch (err: any) {

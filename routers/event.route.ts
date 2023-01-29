@@ -1,20 +1,28 @@
 import express from "express";
-//import volunteerController from "../controllers/volunteer.controller";
+import eventController from "../controllers/event.controller";
+import { authorize } from "../middlewares/volunteer.authorization";
+import { validateAddEvent } from "../middlewares/validator.middleware";
+import multer from "multer";
+import { storage } from "../helpers/cloudinary";
+const upload = multer({ storage });
 
 const Router = express.Router();
 
-// Get all events - /all - GET
+Router.route("/all").get(eventController.getAllEvents);
 
-// Get an event by id - /:id - GET
+Router.route("/add").post(
+  authorize(3),
+  validateAddEvent(),
+  eventController.addEvent
+);
 
-// Add an event - /add - POST (minAccessLevel: 3)
+Router.route("/images/:id")
+  .put(authorize(3), upload.array("images"), eventController.addImages)
+  .delete(authorize(3), eventController.deleteEventImages);
 
-// Update an event - /update - PUT (minAccessLevel: 3)
-
-// Update Picture - /updatepicture - PUT (minAccessLevel: 3)
-
-// Delete an event - /delete - DELETE (minAccessLevel: 4)
-
-// Scan event qr - /eventqrscan - GET (minAccessLevel: 1)
+Router.route("/:id")
+  .get(eventController.getEvent)
+  .put(authorize(3), validateAddEvent(), eventController.updateEvent)
+  .delete(authorize(3), eventController.deleteEvent);
 
 export default Router;
