@@ -123,7 +123,7 @@ const sendVerificationMail = async (req: any, res: any) => {
       "Espektro KGEC - Verify your email address",
       text
     );
-    if (resMail.hasError === true) throw res.error;
+    if (resMail.hasError === true) throw resMail.error;
     await createLogService({
       logType: "EMAIL_SENT",
       userId: new ObjectId(req.user._id),

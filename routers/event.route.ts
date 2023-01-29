@@ -17,5 +17,4 @@ const Router = express.Router();
 
 // Scan event qr - /eventqrscan - GET (minAccessLevel: 1)
 
-
 export default Router;

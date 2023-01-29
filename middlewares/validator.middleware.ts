@@ -41,3 +41,13 @@ export const validateResetPassword = () => {
     } else next();
   };
 };
+
+export const validateAddVolunteer = () => {
+  return async (req: any, res: any, next: any) => {
+    const { error } = joiSchemas.addVolunteerSchema.validate(req.body);
+    if (error) {
+      const msg = error.details.map((el: any) => el.message).join(",");
+      messageError(res, BAD_REQUEST, msg, "ValidationError");
+    } else next();
+  };
+};

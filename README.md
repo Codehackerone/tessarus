@@ -14,7 +14,7 @@ Click [here](https://documenter.getpostman.com/view/15506921/2s8ZDczzci) to view
 
 # 3rd Party Services Used
 
--   MongoDB
--   AWS 
--   Cloudinary
--   SendGrid (RapidAPI)
+- MongoDB
+- AWS
+- Cloudinary
+- SendGrid (RapidAPI)

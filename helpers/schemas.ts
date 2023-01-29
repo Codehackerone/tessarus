@@ -57,9 +57,18 @@ const resetPasswordSchema = Joi.object({
   resetToken: Joi.string().required().escapeHTML(),
 });
 
+const addVolunteerSchema = Joi.object({
+  name: Joi.string().required().escapeHTML(),
+  email: Joi.string().required().escapeHTML(),
+  phone: Joi.string().max(10, "utf-8").required().escapeHTML(),
+  events: Joi.array(),
+  accessLevel: Joi.number().valid(1, 2, 3),
+});
+
 export default {
   userSignUpSchema,
   userLoginSchema,
   updateUserSchema,
   resetPasswordSchema,
+  addVolunteerSchema,
 };

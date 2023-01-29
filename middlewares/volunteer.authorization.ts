@@ -4,11 +4,11 @@ import volunteerService from "../services/volunteer.service";
 import { messageError } from "../helpers/message";
 
 /*
-    * @accessLevel: 1 - Volunteer
-    * @accessLevel: 2 - Treasurer
-    * @accessLevel: 3 - Admin
-    * @accessLevel: 4 - Super Admin
-*/
+ * @accessLevel: 1 - Volunteer
+ * @accessLevel: 2 - Treasurer
+ * @accessLevel: 3 - Admin
+ * @accessLevel: 4 - Super Admin
+ */
 
 export const authorize = (accessLevel: number) => {
   return async (req: any, res: any, next: any) => {
@@ -39,12 +39,12 @@ export const authorize = (accessLevel: number) => {
           email: decoded.email,
         });
         if (volunteer.accessLevel < accessLevel) {
-            return messageError(
-                res,
-                UNAUTHORIZED,
-                "Volunteer not authorized.",
-                "AuthorizationError"
-            );
+          return messageError(
+            res,
+            UNAUTHORIZED,
+            "Volunteer not authorized.",
+            "AuthorizationError"
+          );
         }
         req.volunteer = volunteer;
         next();

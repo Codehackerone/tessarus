@@ -5,7 +5,7 @@ const Router = express.Router();
 
 // register for an event - /register - POST
 
-// get all tickets - /all - GET 
+// get all tickets - /all - GET
 
 // get all tickets for an event - /event/:id - GET
 
@@ -14,9 +14,5 @@ const Router = express.Router();
 // get all tickets for a user for an event - /user/:id/event/:id - GET
 
 // check in for an event - /checkin - POST- minAccessLevel: 1
-
-
-
-
 
 export default Router;
