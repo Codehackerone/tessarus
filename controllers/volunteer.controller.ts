@@ -29,7 +29,7 @@ const addVolunteer = async (req: any, res: any) => {
     let password = getRandomId(8);
 
     req.body.password = password;
-    var volunteer: any = await volunteerService.addVolunteerService(req.body);
+    let volunteer: any = await volunteerService.addVolunteerService(req.body);
 
     let text: string =
       "Hey " +
@@ -87,13 +87,13 @@ const addVolunteer = async (req: any, res: any) => {
 
 const login = async (req: any, res: any) => {
   try {
-    var email = req.body.email;
-    var password = req.body.password;
+    let email = req.body.email;
+    let password = req.body.password;
     const volunteer: any = await volunteerService.findVolunteerService({
       email,
     });
     if (!volunteer) {
-      var err: any = {
+      let err: any = {
         statusObj: BAD_REQUEST,
         type: "AuthenticationError",
         name: "Email or Password doesn't match.",
@@ -101,7 +101,7 @@ const login = async (req: any, res: any) => {
       throw err;
     }
     if (!bcrypt.compareSync(password, volunteer.password)) {
-      var err: any = {
+      let err: any = {
         statusObj: BAD_REQUEST,
         type: "AuthenticationError",
         name: "Email or Password doesn't match.",
@@ -113,7 +113,7 @@ const login = async (req: any, res: any) => {
       String(process.env.JWT_SECRET),
       jwt_headers
     );
-    var return_object: any = {};
+    let return_object: any = {};
     return_object.auth_token = access_token;
     return_object.volunteer = Object.assign({}, volunteer)["_doc"];
     delete return_object.volunteer.password;
@@ -134,17 +134,17 @@ const login = async (req: any, res: any) => {
 
 const getAllVolunteers = async (req: any, res: any) => {
   try {
-    var volunteers: any = await volunteerService.findAllVolunteersService();
+    let volunteers: any = await volunteerService.findAllVolunteersService();
 
     if (volunteers.length === 0) {
-      var err: any = {
+      let err: any = {
         statusObj: NOTFOUND,
         type: "NotFoundError",
         name: "No volunteers found",
       };
       throw err;
     }
-    var return_object: any = {};
+    let return_object: any = {};
     return_object.volunteers = volunteers;
 
     messageCustom(res, OK, "Volunteers fetched successfully", return_object);
@@ -161,12 +161,12 @@ const getVolunteer = async (req: any, res: any) => {
   try {
     let volunteerId = req.params.id;
 
-    var volunteer: any = await volunteerService.findVolunteerService({
+    let volunteer: any = await volunteerService.findVolunteerService({
       _id: volunteerId,
     });
 
     if (!volunteer) {
-      var err: any = {
+      let err: any = {
         statusObj: NOTFOUND,
         type: "NotFoundError",
         name: "No volunteer found",
@@ -194,7 +194,7 @@ const updateVolunteer = async (req: any, res: any) => {
       _id: volunteerId,
     });
     if (!volunteer) {
-      var err: any = {
+      let err: any = {
         statusObj: NOTFOUND,
         type: "NotFoundError",
         name: "No volunteer found",
@@ -203,7 +203,7 @@ const updateVolunteer = async (req: any, res: any) => {
     }
 
     if (volunteer.accessLevel >= 4) {
-      var err: any = {
+      let err: any = {
         statusObj: FORBIDDEN,
         type: "ForbiddenError",
         name: "You are not authorized to perform this action",
@@ -230,16 +230,16 @@ const updateVolunteer = async (req: any, res: any) => {
 
 const getAllUsers = async (req: any, res: any) => {
   try {
-    var users: any = await userService.getAllUsersService();
+    let users: any = await userService.getAllUsersService();
     if (users.length === 0) {
-      var err: any = {
+      let err: any = {
         statusObj: NOTFOUND,
         type: "NotFoundError",
         name: "No users found",
       };
       throw err;
     }
-    var return_object: any = {};
+    let return_object: any = {};
     return_object.users = users;
     messageCustom(res, OK, "Users fetched successfully", return_object);
   } catch (err: any) {
@@ -253,16 +253,16 @@ const getAllUsers = async (req: any, res: any) => {
 
 const getAllLogs = async (req: any, res: any) => {
   try {
-    var logs: any = await getAllLogsService();
+    let logs: any = await getAllLogsService();
     if (logs.length === 0) {
-      var err: any = {
+      let err: any = {
         statusObj: NOTFOUND,
         type: "NotFoundError",
         name: "No logs found",
       };
       throw err;
     }
-    var return_object: any = {};
+    let return_object: any = {};
     return_object.logs = logs;
     messageCustom(res, OK, "Logs fetched successfully", return_object);
   } catch (err: any) {
@@ -281,7 +281,7 @@ const deleteVolunteer = async (req: any, res: any) => {
       _id: volunteerId,
     });
     if (!volunteer) {
-      var err: any = {
+      let err: any = {
         statusObj: NOTFOUND,
         type: "NotFoundError",
         name: "No volunteer found",
@@ -290,7 +290,7 @@ const deleteVolunteer = async (req: any, res: any) => {
     }
 
     if (volunteer.accessLevel >= 4) {
-      var err: any = {
+      let err: any = {
         statusObj: FORBIDDEN,
         type: "ForbiddenError",
         name: "You are not authorized to perform this action",
@@ -319,7 +319,7 @@ const userQRScan = async (req: any, res: any) => {
       _id: qrText.split("-")[0],
     });
     if (!user) {
-      var err: any = {
+      let err: any = {
         statusObj: NOTFOUND,
         type: "NotFoundError",
         name: "No user found",
