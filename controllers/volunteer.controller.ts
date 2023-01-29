@@ -8,6 +8,7 @@ import {
   BAD_REQUEST,
   CONFLICT,
   SERVER_ERROR,
+  FORBIDDEN,
 } from "../helpers/messageTypes";
 import getRandomId from "../helpers/randomTextGenerator";
 import { createLogService } from "../services/log.service";
@@ -184,9 +185,51 @@ const getVolunteer = async (req: any, res: any) => {
   }
 };
 
+const updateVolunteer = async (req: any, res: any) => {
+  try {
+    let volunteerId = req.params.id;
+    let volunteer: any = await volunteerService.findVolunteerService({
+      _id: volunteerId,
+    });
+    if (!volunteer) {
+      var err: any = {
+        statusObj: NOTFOUND,
+        type: "NotFoundError",
+        name: "No volunteer found",
+      };
+      throw err;
+    }
+
+    if (volunteer.accessLevel >= 4) {
+      var err: any = {
+        statusObj: FORBIDDEN,
+        type: "ForbiddenError",
+        name: "You are not authorized to perform this action",
+      };
+      throw err;
+    }
+    let updatedVolunteer: any = await volunteerService.updateVolunteerService(
+      volunteerId,
+      req.body
+    );
+
+    let return_object: any = {};
+    return_object.volunteer = Object.assign({}, updatedVolunteer)["_doc"];
+    delete return_object.volunteer.password;
+    messageCustom(res, OK, "Volunteer updated successfully", return_object);
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
+};
+
 export default {
   addVolunteer,
   login,
   getAllVolunteers,
   getVolunteer,
+  updateVolunteer,
 };

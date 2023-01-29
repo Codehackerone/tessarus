@@ -65,10 +65,17 @@ const addVolunteerSchema = Joi.object({
   accessLevel: Joi.number().valid(1, 2, 3, 4),
 });
 
+const updateVolunteerSchema = Joi.object({
+  name: Joi.string().required().escapeHTML(),
+  events: Joi.array(),
+  accessLevel: Joi.number().valid(1, 2, 3),
+});
+
 export default {
   userSignUpSchema,
   userLoginSchema,
   updateUserSchema,
   resetPasswordSchema,
   addVolunteerSchema,
+  updateVolunteerSchema,
 };

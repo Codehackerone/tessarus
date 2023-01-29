@@ -3,6 +3,7 @@ import volunteerController from "../controllers/volunteer.controller";
 import {
   validateAddVolunteer,
   validateLogin,
+  validateUpdateVolunteer,
 } from "../middlewares/validator.middleware";
 import { authorize } from "../middlewares/volunteer.authorization";
 import { issuperadmin } from "../middlewares/superadmin.middleware";
@@ -25,12 +26,16 @@ Router.post(
 
 Router.post("/login", validateLogin(), volunteerController.login);
 
-// Update volunteer - /update - PUT (minAccessLevel: 4)
-
 // Delete volunteer - /delete - DELETE (minAccessLevel: 4)
 
 // Scan user qr - /userqrscan - GET (minAccessLevel: 1)
 
-Router.route("/:id").get(authorize(3), volunteerController.getVolunteer);
+Router.route("/:id")
+  .get(authorize(3), volunteerController.getVolunteer)
+  .put(
+    authorize(4),
+    validateUpdateVolunteer(),
+    volunteerController.updateVolunteer
+  );
 
 export default Router;

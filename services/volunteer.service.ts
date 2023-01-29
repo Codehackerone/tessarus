@@ -13,8 +13,13 @@ const findAllVolunteersService = async () => {
   return Volunteer.find().select("-password");
 };
 
+const updateVolunteerService = async (volunteerId: any, volunteer: any) => {
+  return Volunteer.findByIdAndUpdate(volunteerId, volunteer, { new: true });
+};
+
 export default {
   addVolunteerService,
   findVolunteerService,
   findAllVolunteersService,
+  updateVolunteerService,
 };

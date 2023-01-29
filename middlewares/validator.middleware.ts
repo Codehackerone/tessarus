@@ -51,3 +51,13 @@ export const validateAddVolunteer = () => {
     } else next();
   };
 };
+
+export const validateUpdateVolunteer = () => {
+  return async (req: any, res: any, next: any) => {
+    const { error } = joiSchemas.updateVolunteerSchema.validate(req.body);
+    if (error) {
+      const msg = error.details.map((el: any) => el.message).join(",");
+      messageError(res, BAD_REQUEST, msg, "ValidationError");
+    } else next();
+  };
+};
