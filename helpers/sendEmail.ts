@@ -28,7 +28,7 @@ async function sendMail(to: string, subject: string, emailContent: string) {
             },
             "content": [
               {
-                "type": "text/plain",
+                "type": "text/html",
                 "value": "${emailContent}"
               }
             ]

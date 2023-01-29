@@ -57,9 +57,49 @@ const resetPasswordSchema = Joi.object({
   resetToken: Joi.string().required().escapeHTML(),
 });
 
+const addVolunteerSchema = Joi.object({
+  name: Joi.string().required().escapeHTML(),
+  email: Joi.string().required().escapeHTML(),
+  phone: Joi.string().max(10, "utf-8").required().escapeHTML(),
+  events: Joi.array(),
+  accessLevel: Joi.number().valid(1, 2, 3, 4),
+});
+
+const updateVolunteerSchema = Joi.object({
+  name: Joi.string().required().escapeHTML(),
+  events: Joi.array(),
+  accessLevel: Joi.number().valid(1, 2, 3),
+});
+
+const addEventSchema = Joi.object({
+  title: Joi.string().required().escapeHTML(),
+  description: Joi.string().required().escapeHTML(),
+  tagLine: Joi.string().escapeHTML(),
+  startTime: Joi.date().format("YYYY-MM-DD HH:mm:ss").required(),
+  endTime: Joi.date().format("YYYY-MM-DD HH:mm:ss").required(),
+  eventVenue: Joi.string().required().escapeHTML(),
+  eventType: Joi.string().valid("solo", "group"),
+  eventMinParticipants: Joi.number(),
+  eventMaxParticipants: Joi.number(),
+  eventPrice: Joi.number().min(0),
+  eventOrganiserClub: Joi.object({
+    name: Joi.string().required().escapeHTML(),
+    image: Joi.string().required().escapeHTML(),
+  }),
+  eventCoordinators: Joi.array().items(
+    Joi.object({
+      name: Joi.string().required().escapeHTML(),
+      phone: Joi.string().max(10, "utf-8").required().escapeHTML(),
+    })
+  ),
+});
+
 export default {
   userSignUpSchema,
   userLoginSchema,
   updateUserSchema,
   resetPasswordSchema,
+  addVolunteerSchema,
+  updateVolunteerSchema,
+  addEventSchema,
 };

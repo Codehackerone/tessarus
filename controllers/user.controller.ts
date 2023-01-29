@@ -23,13 +23,13 @@ const jwt_headers: any = {
 const signUp = async (req: any, res: any) => {
   try {
     req.body.espektroId = "E" + getRandomId(10);
-    var user: any = await userService.signUpService(req.body);
+    let user: any = await userService.signUpService(req.body);
     const access_token = jwt.sign(
       { email: user.email, user_id: user._id },
       String(process.env.JWT_SECRET),
       jwt_headers
     );
-    var return_object: any = {
+    let return_object: any = {
       user: user,
       auth_token: access_token,
     };
@@ -66,11 +66,11 @@ const signUp = async (req: any, res: any) => {
 
 const login = async (req: any, res: any) => {
   try {
-    var email = req.body.email;
-    var password = req.body.password;
+    let email = req.body.email;
+    let password = req.body.password;
     const user: any = await userService.findUserService({ email });
     if (!user) {
-      var err: any = {
+      let err: any = {
         statusObj: BAD_REQUEST,
         type: "AuthenticationError",
         name: "Email or Password doesn't match.",
@@ -78,7 +78,7 @@ const login = async (req: any, res: any) => {
       throw err;
     }
     if (!bcrypt.compareSync(password, user.password)) {
-      var err: any = {
+      let err: any = {
         statusObj: BAD_REQUEST,
         type: "AuthenticationError",
         name: "Email or Password doesn't match.",
@@ -90,7 +90,7 @@ const login = async (req: any, res: any) => {
       String(process.env.JWT_SECRET),
       jwt_headers
     );
-    var return_object: any = {};
+    let return_object: any = {};
     return_object.auth_token = access_token;
     return_object.user = Object.assign({}, user)["_doc"];
     delete return_object.user.password;
@@ -123,7 +123,7 @@ const sendVerificationMail = async (req: any, res: any) => {
       "Espektro KGEC - Verify your email address",
       text
     );
-    if (resMail.hasError === true) throw res.error;
+    if (resMail.hasError === true) throw resMail.error;
     await createLogService({
       logType: "EMAIL_SENT",
       userId: new ObjectId(req.user._id),
@@ -145,7 +145,7 @@ const verifyToken = async (req: any, res: any) => {
     message(res, OK, "User already verified");
     return;
   }
-  var user: any = await userService.verifyToken(req.user);
+  let user: any = await userService.verifyToken(req.user);
   await createLogService({
     logType: "USER_VERIFIED",
     userId: new ObjectId(user._id),
@@ -156,7 +156,7 @@ const verifyToken = async (req: any, res: any) => {
 
 const updateUser = async (req: any, res: any) => {
   try {
-    var user: any = await userService.updateUserService(req.user._id, req.body);
+    let user: any = await userService.updateUserService(req.user._id, req.body);
     delete user.password;
     await createLogService({
       logType: "USER_UPDATED",
@@ -195,8 +195,8 @@ const userProfile = async (req: any, res: any) => {
 
 const updateProfilePic = async (req: any, res: any) => {
   try {
-    var path = req.file["path"];
-    var user: any = await userService.updateUserService(req.user._id, {
+    let path = req.file["path"];
+    let user: any = await userService.updateUserService(req.user._id, {
       profileImageUrl: path,
     });
 

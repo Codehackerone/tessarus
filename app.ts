@@ -5,6 +5,8 @@ import { message } from "./helpers/message";
 import { OK, NOT_FOUND } from "./helpers/messageTypes";
 import mongoose from "mongoose";
 import userRouter from "./routers/user.route";
+import volunterRouter from "./routers/volunteer.route";
+import eventRouter from "./routers/event.route";
 
 config();
 
@@ -36,6 +38,8 @@ app.get("/", (req: any, res: any) => {
 });
 
 app.use("/api/users", userRouter);
+app.use("/api/volunteers", volunterRouter);
+app.use("/api/events", eventRouter);
 
 app.all("*", (req: any, res: any) => {
   message(res, NOT_FOUND, "Route does not exist");

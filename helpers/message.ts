@@ -1,5 +1,5 @@
 export const message = function (res: any, messageType: any, message: String) {
-  var return_object: any = {
+  let return_object: any = {
     message: message,
   };
   return_object = Object.assign(return_object, messageType);
@@ -12,7 +12,7 @@ export const messageError = function (
   message: String,
   err: any
 ) {
-  var return_object: any = {
+  let return_object: any = {
     message: message,
     error: err,
   };

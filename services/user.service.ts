@@ -28,10 +28,16 @@ const resetPasswordService = async (userId: any, newPassword: any) => {
   await user.save();
 };
 
+const getAllUsersService = async () => {
+  let users: any = await User.find().select("-password");
+  return users;
+};
+
 export default {
   signUpService,
   findUserService,
   verifyToken,
   updateUserService,
   resetPasswordService,
+  getAllUsersService,
 };

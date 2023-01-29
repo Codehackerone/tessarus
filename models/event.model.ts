@@ -28,7 +28,9 @@ const eventSchema = new Schema(
     },
     eventImages: [
       {
-        type: String,
+        url: {
+          type: String,
+        },
       },
     ],
     eventType: {
@@ -62,16 +64,17 @@ const eventSchema = new Schema(
           type: String,
           required: true,
         },
-        image: {
-          type: String,
-          required: true,
-        },
         phone: {
           type: String,
           required: true,
         },
       },
     ],
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: "Volunteer",
+      required: true,
+    },
   },
   {
     timestamps: true,

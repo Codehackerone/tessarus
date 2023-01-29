@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 const Schema = mongoose.Schema;
+const bcrypt = require("bcryptjs");
 
 const volunteerSchema = new Schema(
   {
@@ -10,10 +11,12 @@ const volunteerSchema = new Schema(
     email: {
       type: String,
       required: true,
+      unique: true,
     },
     phone: {
       type: String,
       required: true,
+      unique: true,
     },
     password: {
       type: String,
@@ -25,9 +28,14 @@ const volunteerSchema = new Schema(
         ref: "Event",
       },
     ],
-    userType: {
+    accessLevel: {
+      type: Number,
+      default: 1,
+    },
+    profileImageUrl: {
       type: String,
-      enum: ["Volunteer", "Treasurer", "Admin"],
+      default:
+        "https://res.cloudinary.com/dfediigxy/image/upload/v1674744900/Tessarus/images_cr3z7v.jpg",
     },
   },
   {
@@ -35,6 +43,14 @@ const volunteerSchema = new Schema(
   }
 );
 
-const Volunteer = mongoose.model("Ticket", volunteerSchema);
+volunteerSchema.pre("save", async function (next: any) {
+  if (!this.isModified || !this.isNew) {
+    next();
+  } else this.isModified("password");
+  if (this.password) this.password = bcrypt.hashSync(String(this.password), 12);
+  next();
+});
+
+const Volunteer = mongoose.model("Volunteer", volunteerSchema);
 
 export default Volunteer;

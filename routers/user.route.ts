@@ -6,7 +6,7 @@ import {
   validateUpdateUser,
   validateResetPassword,
 } from "../middlewares/validator.middleware";
-import { authorize } from "../middlewares/authorization";
+import { authorize } from "../middlewares/user.authorization";
 import multer from "multer";
 import { storage } from "../helpers/cloudinary";
 const upload = multer({ storage });
