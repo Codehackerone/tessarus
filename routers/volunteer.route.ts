@@ -10,9 +10,9 @@ import { issuperadmin } from "../middlewares/superadmin.middleware";
 
 const Router = express.Router();
 
-// Get all users - /allusers - GET (minAccessLevel: 4)
+Router.route("/allusers").get(authorize(4), volunteerController.getAllUsers);
 
-// Get all logs - /alllogs - GET (minAccessLevel: 4)
+Router.route("/alllogs").get(authorize(4), volunteerController.getAllLogs);
 
 Router.route("/all").get(authorize(3), volunteerController.getAllVolunteers);
 
@@ -26,9 +26,7 @@ Router.post(
 
 Router.post("/login", validateLogin(), volunteerController.login);
 
-// Delete volunteer - /delete - DELETE (minAccessLevel: 4)
-
-// Scan user qr - /userqrscan - GET (minAccessLevel: 1)
+Router.post("/userqrscan", authorize(1), volunteerController.userQRScan);
 
 Router.route("/:id")
   .get(authorize(3), volunteerController.getVolunteer)
@@ -36,6 +34,7 @@ Router.route("/:id")
     authorize(4),
     validateUpdateVolunteer(),
     volunteerController.updateVolunteer
-  );
+  )
+  .delete(authorize(4), volunteerController.deleteVolunteer);
 
 export default Router;

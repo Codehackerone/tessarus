@@ -1,6 +1,8 @@
 import { ObjectId } from "mongodb";
 import jwt from "jsonwebtoken";
 import volunteerService from "../services/volunteer.service";
+import userService from "../services/user.service";
+import { getAllLogsService } from "../services/log.service";
 import { message, messageCustom, messageError } from "../helpers/message";
 import {
   OK,
@@ -226,10 +228,126 @@ const updateVolunteer = async (req: any, res: any) => {
   }
 };
 
+const getAllUsers = async (req: any, res: any) => {
+  try {
+    var users: any = await userService.getAllUsersService();
+    if (users.length === 0) {
+      var err: any = {
+        statusObj: NOTFOUND,
+        type: "NotFoundError",
+        name: "No users found",
+      };
+      throw err;
+    }
+    var return_object: any = {};
+    return_object.users = users;
+    messageCustom(res, OK, "Users fetched successfully", return_object);
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
+};
+
+const getAllLogs = async (req: any, res: any) => {
+  try {
+    var logs: any = await getAllLogsService();
+    if (logs.length === 0) {
+      var err: any = {
+        statusObj: NOTFOUND,
+        type: "NotFoundError",
+        name: "No logs found",
+      };
+      throw err;
+    }
+    var return_object: any = {};
+    return_object.logs = logs;
+    messageCustom(res, OK, "Logs fetched successfully", return_object);
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
+};
+
+const deleteVolunteer = async (req: any, res: any) => {
+  try {
+    let volunteerId = req.params.id;
+    let volunteer: any = await volunteerService.findVolunteerService({
+      _id: volunteerId,
+    });
+    if (!volunteer) {
+      var err: any = {
+        statusObj: NOTFOUND,
+        type: "NotFoundError",
+        name: "No volunteer found",
+      };
+      throw err;
+    }
+
+    if (volunteer.accessLevel >= 4) {
+      var err: any = {
+        statusObj: FORBIDDEN,
+        type: "ForbiddenError",
+        name: "You are not authorized to perform this action",
+      };
+      throw err;
+    }
+
+    let deletedVolunteer: any = await volunteerService.deleteVolunteerService(
+      volunteerId
+    );
+
+    message(res, OK, "Volunteer deleted successfully");
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
+};
+
+const userQRScan = async (req: any, res: any) => {
+  try {
+    let qrText = req.body.qrText;
+    let user: any = await userService.findUserService({
+      _id: qrText.split("-")[0],
+    });
+    if (!user) {
+      var err: any = {
+        statusObj: NOTFOUND,
+        type: "NotFoundError",
+        name: "No user found",
+      };
+      throw err;
+    }
+    let return_object: any = {};
+    return_object.user = Object.assign({}, user)["_doc"];
+    delete return_object.user.password;
+
+    messageCustom(res, OK, "User fetched successfully", return_object);
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
+};
+
 export default {
   addVolunteer,
   login,
   getAllVolunteers,
   getVolunteer,
   updateVolunteer,
+  getAllUsers,
+  getAllLogs,
+  deleteVolunteer,
+  userQRScan,
 };

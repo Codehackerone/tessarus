@@ -17,9 +17,14 @@ const updateVolunteerService = async (volunteerId: any, volunteer: any) => {
   return Volunteer.findByIdAndUpdate(volunteerId, volunteer, { new: true });
 };
 
+const deleteVolunteerService = async (volunteerId: any) => {
+  return Volunteer.findByIdAndDelete(volunteerId);
+};
+
 export default {
   addVolunteerService,
   findVolunteerService,
   findAllVolunteersService,
   updateVolunteerService,
+  deleteVolunteerService,
 };
