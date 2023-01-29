@@ -62,7 +62,7 @@ const addVolunteerSchema = Joi.object({
   email: Joi.string().required().escapeHTML(),
   phone: Joi.string().max(10, "utf-8").required().escapeHTML(),
   events: Joi.array(),
-  accessLevel: Joi.number().valid(1, 2, 3),
+  accessLevel: Joi.number().valid(1, 2, 3, 4),
 });
 
 export default {

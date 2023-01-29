@@ -13,6 +13,7 @@ import getRandomId from "../helpers/randomTextGenerator";
 import { createLogService } from "../services/log.service";
 import sendMail from "../helpers/sendEmail";
 import bcrypt from "bcryptjs";
+import { NOTFOUND } from "dns";
 
 const expiry_length = 30 * 86400;
 const jwt_headers: any = {
@@ -123,7 +124,61 @@ const login = async (req: any, res: any) => {
     if (err.statusObj !== undefined) {
       messageError(res, err.statusObj, err.name, err.type);
     } else {
-      console.log(err);
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
+};
+
+const getAllVolunteers = async (req: any, res: any) => {
+  try {
+    var volunteers: any = await volunteerService.findAllVolunteersService();
+
+    if (volunteers.length === 0) {
+      var err: any = {
+        statusObj: NOTFOUND,
+        type: "NotFoundError",
+        name: "No volunteers found",
+      };
+      throw err;
+    }
+    var return_object: any = {};
+    return_object.volunteers = volunteers;
+
+    messageCustom(res, OK, "Volunteers fetched successfully", return_object);
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
+};
+
+const getVolunteer = async (req: any, res: any) => {
+  try {
+    let volunteerId = req.params.id;
+
+    var volunteer: any = await volunteerService.findVolunteerService({
+      _id: volunteerId,
+    });
+
+    if (!volunteer) {
+      var err: any = {
+        statusObj: NOTFOUND,
+        type: "NotFoundError",
+        name: "No volunteer found",
+      };
+      throw err;
+    }
+    let return_object: any = {};
+    return_object.volunteer = Object.assign({}, volunteer)["_doc"];
+    delete return_object.volunteer.password;
+
+    messageCustom(res, OK, "Volunteer fetched successfully", return_object);
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
       messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
     }
   }
@@ -132,4 +187,6 @@ const login = async (req: any, res: any) => {
 export default {
   addVolunteer,
   login,
+  getAllVolunteers,
+  getVolunteer,
 };
