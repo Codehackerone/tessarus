@@ -94,6 +94,11 @@ const addEventSchema = Joi.object({
   ),
 });
 
+const addCoinsSchema = Joi.object({
+  amount: Joi.number().required(),
+  userId: Joi.string().required().escapeHTML(),
+});
+
 export default {
   userSignUpSchema,
   userLoginSchema,
@@ -102,4 +107,5 @@ export default {
   addVolunteerSchema,
   updateVolunteerSchema,
   addEventSchema,
+  addCoinsSchema,
 };

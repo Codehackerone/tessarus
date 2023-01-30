@@ -4,6 +4,7 @@ import {
   validateAddVolunteer,
   validateLogin,
   validateUpdateVolunteer,
+  validateAddCoins,
 } from "../middlewares/validator.middleware";
 import { authorize } from "../middlewares/volunteer.authorization";
 import { issuperadmin } from "../middlewares/superadmin.middleware";
@@ -25,6 +26,13 @@ Router.post(
 );
 
 Router.post("/login", validateLogin(), volunteerController.login);
+
+Router.post(
+  "/addcoins",
+  authorize(2),
+  validateAddCoins(),
+  volunteerController.addCoins
+);
 
 Router.post("/userqrscan", authorize(1), volunteerController.userQRScan);
 

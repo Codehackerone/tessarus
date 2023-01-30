@@ -43,6 +43,30 @@ const logSchema = new Schema(
   }
 );
 
-const Log = mongoose.model("Log", logSchema);
+const paymentLogSchema = new Schema({
+  volunteerId: {
+    type: Schema.Types.ObjectId,
+    ref: "Volunteer",
+    required: true,
+  },
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  amount: {
+    type: Number,
+    required: true,
+  },
+  description: {
+    type: String,
+  },
+});
 
-export default Log;
+const Log = mongoose.model("Log", logSchema);
+const paymentLog = mongoose.model("PaymentLog", paymentLogSchema);
+
+export default {
+  Log,
+  paymentLog,
+};
