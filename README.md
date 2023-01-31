@@ -19,7 +19,7 @@ Click [here](https://documenter.getpostman.com/view/15506921/2s8ZDczzci) to view
 - Cloudinary
 - SendGrid (RapidAPI)
 
-# Deployment Steps
+# Start app
 
 - `git clone`
 - create .env
