@@ -18,7 +18,10 @@ const ticketSchema = new Schema(
       default: false,
     },
     ticketNumber: {
-      type: Number,
+      type: String,
+    },
+    checkedInAt: {
+      type: Date,
     },
     team: {
       name: {

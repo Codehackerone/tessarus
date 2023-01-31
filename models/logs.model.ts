@@ -33,6 +33,10 @@ const logSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Volunteer",
     },
+    ticketId: {
+      type: Schema.Types.ObjectId,
+      ref: "Ticket",
+    },
     description: {
       type: String,
       required: true,

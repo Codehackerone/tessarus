@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 import jwt from "jsonwebtoken";
 import volunteerService from "../services/volunteer.service";
 import userService from "../services/user.service";
+import eventService from "../services/event.service";
 import { getAllLogsService } from "../services/log.service";
 import { message, messageCustom, messageError } from "../helpers/message";
 import {
@@ -36,6 +37,21 @@ const addVolunteer = async (req: any, res: any) => {
     let password = getRandomId(8);
 
     req.body.password = password;
+
+    for (let eventId of req.body.events) {
+      let event: any = await eventService.getEventService({
+        _id: eventId,
+      });
+      if (!event) {
+        let err: any = {
+          statusObj: NOT_FOUND,
+          type: "NotFoundError",
+          name: "No event found with id: " + eventId,
+        };
+        throw err;
+      }
+    }
+
     let volunteer: any = await volunteerService.addVolunteerService(req.body);
 
     let text: string =
@@ -209,14 +225,20 @@ const updateVolunteer = async (req: any, res: any) => {
       throw err;
     }
 
-    if (volunteer.accessLevel >= 4) {
-      let err: any = {
-        statusObj: FORBIDDEN,
-        type: "ForbiddenError",
-        name: "You are not authorized to perform this action",
-      };
-      throw err;
+    for (let eventId of req.body.events) {
+      let event: any = await eventService.getEventService({
+        _id: eventId,
+      });
+      if (!event) {
+        let err: any = {
+          statusObj: NOT_FOUND,
+          type: "NotFoundError",
+          name: "No event found with id: " + eventId,
+        };
+        throw err;
+      }
     }
+
     let updatedVolunteer: any = await volunteerService.updateVolunteerService(
       volunteerId,
       req.body

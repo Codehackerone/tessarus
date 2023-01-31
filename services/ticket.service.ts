@@ -9,7 +9,14 @@ const getTicketService = async (ticketBody: any) => {
   return await Ticket.find(ticketBody);
 };
 
+const updateTicketService = async (ticketId: any, ticketBody: any) => {
+  return await Ticket.findOneAndUpdate({ _id: ticketId }, ticketBody, {
+    new: true,
+  });
+};
+
 export default {
   createTicketService,
   getTicketService,
+  updateTicketService,
 };

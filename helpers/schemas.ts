@@ -68,7 +68,6 @@ const addVolunteerSchema = Joi.object({
 const updateVolunteerSchema = Joi.object({
   name: Joi.string().required().escapeHTML(),
   events: Joi.array(),
-  accessLevel: Joi.number().valid(1, 2, 3),
 });
 
 const addEventSchema = Joi.object({
