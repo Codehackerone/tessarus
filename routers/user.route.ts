@@ -9,8 +9,7 @@ import {
 } from "../middlewares/validator.middleware";
 import { authorize } from "../middlewares/user.authorization";
 import multer from "multer";
-import { storage } from "../helpers/cloudinary";
-const upload = multer({ storage });
+const upload = multer({ dest: './uploads/' });
 
 const Router = express.Router();
 

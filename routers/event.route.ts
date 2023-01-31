@@ -7,8 +7,7 @@ import {
   validateRegisterEvent,
 } from "../middlewares/validator.middleware";
 import multer from "multer";
-import { storage } from "../helpers/cloudinary";
-const upload = multer({ storage });
+const upload = multer({ dest: "./uploads/" });
 
 const Router = express.Router();
 
