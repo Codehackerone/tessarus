@@ -23,6 +23,7 @@ import {
 import sendMail from "../helpers/sendEmail";
 import bcrypt from "bcryptjs";
 import { config } from "dotenv";
+import { addVolunteerTemplate } from "../helpers/emailTemplate";
 
 config();
 
@@ -38,33 +39,28 @@ const addVolunteer = async (req: any, res: any) => {
 
     req.body.password = password;
 
-    for (let eventId of req.body.events) {
-      let event: any = await eventService.getEventService({
-        _id: eventId,
-      });
-      if (!event) {
-        let err: any = {
-          statusObj: NOT_FOUND,
-          type: "NotFoundError",
-          name: "No event found with id: " + eventId,
-        };
-        throw err;
+    if (req.body.events) {
+      for (let eventId of req.body.events) {
+        let event: any = await eventService.getEventService({
+          _id: eventId,
+        });
+        if (!event) {
+          let err: any = {
+            statusObj: NOT_FOUND,
+            type: "NotFoundError",
+            name: "No event found with id: " + eventId,
+          };
+          throw err;
+        }
       }
     }
 
     let volunteer: any = await volunteerService.addVolunteerService(req.body);
-
-    let text: string =
-      "Hey " +
-      volunteer.name +
-      "," +
-      "Welcome to Espektro KGEC! We're excited to have you on board as a volunteer." +
-      "Your login credentials are:Email: " +
-      volunteer.email +
-      "Password: " +
-      password +
-      " .Please login to your account and change your password." +
-      "Regards, Espektro KGEC Team";
+    let text: any = addVolunteerTemplate(
+      volunteer.name,
+      volunteer.email,
+      password
+    );
 
     let resMail: any = await sendMail(
       volunteer.email,
@@ -101,7 +97,7 @@ const addVolunteer = async (req: any, res: any) => {
           err.name
         );
       } else {
-        console.log(err.response.data);
+        //console.log(err.response.data);
         messageError(res, SERVER_ERROR, err.message, err.name);
       }
     }
