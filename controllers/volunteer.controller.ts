@@ -17,6 +17,7 @@ import getRandomId from "../helpers/randomTextGenerator";
 import {
   createLogService,
   createPaymentLogService,
+  getAllPaymentLogsService,
 } from "../services/log.service";
 import sendMail from "../helpers/sendEmail";
 import bcrypt from "bcryptjs";
@@ -288,6 +289,29 @@ const getAllLogs = async (req: any, res: any) => {
   }
 };
 
+const getAllPaymentLogs = async (req: any, res: any) => {
+  try {
+    let logs: any = await getAllPaymentLogsService();
+    if (logs.length === 0) {
+      let err: any = {
+        statusObj: NOT_FOUND,
+        type: "NotFoundError",
+        name: "No logs found",
+      };
+      throw err;
+    }
+    let return_object: any = {};
+    return_object.logs = logs;
+    messageCustom(res, OK, "Logs fetched successfully", return_object);
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
+};
+
 const deleteVolunteer = async (req: any, res: any) => {
   try {
     let volunteerId = req.params.id;
@@ -385,6 +409,7 @@ const addCoins = async (req: any, res: any) => {
     delete return_object.user.password;
 
     await createPaymentLogService({
+      logType: "COINS_ADDED",
       userId: new ObjectId(userId),
       volunteerId: new ObjectId(req.volunteer._id),
       amount: req.body.amount,
@@ -411,4 +436,5 @@ export default {
   deleteVolunteer,
   userQRScan,
   addCoins,
+  getAllPaymentLogs,
 };

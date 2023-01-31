@@ -14,7 +14,7 @@ const logSchema = new Schema(
         "EVENT_CREATED",
         "EVENT_UPDATED",
         "EVENT_DELETED",
-        "TICKET_CREATED",
+        "EVENT_REGISTERED",
         "CHECKED_IN",
         "PAYMENT",
         "COINS_UPDATED",
@@ -44,10 +44,14 @@ const logSchema = new Schema(
 );
 
 const paymentLogSchema = new Schema({
+  logType: {
+    type: String,
+    enum: ["COINS_ADDED", "COINS_REDEEMED", "COINS_USED"],
+    required: true,
+  },
   volunteerId: {
     type: Schema.Types.ObjectId,
     ref: "Volunteer",
-    required: true,
   },
   userId: {
     type: Schema.Types.ObjectId,
@@ -56,7 +60,9 @@ const paymentLogSchema = new Schema({
   },
   amount: {
     type: Number,
-    required: true,
+  },
+  coins: {
+    type: Number,
   },
   description: {
     type: String,

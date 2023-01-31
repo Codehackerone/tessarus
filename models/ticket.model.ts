@@ -13,16 +13,30 @@ const ticketSchema = new Schema(
       ref: "User",
       required: true,
     },
-    qrText: {
-      type: String,
-      required: true,
-    },
     checkedIn: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     ticketNumber: {
       type: Number,
+    },
+    team: {
+      name: {
+        type: String,
+      },
+      members: [
+        {
+          name: {
+            type: String,
+          },
+          designation: {
+            type: String,
+          },
+          espektroId: {
+            type: String,
+          },
+        },
+      ],
     },
   },
   {

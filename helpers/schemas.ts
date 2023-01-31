@@ -99,6 +99,25 @@ const addCoinsSchema = Joi.object({
   userId: Joi.string().required().escapeHTML(),
 });
 
+const registerEventSchema = Joi.object({
+  eventId: Joi.string().required().escapeHTML(),
+  team: Joi.object(),
+});
+
+const registerEventTeamSchema = Joi.object({
+  eventId: Joi.string().required().escapeHTML(),
+  team: Joi.object().keys({
+    name: Joi.string().required().escapeHTML(),
+    members: Joi.array()
+      .required()
+      .items(
+        Joi.object({
+          espektroId: Joi.string().required().escapeHTML(),
+        })
+      ),
+  }),
+});
+
 export default {
   userSignUpSchema,
   userLoginSchema,
@@ -108,4 +127,6 @@ export default {
   updateVolunteerSchema,
   addEventSchema,
   addCoinsSchema,
+  registerEventSchema,
+  registerEventTeamSchema,
 };

@@ -15,6 +15,11 @@ Router.route("/allusers").get(authorize(4), volunteerController.getAllUsers);
 
 Router.route("/alllogs").get(authorize(4), volunteerController.getAllLogs);
 
+Router.route("/allpaymentlogs").get(
+  authorize(4),
+  volunteerController.getAllPaymentLogs
+);
+
 Router.route("/all").get(authorize(3), volunteerController.getAllVolunteers);
 
 Router.post(
