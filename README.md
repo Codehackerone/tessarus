@@ -24,6 +24,6 @@ Click [here](https://documenter.getpostman.com/view/15506921/2s8ZDczzci) to view
 - `git clone`
 - create .env
 - `yarn install`
-- `yarn build`  
+- `yarn build`
 - create upload folder
 - install pm2 and run `pm2 start build/app.js`

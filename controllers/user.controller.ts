@@ -16,7 +16,7 @@ import { createLogService } from "../services/log.service";
 import sendMail from "../helpers/sendEmail";
 import otpService from "../services/otp.service";
 import { uploadFile } from "../helpers/s3";
-import fs from 'fs';
+import fs from "fs";
 
 const expiry_length = 30 * 86400;
 const jwt_headers: any = {
@@ -356,7 +356,7 @@ const updateProfilePic = async (req: any, res: any) => {
       profileImageUrl: String(result.Location),
     });
 
-    if(!user){
+    if (!user) {
       throw {
         statusObj: BAD_REQUEST,
         name: "User not found",
@@ -364,8 +364,8 @@ const updateProfilePic = async (req: any, res: any) => {
       };
     }
 
-    fs.unlinkSync('./uploads/' + req.file.filename);
-    
+    fs.unlinkSync("./uploads/" + req.file.filename);
+
     await createLogService({
       logType: "USER_UPDATED",
       userId: new ObjectId(user._id),

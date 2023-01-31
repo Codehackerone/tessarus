@@ -16,7 +16,7 @@ import {
 } from "../services/log.service";
 import moment from "moment";
 import { uploadFile } from "../helpers/s3";
-import fs from 'fs';
+import fs from "fs";
 
 moment.suppressDeprecationWarnings = true;
 
@@ -306,7 +306,7 @@ const addImages = async (req: any, res: any) => {
       imagesArray.push({
         url: result.Location,
       });
-      fs.unlinkSync('./uploads/' + file.filename);
+      fs.unlinkSync("./uploads/" + file.filename);
     }
 
     let images: any = await eventService.updateEventByIdService(req.params.id, {

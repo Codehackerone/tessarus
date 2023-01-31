@@ -1,6 +1,6 @@
-import { config } from 'dotenv';
-import S3 from 'aws-sdk/clients/s3.js';
-import fs from 'fs';
+import { config } from "dotenv";
+import S3 from "aws-sdk/clients/s3.js";
+import fs from "fs";
 
 config();
 
@@ -15,14 +15,14 @@ const s3 = new S3({
   secretAccessKey,
 });
 
-export const uploadFile = async (file:any) => {
+export const uploadFile = async (file: any) => {
   const fileStream = fs.createReadStream(file.path);
-  const uploadParams:any = {
+  const uploadParams: any = {
     Bucket: bucketName,
     Body: fileStream,
     Key: file.filename,
     ContentType: file.mimetype,
-    ACL: 'public-read',
+    ACL: "public-read",
   };
   return s3.upload(uploadParams).promise();
 };
