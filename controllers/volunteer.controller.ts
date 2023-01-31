@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 import jwt from "jsonwebtoken";
 import volunteerService from "../services/volunteer.service";
 import userService from "../services/user.service";
+import eventService from "../services/event.service";
 import { getAllLogsService } from "../services/log.service";
 import { message, messageCustom, messageError } from "../helpers/message";
 import {
@@ -11,12 +12,20 @@ import {
   CONFLICT,
   SERVER_ERROR,
   FORBIDDEN,
+  NOT_FOUND,
 } from "../helpers/messageTypes";
 import getRandomId from "../helpers/randomTextGenerator";
-import { createLogService } from "../services/log.service";
+import {
+  createLogService,
+  createPaymentLogService,
+  getAllPaymentLogsService,
+} from "../services/log.service";
 import sendMail from "../helpers/sendEmail";
 import bcrypt from "bcryptjs";
-import { NOTFOUND } from "dns";
+import { config } from "dotenv";
+import { addVolunteerTemplate } from "../helpers/emailTemplate";
+
+config();
 
 const expiry_length = 30 * 86400;
 const jwt_headers: any = {
@@ -29,19 +38,29 @@ const addVolunteer = async (req: any, res: any) => {
     let password = getRandomId(8);
 
     req.body.password = password;
-    let volunteer: any = await volunteerService.addVolunteerService(req.body);
 
-    let text: string =
-      "Hey " +
-      volunteer.name +
-      "," +
-      "Welcome to Espektro KGEC! We're excited to have you on board as a volunteer." +
-      "Your login credentials are:Email: " +
-      volunteer.email +
-      "Password: " +
-      password +
-      " .Please login to your account and change your password." +
-      "Regards, Espektro KGEC Team";
+    if (req.body.events) {
+      for (let eventId of req.body.events) {
+        let event: any = await eventService.getEventService({
+          _id: eventId,
+        });
+        if (!event) {
+          let err: any = {
+            statusObj: NOT_FOUND,
+            type: "NotFoundError",
+            name: "No event found with id: " + eventId,
+          };
+          throw err;
+        }
+      }
+    }
+
+    let volunteer: any = await volunteerService.addVolunteerService(req.body);
+    let text: any = addVolunteerTemplate(
+      volunteer.name,
+      volunteer.email,
+      password
+    );
 
     let resMail: any = await sendMail(
       volunteer.email,
@@ -78,7 +97,7 @@ const addVolunteer = async (req: any, res: any) => {
           err.name
         );
       } else {
-        console.log(err.response.data);
+        //console.log(err.response.data);
         messageError(res, SERVER_ERROR, err.message, err.name);
       }
     }
@@ -138,7 +157,7 @@ const getAllVolunteers = async (req: any, res: any) => {
 
     if (volunteers.length === 0) {
       let err: any = {
-        statusObj: NOTFOUND,
+        statusObj: NOT_FOUND,
         type: "NotFoundError",
         name: "No volunteers found",
       };
@@ -167,7 +186,7 @@ const getVolunteer = async (req: any, res: any) => {
 
     if (!volunteer) {
       let err: any = {
-        statusObj: NOTFOUND,
+        statusObj: NOT_FOUND,
         type: "NotFoundError",
         name: "No volunteer found",
       };
@@ -195,21 +214,27 @@ const updateVolunteer = async (req: any, res: any) => {
     });
     if (!volunteer) {
       let err: any = {
-        statusObj: NOTFOUND,
+        statusObj: NOT_FOUND,
         type: "NotFoundError",
         name: "No volunteer found",
       };
       throw err;
     }
 
-    if (volunteer.accessLevel >= 4) {
-      let err: any = {
-        statusObj: FORBIDDEN,
-        type: "ForbiddenError",
-        name: "You are not authorized to perform this action",
-      };
-      throw err;
+    for (let eventId of req.body.events) {
+      let event: any = await eventService.getEventService({
+        _id: eventId,
+      });
+      if (!event) {
+        let err: any = {
+          statusObj: NOT_FOUND,
+          type: "NotFoundError",
+          name: "No event found with id: " + eventId,
+        };
+        throw err;
+      }
     }
+
     let updatedVolunteer: any = await volunteerService.updateVolunteerService(
       volunteerId,
       req.body
@@ -241,7 +266,7 @@ const getAllUsers = async (req: any, res: any) => {
     let users: any = await userService.getAllUsersService();
     if (users.length === 0) {
       let err: any = {
-        statusObj: NOTFOUND,
+        statusObj: NOT_FOUND,
         type: "NotFoundError",
         name: "No users found",
       };
@@ -264,7 +289,30 @@ const getAllLogs = async (req: any, res: any) => {
     let logs: any = await getAllLogsService();
     if (logs.length === 0) {
       let err: any = {
-        statusObj: NOTFOUND,
+        statusObj: NOT_FOUND,
+        type: "NotFoundError",
+        name: "No logs found",
+      };
+      throw err;
+    }
+    let return_object: any = {};
+    return_object.logs = logs;
+    messageCustom(res, OK, "Logs fetched successfully", return_object);
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
+};
+
+const getAllPaymentLogs = async (req: any, res: any) => {
+  try {
+    let logs: any = await getAllPaymentLogsService();
+    if (logs.length === 0) {
+      let err: any = {
+        statusObj: NOT_FOUND,
         type: "NotFoundError",
         name: "No logs found",
       };
@@ -290,7 +338,7 @@ const deleteVolunteer = async (req: any, res: any) => {
     });
     if (!volunteer) {
       let err: any = {
-        statusObj: NOTFOUND,
+        statusObj: NOT_FOUND,
         type: "NotFoundError",
         name: "No volunteer found",
       };
@@ -335,7 +383,7 @@ const userQRScan = async (req: any, res: any) => {
     });
     if (!user) {
       let err: any = {
-        statusObj: NOTFOUND,
+        statusObj: NOT_FOUND,
         type: "NotFoundError",
         name: "No user found",
       };
@@ -355,6 +403,46 @@ const userQRScan = async (req: any, res: any) => {
   }
 };
 
+const addCoins = async (req: any, res: any) => {
+  try {
+    let userId = req.body.userId;
+    let user: any = await userService.findUserService({
+      _id: userId,
+    });
+    if (!user) {
+      let err: any = {
+        statusObj: NOT_FOUND,
+        type: "NotFoundError",
+        name: "No user found",
+      };
+      throw err;
+    }
+    let updatedUser: any = await userService.updateUserService(userId, {
+      coins:
+        user.coins + req.body.amount * Number(process.env.COIN_RUPEE_RATIO),
+    });
+
+    let return_object: any = {};
+    return_object.user = Object.assign({}, updatedUser)["_doc"];
+    delete return_object.user.password;
+
+    await createPaymentLogService({
+      logType: "COINS_ADDED",
+      userId: new ObjectId(userId),
+      volunteerId: new ObjectId(req.volunteer._id),
+      amount: req.body.amount,
+    });
+
+    message(res, OK, "Coins added to user successfully");
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
+};
+
 export default {
   addVolunteer,
   login,
@@ -365,4 +453,6 @@ export default {
   getAllLogs,
   deleteVolunteer,
   userQRScan,
+  addCoins,
+  getAllPaymentLogs,
 };

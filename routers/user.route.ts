@@ -5,6 +5,7 @@ import {
   validateLogin,
   validateUpdateUser,
   validateResetPassword,
+  validateOTPSchema,
 } from "../middlewares/validator.middleware";
 import { authorize } from "../middlewares/user.authorization";
 import multer from "multer";
@@ -22,7 +23,23 @@ Router.route("/sendmail").patch(
   userController.sendVerificationMail
 );
 
-Router.route("/verifytoken").post(authorize(), userController.verifyToken);
+Router.route("/sendotp").post(authorize(), userController.sendOTP);
+
+Router.route("/sendotpreset").post(authorize(), userController.sendOTPForReset);
+
+Router.route("/verifyotpforuser").post(
+  authorize(),
+  validateOTPSchema(),
+  userController.verifyOTPForUserVerification
+);
+
+Router.route("/verifyotpforreset").post(
+  authorize(),
+  validateOTPSchema(),
+  userController.verifyOTPForResetPassword
+);
+
+//Router.route("/verifytoken").post(authorize(), userController.verifyToken);
 
 Router.route("/update").put(
   authorize(),

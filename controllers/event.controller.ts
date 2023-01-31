@@ -1,6 +1,8 @@
 import { ObjectId } from "mongodb";
 import { message, messageCustom, messageError } from "../helpers/message";
 import eventService from "../services/event.service";
+import userService from "../services/user.service";
+import ticketService from "../services/ticket.service";
 import {
   OK,
   CREATED,
@@ -8,7 +10,13 @@ import {
   CONFLICT,
   SERVER_ERROR,
 } from "../helpers/messageTypes";
-import { createLogService } from "../services/log.service";
+import {
+  createLogService,
+  createPaymentLogService,
+} from "../services/log.service";
+import moment from "moment";
+
+moment.suppressDeprecationWarnings = true;
 
 export const addEvent = async (req: any, res: any) => {
   try {
@@ -385,6 +393,147 @@ const deleteEventImages = async (req: any, res: any) => {
   }
 };
 
+const registerEvent = async (req: any, res: any) => {
+  try {
+    let event: any = await eventService.getEventService({
+      _id: req.body.eventId,
+    });
+
+    if (event.length === 0) {
+      messageError(res, BAD_REQUEST, "Event not found", "BAD_REQUEST");
+      return;
+    }
+
+    event = event[0];
+
+    // check event already registered
+    let alreadyRegistered = await ticketService.getTicketService({
+      eventId: new ObjectId(req.body.eventId),
+      userId: new ObjectId(req.user._id),
+    });
+
+    if (alreadyRegistered.length > 0) {
+      messageError(
+        res,
+        BAD_REQUEST,
+        "You have already registered for this event",
+        "BAD_REQUEST"
+      );
+      return;
+    }
+
+    if (
+      new Date(event.startTime) <
+      new Date(moment("YYYY-MM-DD HH:mm:ss").format())
+    ) {
+      messageError(
+        res,
+        BAD_REQUEST,
+        "Event has already started",
+        "BAD_REQUEST"
+      );
+      return;
+    }
+
+    if (event.eventType === "group") {
+      let teamMembersArray: any = [];
+      teamMembersArray.push({
+        name: req.user.name,
+        espektroId: req.user.espektroId,
+        designation: "Team Leader",
+      });
+
+      if (!req.body.team) {
+        messageError(
+          res,
+          BAD_REQUEST,
+          "This is a team event. Team is required",
+          "BAD_REQUEST"
+        );
+        return;
+      }
+
+      if (req.body.team.members.length + 1 > event.eventMaxParticipants) {
+        messageError(res, BAD_REQUEST, "Team size exceeded", "BAD_REQUEST");
+        return;
+      }
+      if (req.body.team.members.length + 1 < event.eventMinParticipants) {
+        messageError(
+          res,
+          BAD_REQUEST,
+          "Team size is less than minimum",
+          "BAD_REQUEST"
+        );
+        return;
+      }
+
+      for (let teamMember of req.body.team.members) {
+        let user: any = await userService.findUserService({
+          espektroId: teamMember.espektroId,
+        });
+        if (!user || user.length === 0) {
+          messageError(
+            res,
+            BAD_REQUEST,
+            "User of Espektro ID " + teamMember.espektroId + "not found",
+            "BAD_REQUEST"
+          );
+          return;
+        }
+        teamMembersArray.push({
+          name: user.name,
+          espektroId: user.espektroId,
+          designation: "Team Member",
+        });
+      }
+
+      req.body.team.members = teamMembersArray;
+    }
+
+    if (event.eventPrice > 0 && req.user.coins < event.eventPrice) {
+      messageError(
+        res,
+        BAD_REQUEST,
+        "Insufficient coins. Please recharge",
+        "BAD_REQUEST"
+      );
+      return;
+    }
+    req.body.userId = req.user._id;
+    let ticket: any = await ticketService.createTicketService(req.body);
+
+    let return_object: any = {
+      ticket: ticket,
+    };
+
+    await userService.updateUserService(req.user._id, {
+      coins: req.user.coins - event.eventPrice,
+    });
+
+    await createPaymentLogService({
+      logType: "COINS_USED",
+      userId: new ObjectId(req.user._id),
+      coins: event.eventPrice,
+      description: `${req.user.name} used ${event.eventPrice} coins to register for event ${event.title}`,
+    });
+
+    await createLogService({
+      logType: "EVENT_REGISTERED",
+      userId: new ObjectId(req.user._id),
+      description: `${req.user.name} registered for event ${event.title}`,
+    });
+
+    messageCustom(res, OK, "Event registered successfully", return_object);
+  } catch (err: any) {
+    console.log(err);
+    if (err.error === "ValidationError") {
+      messageError(res, BAD_REQUEST, err.message, err.name);
+    } else {
+      messageError(res, SERVER_ERROR, err.message, err.name);
+    }
+  }
+};
+
 export default {
   addEvent,
   getAllEvents,
@@ -393,4 +542,5 @@ export default {
   deleteEvent,
   addImages,
   deleteEventImages,
+  registerEvent,
 };

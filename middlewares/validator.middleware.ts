@@ -71,3 +71,41 @@ export const validateAddEvent = () => {
     } else next();
   };
 };
+
+export const validateAddCoins = () => {
+  return async (req: any, res: any, next: any) => {
+    const { error } = joiSchemas.addCoinsSchema.validate(req.body);
+    if (error) {
+      const msg = error.details.map((el: any) => el.message).join(",");
+      messageError(res, BAD_REQUEST, msg, "ValidationError");
+    } else next();
+  };
+};
+
+export const validateRegisterEvent = () => {
+  return async (req: any, res: any, next: any) => {
+    if (!req.body.team) {
+      const { error } = joiSchemas.registerEventSchema.validate(req.body);
+      if (error) {
+        const msg = error.details.map((el: any) => el.message).join(",");
+        messageError(res, BAD_REQUEST, msg, "ValidationError");
+      } else next();
+    } else {
+      const { error } = joiSchemas.registerEventTeamSchema.validate(req.body);
+      if (error) {
+        const msg = error.details.map((el: any) => el.message).join(",");
+        messageError(res, BAD_REQUEST, msg, "ValidationError");
+      } else next();
+    }
+  };
+};
+
+export const validateOTPSchema = () => {
+  return async (req: any, res: any, next: any) => {
+    const { error } = joiSchemas.verifyOTPSchema.validate(req.body);
+    if (error) {
+      const msg = error.details.map((el: any) => el.message).join(",");
+      messageError(res, BAD_REQUEST, msg, "ValidationError");
+    } else next();
+  };
+};

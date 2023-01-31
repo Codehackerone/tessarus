@@ -4,6 +4,7 @@ import {
   validateAddVolunteer,
   validateLogin,
   validateUpdateVolunteer,
+  validateAddCoins,
 } from "../middlewares/validator.middleware";
 import { authorize } from "../middlewares/volunteer.authorization";
 import { issuperadmin } from "../middlewares/superadmin.middleware";
@@ -13,6 +14,11 @@ const Router = express.Router();
 Router.route("/allusers").get(authorize(4), volunteerController.getAllUsers);
 
 Router.route("/alllogs").get(authorize(4), volunteerController.getAllLogs);
+
+Router.route("/allpaymentlogs").get(
+  authorize(4),
+  volunteerController.getAllPaymentLogs
+);
 
 Router.route("/all").get(authorize(3), volunteerController.getAllVolunteers);
 
@@ -25,6 +31,13 @@ Router.post(
 );
 
 Router.post("/login", validateLogin(), volunteerController.login);
+
+Router.post(
+  "/addcoins",
+  authorize(2),
+  validateAddCoins(),
+  volunteerController.addCoins
+);
 
 Router.post("/userqrscan", authorize(1), volunteerController.userQRScan);
 

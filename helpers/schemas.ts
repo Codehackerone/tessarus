@@ -68,7 +68,6 @@ const addVolunteerSchema = Joi.object({
 const updateVolunteerSchema = Joi.object({
   name: Joi.string().required().escapeHTML(),
   events: Joi.array(),
-  accessLevel: Joi.number().valid(1, 2, 3),
 });
 
 const addEventSchema = Joi.object({
@@ -94,6 +93,36 @@ const addEventSchema = Joi.object({
   ),
 });
 
+const addCoinsSchema = Joi.object({
+  amount: Joi.number().required(),
+  userId: Joi.string().required().escapeHTML(),
+});
+
+const registerEventSchema = Joi.object({
+  eventId: Joi.string().required().escapeHTML(),
+  team: Joi.object(),
+});
+
+const registerEventTeamSchema = Joi.object({
+  eventId: Joi.string().required().escapeHTML(),
+  team: Joi.object().keys({
+    name: Joi.string().required().escapeHTML(),
+    members: Joi.array()
+      .required()
+      .items(
+        Joi.object({
+          espektroId: Joi.string().required().escapeHTML(),
+        })
+      ),
+  }),
+});
+
+const verifyOTPSchema = Joi.object({
+  otp: Joi.string().required().escapeHTML(),
+  otp_token: Joi.string().required().escapeHTML(),
+  password: Joi.string().escapeHTML(),
+});
+
 export default {
   userSignUpSchema,
   userLoginSchema,
@@ -102,4 +131,8 @@ export default {
   addVolunteerSchema,
   updateVolunteerSchema,
   addEventSchema,
+  addCoinsSchema,
+  registerEventSchema,
+  registerEventTeamSchema,
+  verifyOTPSchema,
 };

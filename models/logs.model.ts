@@ -14,7 +14,7 @@ const logSchema = new Schema(
         "EVENT_CREATED",
         "EVENT_UPDATED",
         "EVENT_DELETED",
-        "TICKET_CREATED",
+        "EVENT_REGISTERED",
         "CHECKED_IN",
         "PAYMENT",
         "COINS_UPDATED",
@@ -22,6 +22,8 @@ const logSchema = new Schema(
         "VOLUNTEER_CREATED",
         "VOLUNTEER_UPDATED",
         "VOLUNTEER_LOGIN",
+        "OTP_SENT",
+        "OTP_VERIFIED",
       ],
       required: true,
     },
@@ -33,6 +35,10 @@ const logSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Volunteer",
     },
+    ticketId: {
+      type: Schema.Types.ObjectId,
+      ref: "Ticket",
+    },
     description: {
       type: String,
       required: true,
@@ -43,6 +49,36 @@ const logSchema = new Schema(
   }
 );
 
-const Log = mongoose.model("Log", logSchema);
+const paymentLogSchema = new Schema({
+  logType: {
+    type: String,
+    enum: ["COINS_ADDED", "COINS_REDEEMED", "COINS_USED"],
+    required: true,
+  },
+  volunteerId: {
+    type: Schema.Types.ObjectId,
+    ref: "Volunteer",
+  },
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  amount: {
+    type: Number,
+  },
+  coins: {
+    type: Number,
+  },
+  description: {
+    type: String,
+  },
+});
 
-export default Log;
+const Log = mongoose.model("Log", logSchema);
+const paymentLog = mongoose.model("PaymentLog", paymentLogSchema);
+
+export default {
+  Log,
+  paymentLog,
+};
