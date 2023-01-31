@@ -152,7 +152,7 @@ const sendOTP = async (req: any, res: any) => {
 
     let otpResponse: any = await otpService.createAndSendOtp(
       name,
-      "Especkro KGEC - OTP for your account",
+      "Espektro KGEC - OTP for your account",
       email,
       otp
     );
@@ -222,7 +222,7 @@ const sendOTPForReset = async (req: any, res: any) => {
 
     let otpResponse: any = await otpService.createAndSendOtpForResetPassword(
       name,
-      "Especkro KGEC - OTP to reset your password for your account",
+      "Espekro KGEC - OTP to reset your password for your account",
       email,
       otp
     );
