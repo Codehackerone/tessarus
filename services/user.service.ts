@@ -18,7 +18,9 @@ const verifyToken = async (userBody: any) => {
 };
 
 const updateUserService = async (userId: any, userBody: any) => {
-  let user: any = await User.findByIdAndUpdate(userId, userBody);
+  let user: any = await User.findByIdAndUpdate(userId, userBody, {
+    new: true,
+  });
   return user;
 };
 

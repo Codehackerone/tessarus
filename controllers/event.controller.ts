@@ -15,6 +15,8 @@ import {
   createPaymentLogService,
 } from "../services/log.service";
 import moment from "moment";
+import { uploadFile } from "../helpers/s3";
+import fs from "fs";
 
 moment.suppressDeprecationWarnings = true;
 
@@ -298,9 +300,14 @@ const addImages = async (req: any, res: any) => {
     event = event[0];
 
     let imagesArray: any = event.eventImages;
-    let newImages = req.files.map((f: any) => ({ url: f.path } as any));
 
-    imagesArray = imagesArray.concat(newImages);
+    for (let file of req.files) {
+      const result = await uploadFile(file);
+      imagesArray.push({
+        url: result.Location,
+      });
+      fs.unlinkSync("./uploads/" + file.filename);
+    }
 
     let images: any = await eventService.updateEventByIdService(req.params.id, {
       eventImages: imagesArray,

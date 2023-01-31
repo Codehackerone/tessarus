@@ -15,6 +15,8 @@ import getRandomId from "../helpers/randomTextGenerator";
 import { createLogService } from "../services/log.service";
 import sendMail from "../helpers/sendEmail";
 import otpService from "../services/otp.service";
+import { uploadFile } from "../helpers/s3";
+import fs from "fs";
 
 const expiry_length = 30 * 86400;
 const jwt_headers: any = {
@@ -349,9 +351,25 @@ const userProfile = async (req: any, res: any) => {
 
 const updateProfilePic = async (req: any, res: any) => {
   try {
-    let path = req.file["path"];
+    const result = await uploadFile(req.file);
     let user: any = await userService.updateUserService(req.user._id, {
-      profileImageUrl: path,
+      profileImageUrl: String(result.Location),
+    });
+
+    if (!user) {
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "User not found",
+        type: "User not found",
+      };
+    }
+
+    fs.unlinkSync("./uploads/" + req.file.filename);
+
+    await createLogService({
+      logType: "USER_UPDATED",
+      userId: new ObjectId(user._id),
+      description: user.name + " updated profile picture",
     });
 
     message(res, OK, "Profile picture updated successfully");
