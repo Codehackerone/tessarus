@@ -9,10 +9,12 @@ import {
   BAD_REQUEST,
   CONFLICT,
   SERVER_ERROR,
+  UNAUTHORIZED,
 } from "../helpers/messageTypes";
 import getRandomId from "../helpers/randomTextGenerator";
 import { createLogService } from "../services/log.service";
 import sendMail from "../helpers/sendEmail";
+import otpService from "../services/otp.service";
 
 const expiry_length = 30 * 86400;
 const jwt_headers: any = {
@@ -135,6 +137,158 @@ const sendVerificationMail = async (req: any, res: any) => {
       messageError(res, err.statusObj, err.name, err.type);
     } else {
       console.log(err);
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
+};
+
+const sendOTP = async (req: any, res: any) => {
+  try {
+    let email = req.user.email;
+    let name = req.user.name;
+    let otp: any = (Math.floor(Math.random() * 10000) + 10000)
+      .toString()
+      .substring(1);
+
+    let otpResponse: any = await otpService.createAndSendOtp(
+      name,
+      "Especkro KGEC - OTP for your account",
+      email,
+      otp
+    );
+    await createLogService({
+      logType: "OTP_SENT",
+      userId: new ObjectId(req.user._id),
+      description: req.user.name + " requested for OTP",
+    });
+
+    var return_object = {
+      otp: {
+        otp_token: otpResponse.otp_token,
+        expiry: otpResponse.expiry,
+        attempts: otpResponse.attempts,
+      },
+    };
+
+    messageCustom(res, OK, "OTP sent to your email", return_object);
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      console.log(err);
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
+};
+
+const verifyOTPForUserVerification = async (req: any, res: any) => {
+  try {
+    let otp_token = req.body.otp_token;
+    let otp = req.body.otp;
+    let otpResponse: any = await otpService.verifyOtp(otp_token, otp);
+    if (otpResponse.hasError === true) throw otpResponse.error;
+
+    await createLogService({
+      logType: "OTP_VERIFIED",
+      userId: new ObjectId(req.user._id),
+      description: req.user.name + " verified OTP",
+    });
+
+    let user: any = await userService.verifyToken(req.user);
+    await createLogService({
+      logType: "USER_VERIFIED",
+      userId: new ObjectId(user._id),
+      description: req.user.name + " verified their account",
+    });
+
+    message(res, OK, "OTP verified successfully and user verified");
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      //console.log(err);
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
+};
+
+const sendOTPForReset = async (req: any, res: any) => {
+  try {
+    let email = req.user.email;
+    let name = req.user.name;
+    let otp: any = (Math.floor(Math.random() * 10000) + 10000)
+      .toString()
+      .substring(1);
+
+    let otpResponse: any = await otpService.createAndSendOtpForResetPassword(
+      name,
+      "Especkro KGEC - OTP to reset your password for your account",
+      email,
+      otp
+    );
+    await createLogService({
+      logType: "OTP_SENT",
+      userId: new ObjectId(req.user._id),
+      description: req.user.name + " requested for OTP to reset password",
+    });
+
+    var return_object = {
+      otp: {
+        otp_token: otpResponse.otp_token,
+        expiry: otpResponse.expiry,
+        attempts: otpResponse.attempts,
+      },
+    };
+
+    messageCustom(res, OK, "OTP sent to your email", return_object);
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      console.log(err);
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
+};
+
+const verifyOTPForResetPassword = async (req: any, res: any) => {
+  try {
+    let password = req.body.password;
+    if (!password) {
+      messageError(
+        res,
+        BAD_REQUEST,
+        "New Password is required",
+        "Password is required"
+      );
+      return;
+    }
+
+    let otp_token = req.body.otp_token;
+    let otp = req.body.otp;
+    let otpResponse: any = await otpService.verifyOtp(otp_token, otp);
+    if (otpResponse.hasError === true) throw otpResponse.error;
+    let user = req.user;
+
+    await createLogService({
+      logType: "OTP_VERIFIED",
+      userId: new ObjectId(req.user._id),
+      description: req.user.name + " verified OTP",
+    });
+
+    await userService.resetPasswordService(user._id, password);
+    await createLogService({
+      logType: "USER_PASSWORD_RESET",
+      userId: new ObjectId(user._id),
+      description: user.name + " reset password",
+    });
+
+    message(res, OK, "Password reset successfully");
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      //console.log(err);
       messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
     }
   }
@@ -303,4 +457,8 @@ export default {
   updateProfilePic,
   forgotPassword,
   resetPassword,
+  sendOTP,
+  verifyOTPForUserVerification,
+  sendOTPForReset,
+  verifyOTPForResetPassword,
 };

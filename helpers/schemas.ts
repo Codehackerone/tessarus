@@ -117,6 +117,12 @@ const registerEventTeamSchema = Joi.object({
   }),
 });
 
+const verifyOTPSchema = Joi.object({
+  otp: Joi.string().required().escapeHTML(),
+  otp_token: Joi.string().required().escapeHTML(),
+  password: Joi.string().escapeHTML(),
+});
+
 export default {
   userSignUpSchema,
   userLoginSchema,
@@ -128,4 +134,5 @@ export default {
   addCoinsSchema,
   registerEventSchema,
   registerEventTeamSchema,
+  verifyOTPSchema,
 };

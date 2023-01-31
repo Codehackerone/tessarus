@@ -22,6 +22,8 @@ const logSchema = new Schema(
         "VOLUNTEER_CREATED",
         "VOLUNTEER_UPDATED",
         "VOLUNTEER_LOGIN",
+        "OTP_SENT",
+        "OTP_VERIFIED",
       ],
       required: true,
     },

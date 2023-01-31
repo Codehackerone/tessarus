@@ -4,6 +4,28 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 async function sendMail(to: string, subject: string, emailContent: string) {
+  let dataToSend = {
+    personalizations: [
+      {
+        to: [
+          {
+            email: to,
+          },
+        ],
+        subject: subject,
+      },
+    ],
+    from: {
+      email: String(process.env.SENDGRID_EMAIL),
+    },
+    content: [
+      {
+        type: "text/html",
+        value: emailContent,
+      },
+    ],
+  };
+
   const options = {
     method: "POST",
     url: "https://rapidprod-sendgrid-v1.p.rapidapi.com/mail/send",
@@ -12,28 +34,7 @@ async function sendMail(to: string, subject: string, emailContent: string) {
       "X-RapidAPI-Key": String(process.env.X_RAPIDAPI_KEY),
       "X-RapidAPI-Host": String(process.env.X_RAPIDAPI_HOST),
     },
-    data: `{
-            "personalizations": [
-              {
-                "to": [
-                  {
-                    "email": "${to}"
-                  }
-                ],
-                "subject": "${subject}"
-              }
-            ],
-            "from": {
-              "email": "${process.env.SENDGRID_EMAIL}"
-            },
-            "content": [
-              {
-                "type": "text/html",
-                "value": "${emailContent}"
-              }
-            ]
-          }
-          `,
+    data: dataToSend,
   };
   return axios
     .request(options)
