@@ -17,6 +17,6 @@ export const createPaymentLogService = async (logBody: any) => {
 };
 
 export const getAllPaymentLogsService = async () => {
-  const logs = await Logs.paymentLog.find();
+  const logs: any = await paginate(Logs.Log, {}, 1, 20, { createdAt: -1 });
   return logs;
 };
