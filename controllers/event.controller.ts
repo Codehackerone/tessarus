@@ -548,6 +548,76 @@ const registerEvent = async (req: any, res: any) => {
   }
 };
 
+const eventCheckIn = async (req: any, res: any) => {
+  try {
+    let user: any = await userService.findUserService({
+      espektroId: req.body.espektroId,
+    });
+
+    if (!user || user.length === 0) {
+      messageError(
+        res,
+        BAD_REQUEST,
+        "User of Espektro ID " + req.body.espektroId + " not found",
+        "BAD_REQUEST"
+      );
+      return;
+    }
+
+    let ticket: any = await ticketService.getTicketService({
+      eventId: new ObjectId(req.body.eventId),
+      userId: new ObjectId(user._id),
+    });
+
+    if (ticket.length === 0) {
+      messageError(
+        res,
+        BAD_REQUEST,
+        "User of Espektro ID " +
+          req.body.espektroId +
+          " is not registered for this event",
+        "BAD_REQUEST"
+      );
+      return;
+    }
+
+    ticket = ticket[0];
+
+    if (!ticket.checkedIn) {
+      messageError(
+        res,
+        BAD_REQUEST,
+        "User of Espektro ID " +
+          req.body.espektroId +
+          " still not checked in for this event",
+        "BAD_REQUEST"
+      );
+      return;
+    }
+
+    if (String(req.body.password) !== String(ticket.ticketNumber)) {
+      messageError(res, BAD_REQUEST, "Invalid password", "BAD_REQUEST");
+      return;
+    }
+
+    let return_object: any = {
+      ticket: ticket,
+    };
+
+    return_object.user = Object.assign({}, user)["_doc"];
+    delete return_object.user.password;
+
+    messageCustom(res, OK, "User logged in successfully", return_object);
+  } catch (err: any) {
+    if (err.error === "ValidationError") {
+      messageError(res, BAD_REQUEST, err.message, err.name);
+    } else {
+      console.log(err);
+      messageError(res, SERVER_ERROR, err.message, err.name);
+    }
+  }
+};
+
 export default {
   addEvent,
   getAllEvents,
@@ -557,4 +627,5 @@ export default {
   addImages,
   deleteEventImages,
   registerEvent,
+  eventCheckIn,
 };
