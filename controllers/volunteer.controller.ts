@@ -59,7 +59,8 @@ const addVolunteer = async (req: any, res: any) => {
     let text: any = addVolunteerTemplate(
       volunteer.name,
       volunteer.email,
-      password
+      password,
+      req.volunteer.name
     );
 
     let resMail: any = await sendMail(
