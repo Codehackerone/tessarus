@@ -85,6 +85,7 @@ export const addEvent = async (req: any, res: any) => {
           err.name
         );
       } else {
+        console.log(err);
         messageError(res, SERVER_ERROR, err.message, err.name);
       }
     }
@@ -104,6 +105,7 @@ const getAllEvents = async (req: any, res: any) => {
     if (err.error === "ValidationError") {
       messageError(res, BAD_REQUEST, err.message, err.name);
     } else {
+      console.log(err);
       messageError(res, SERVER_ERROR, err.message, err.name);
     }
   }
@@ -129,6 +131,7 @@ const getEvent = async (req: any, res: any) => {
     if (err.error === "ValidationError") {
       messageError(res, BAD_REQUEST, err.message, err.name);
     } else {
+      console.log(err);
       messageError(res, SERVER_ERROR, err.message, err.name);
     }
   }
@@ -226,6 +229,7 @@ export const updateEvent = async (req: any, res: any) => {
           err.name
         );
       } else {
+        console.log(err);
         messageError(res, SERVER_ERROR, err.message, err.name);
       }
     }
@@ -269,6 +273,7 @@ export const deleteEvent = async (req: any, res: any) => {
     if (err.error === "ValidationError") {
       messageError(res, BAD_REQUEST, err.message, err.name);
     } else {
+      console.log(err);
       messageError(res, SERVER_ERROR, err.message, err.name);
     }
   }
@@ -328,6 +333,7 @@ const addImages = async (req: any, res: any) => {
     if (err.error === "ValidationError") {
       messageError(res, BAD_REQUEST, err.message, err.name);
     } else {
+      console.log(err);
       messageError(res, SERVER_ERROR, err.message, err.name);
     }
   }
@@ -395,6 +401,7 @@ const deleteEventImages = async (req: any, res: any) => {
     if (err.error === "ValidationError") {
       messageError(res, BAD_REQUEST, err.message, err.name);
     } else {
+      console.log(err);
       messageError(res, SERVER_ERROR, err.message, err.name);
     }
   }
@@ -532,10 +539,10 @@ const registerEvent = async (req: any, res: any) => {
 
     messageCustom(res, OK, "Event registered successfully", return_object);
   } catch (err: any) {
-    console.log(err);
     if (err.error === "ValidationError") {
       messageError(res, BAD_REQUEST, err.message, err.name);
     } else {
+      console.log(err);
       messageError(res, SERVER_ERROR, err.message, err.name);
     }
   }

@@ -38,7 +38,7 @@ export const addVolunteerTemplate = (
   name: string,
   email: string,
   password: string,
-  volunteerName : string = "Admin"
+  volunteerName: string = "Admin"
 ) => {
   return `<html>
         <body>

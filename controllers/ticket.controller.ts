@@ -29,6 +29,7 @@ const allTickets = async (req: any, res: any) => {
     if (err.error === "ValidationError") {
       messageError(res, BAD_REQUEST, err.message, err.name);
     } else {
+      console.log(err);
       messageError(res, SERVER_ERROR, err.message, err.name);
     }
   }
@@ -61,6 +62,7 @@ const getTicket = async (req: any, res: any) => {
     if (err.error === "ValidationError") {
       messageError(res, BAD_REQUEST, err.message, err.name);
     } else {
+      console.log(err);
       messageError(res, SERVER_ERROR, err.message, err.name);
     }
   }
@@ -119,6 +121,7 @@ const checkIn = async (req: any, res: any) => {
     if (err.error === "ValidationError") {
       messageError(res, BAD_REQUEST, err.message, err.name);
     } else {
+      console.log(err);
       messageError(res, SERVER_ERROR, err.message, err.name);
     }
   }

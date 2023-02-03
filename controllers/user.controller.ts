@@ -62,6 +62,7 @@ const signUp = async (req: any, res: any) => {
           err.name
         );
       } else {
+        console.log(err);
         messageError(res, SERVER_ERROR, err.message, err.name);
       }
     }
@@ -208,7 +209,7 @@ const verifyOTPForUserVerification = async (req: any, res: any) => {
     if (err.statusObj !== undefined) {
       messageError(res, err.statusObj, err.name, err.type);
     } else {
-      //console.log(err);
+      console.log(err);
       messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
     }
   }
@@ -290,24 +291,33 @@ const verifyOTPForResetPassword = async (req: any, res: any) => {
     if (err.statusObj !== undefined) {
       messageError(res, err.statusObj, err.name, err.type);
     } else {
-      //console.log(err);
+      console.log(err);
       messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
     }
   }
 };
 
 const verifyToken = async (req: any, res: any) => {
-  if (req.user.verified) {
-    message(res, OK, "User already verified");
-    return;
+  try {
+    if (req.user.verified) {
+      message(res, OK, "User already verified");
+      return;
+    }
+    let user: any = await userService.verifyToken(req.user);
+    await createLogService({
+      logType: "USER_VERIFIED",
+      userId: new ObjectId(user._id),
+      description: req.user.name + " verified email",
+    });
+    message(res, OK, "User verified Successfully");
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      console.log(err);
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
   }
-  let user: any = await userService.verifyToken(req.user);
-  await createLogService({
-    logType: "USER_VERIFIED",
-    userId: new ObjectId(user._id),
-    description: req.user.name + " verified email",
-  });
-  message(res, OK, "User verified Successfully");
 };
 
 const updateUser = async (req: any, res: any) => {
