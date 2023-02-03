@@ -123,6 +123,12 @@ const verifyOTPSchema = Joi.object({
   password: Joi.string().escapeHTML(),
 });
 
+const eventCheckInSchema = Joi.object({
+  eventId: Joi.string().required().escapeHTML(),
+  espektroId: Joi.string().required().escapeHTML(),
+  password: Joi.string().required().escapeHTML(),
+});
+
 export default {
   userSignUpSchema,
   userLoginSchema,
@@ -135,4 +141,5 @@ export default {
   registerEventSchema,
   registerEventTeamSchema,
   verifyOTPSchema,
+  eventCheckInSchema,
 };

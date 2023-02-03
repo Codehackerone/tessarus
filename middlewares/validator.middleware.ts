@@ -109,3 +109,13 @@ export const validateOTPSchema = () => {
     } else next();
   };
 };
+
+export const validateEventCheckIn = () => {
+  return async (req: any, res: any, next: any) => {
+    const { error } = joiSchemas.eventCheckInSchema.validate(req.body);
+    if (error) {
+      const msg = error.details.map((el: any) => el.message).join(",");
+      messageError(res, BAD_REQUEST, msg, "ValidationError");
+    } else next();
+  };
+};

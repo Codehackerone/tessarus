@@ -5,6 +5,7 @@ import { authorize as userAuthorize } from "../middlewares/user.authorization";
 import {
   validateAddEvent,
   validateRegisterEvent,
+  validateEventCheckIn,
 } from "../middlewares/validator.middleware";
 import multer from "multer";
 const upload = multer({ dest: "./uploads/" });
@@ -27,6 +28,11 @@ Router.route("/register").post(
   userAuthorize(),
   validateRegisterEvent(),
   eventController.registerEvent
+);
+
+Router.route("/checkin").post(
+  validateEventCheckIn(),
+  eventController.eventCheckIn
 );
 
 Router.route("/:id")
