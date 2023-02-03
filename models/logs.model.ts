@@ -21,6 +21,7 @@ const logSchema = new Schema(
         "EMAIL_SENT",
         "VOLUNTEER_CREATED",
         "VOLUNTEER_UPDATED",
+        "VOLUNTEER_DELETED",
         "VOLUNTEER_LOGIN",
         "OTP_SENT",
         "OTP_VERIFIED",
