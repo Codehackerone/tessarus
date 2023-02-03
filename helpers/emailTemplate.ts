@@ -37,13 +37,14 @@ export const sendOTPResetPasswordTemplate = (name: string, otp: string) => {
 export const addVolunteerTemplate = (
   name: string,
   email: string,
-  password: string
+  password: string,
+  volunteerName: string = "Admin"
 ) => {
   return `<html>
         <body>
         <p>
             <h3>Hello ${name},<br>        
-            You are added as a volunteer for Espektro 2023.</h3><br>
+            You are added as a volunteer for Espektro 2023 by ${volunteerName}.</h3><br>
 
 
             Please use the following credentials to login from the volunteer app.<br>

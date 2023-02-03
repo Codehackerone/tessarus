@@ -59,7 +59,8 @@ const addVolunteer = async (req: any, res: any) => {
     let text: any = addVolunteerTemplate(
       volunteer.name,
       volunteer.email,
-      password
+      password,
+      req.volunteer.name
     );
 
     let resMail: any = await sendMail(
@@ -98,6 +99,7 @@ const addVolunteer = async (req: any, res: any) => {
         );
       } else {
         //console.log(err.response.data);
+        console.log(err);
         messageError(res, SERVER_ERROR, err.message, err.name);
       }
     }
@@ -146,6 +148,7 @@ const login = async (req: any, res: any) => {
     if (err.statusObj !== undefined) {
       messageError(res, err.statusObj, err.name, err.type);
     } else {
+      console.log(err);
       messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
     }
   }
@@ -171,6 +174,7 @@ const getAllVolunteers = async (req: any, res: any) => {
     if (err.statusObj !== undefined) {
       messageError(res, err.statusObj, err.name, err.type);
     } else {
+      console.log(err);
       messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
     }
   }
@@ -201,6 +205,7 @@ const getVolunteer = async (req: any, res: any) => {
     if (err.statusObj !== undefined) {
       messageError(res, err.statusObj, err.name, err.type);
     } else {
+      console.log(err);
       messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
     }
   }
@@ -256,6 +261,7 @@ const updateVolunteer = async (req: any, res: any) => {
     if (err.statusObj !== undefined) {
       messageError(res, err.statusObj, err.name, err.type);
     } else {
+      console.log(err);
       messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
     }
   }
@@ -279,6 +285,7 @@ const getAllUsers = async (req: any, res: any) => {
     if (err.statusObj !== undefined) {
       messageError(res, err.statusObj, err.name, err.type);
     } else {
+      console.log(err);
       messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
     }
   }
@@ -302,6 +309,7 @@ const getAllLogs = async (req: any, res: any) => {
     if (err.statusObj !== undefined) {
       messageError(res, err.statusObj, err.name, err.type);
     } else {
+      console.log(err);
       messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
     }
   }
@@ -325,6 +333,7 @@ const getAllPaymentLogs = async (req: any, res: any) => {
     if (err.statusObj !== undefined) {
       messageError(res, err.statusObj, err.name, err.type);
     } else {
+      console.log(err);
       messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
     }
   }
@@ -370,6 +379,7 @@ const deleteVolunteer = async (req: any, res: any) => {
     if (err.statusObj !== undefined) {
       messageError(res, err.statusObj, err.name, err.type);
     } else {
+      console.log(err);
       messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
     }
   }
@@ -398,6 +408,7 @@ const userQRScan = async (req: any, res: any) => {
     if (err.statusObj !== undefined) {
       messageError(res, err.statusObj, err.name, err.type);
     } else {
+      console.log(err);
       messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
     }
   }
@@ -438,6 +449,7 @@ const addCoins = async (req: any, res: any) => {
     if (err.statusObj !== undefined) {
       messageError(res, err.statusObj, err.name, err.type);
     } else {
+      console.log(err);
       messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
     }
   }
