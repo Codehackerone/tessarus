@@ -1,4 +1,5 @@
 import Logs from "../models/logs.model";
+import { paginate } from "../helpers/paginate";
 
 export const createLogService = async (logBody: any) => {
   const log = await Logs.Log.create(logBody);
@@ -6,7 +7,7 @@ export const createLogService = async (logBody: any) => {
 };
 
 export const getAllLogsService = async () => {
-  const logs = await Logs.Log.find();
+  const logs: any = await paginate(Logs.Log, {}, 1, 20, { createdAt: -1 });
   return logs;
 };
 
@@ -16,6 +17,6 @@ export const createPaymentLogService = async (logBody: any) => {
 };
 
 export const getAllPaymentLogsService = async () => {
-  const logs = await Logs.paymentLog.find();
+  const logs: any = await paginate(Logs.Log, {}, 1, 20, { createdAt: -1 });
   return logs;
 };

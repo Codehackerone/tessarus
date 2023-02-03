@@ -109,12 +109,22 @@ const checkIn = async (req: any, res: any) => {
       }
     );
 
+    const user: any = await userService.findUserService({
+      _id: updatedTicket.userId,
+    });
+
+    const event: any = await eventService.getEventService({
+      _id: updatedTicket.eventId,
+    });
+
+    console.log(event);
+
     createLogService({
       logType: "CHECKED_IN",
       userId: updatedTicket.userId,
       volunteerId: req.volunteer._id,
       ticketId: req.params.id,
-      description: `${req.volunteer.name} checked in ${updatedTicket.name} for ${updatedTicket.eventId.name} event.`,
+      description: `${req.volunteer.name} checked in ${user.name} for ${event[0].title} event.`,
     });
     message(res, OK, "Ticket checked in successfully");
   } catch (err: any) {
