@@ -450,6 +450,7 @@ const addCoins = async (req: any, res: any) => {
       userId: new ObjectId(userId),
       volunteerId: new ObjectId(req.volunteer._id),
       amount: req.body.amount,
+      description: `Coins added to user ${updatedUser.name} by volunteer ${req.volunteer.name}`,
     });
 
     message(res, OK, "Coins added to user successfully");
