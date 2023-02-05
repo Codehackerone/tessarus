@@ -8,7 +8,7 @@ const Router = express.Router();
 Router.route("/allforusers").get(userAuthorize(), ticketController.allTickets);
 
 Router.route("/allforusers/:id").get(
-  volunteerAuthorize(1),
+  volunteerAuthorize(4),
   ticketController.allTicketsForUser
 );
 

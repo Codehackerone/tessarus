@@ -293,7 +293,11 @@ const getAllUsers = async (req: any, res: any) => {
 
 const getAllLogs = async (req: any, res: any) => {
   try {
-    let logs: any = await getAllLogsService();
+    let logType = !req.query.logType ? {} : { logType: req.query.logType };
+    let page = !req.query.page ? 1 : Number(req.query.page);
+    let dpp = !req.query.dpp ? 20 : Number(req.query.dpp);
+
+    let logs: any = await getAllLogsService(logType, page, dpp);
     if (logs.length === 0) {
       let err: any = {
         statusObj: NOT_FOUND,
@@ -317,7 +321,11 @@ const getAllLogs = async (req: any, res: any) => {
 
 const getAllPaymentLogs = async (req: any, res: any) => {
   try {
-    let logs: any = await getAllPaymentLogsService();
+    let logType = !req.query.logType ? {} : { logType: req.query.logType };
+    let page = !req.query.page ? 1 : Number(req.query.page);
+    let dpp = !req.query.dpp ? 20 : Number(req.query.dpp);
+
+    let logs: any = await getAllPaymentLogsService(logType, page, dpp);
     if (logs.length === 0) {
       let err: any = {
         statusObj: NOT_FOUND,

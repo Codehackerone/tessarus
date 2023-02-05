@@ -6,8 +6,14 @@ export const createLogService = async (logBody: any) => {
   return log;
 };
 
-export const getAllLogsService = async () => {
-  const logs: any = await paginate(Logs.Log, {}, 1, 20, { createdAt: -1 });
+export const getAllLogsService = async (
+  logType: object,
+  page: number,
+  dpp: number
+) => {
+  const logs: any = await paginate(Logs.Log, logType, page, dpp, {
+    createdAt: -1,
+  });
   return logs;
 };
 
@@ -16,7 +22,13 @@ export const createPaymentLogService = async (logBody: any) => {
   return log;
 };
 
-export const getAllPaymentLogsService = async () => {
-  const logs: any = await paginate(Logs.Log, {}, 1, 20, { createdAt: -1 });
+export const getAllPaymentLogsService = async (
+  logType: object,
+  page: number,
+  dpp: number
+) => {
+  const logs: any = await paginate(Logs.paymentLog, logType, page, dpp, {
+    createdAt: -1,
+  });
   return logs;
 };
