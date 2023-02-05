@@ -1,12 +1,19 @@
 import Event from "../models/event.model";
+import { paginate } from "../helpers/paginate";
 
 const addEventService = async (eventBody: any) => {
   const event = new Event(eventBody);
   return event.save();
 };
 
-const getAllEventsService = async () => {
-  return Event.find();
+const getAllEventsService = async (
+  query: object,
+  page: number,
+  dpp: number
+) => {
+  return await paginate(Event, query, page, dpp, {
+    createdAt: -1,
+  });
 };
 
 const getEventService = async (event: any) => {
@@ -21,10 +28,20 @@ const deleteEventByIdService = async (id: string) => {
   return Event.findByIdAndDelete(id);
 };
 
+const findEventByNameService = async (name: string) => {
+  return Event.find({
+    title: {
+      $regex: name,
+      $options: "i",
+    },
+  });
+};
+
 export default {
   addEventService,
   getAllEventsService,
   getEventService,
   updateEventByIdService,
   deleteEventByIdService,
+  findEventByNameService,
 };

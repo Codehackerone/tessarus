@@ -7,6 +7,11 @@ const Router = express.Router();
 
 Router.route("/allforusers").get(userAuthorize(), ticketController.allTickets);
 
+Router.route("/allforusers/:id").get(
+  volunteerAuthorize(4),
+  ticketController.allTicketsForUser
+);
+
 // get all tickets for an event - /event/:id - GET
 
 // get all tickets for a user - /user/:id - GET

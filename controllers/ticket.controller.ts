@@ -35,6 +35,36 @@ const allTickets = async (req: any, res: any) => {
   }
 };
 
+const allTicketsForUser = async (req: any, res: any) => {
+  try {
+    if (!req.params.id) {
+      messageError(
+        res,
+        BAD_REQUEST,
+        "User ID not provided",
+        "User ID not provided"
+      );
+      return;
+    }
+    const tickets = await ticketService.getTicketService({
+      userId: req.params.id,
+    });
+
+    let return_object = {
+      tickets: tickets,
+    };
+
+    messageCustom(res, OK, "Tickets fetched successfully", return_object);
+  } catch (err: any) {
+    if (err.error === "ValidationError") {
+      messageError(res, BAD_REQUEST, err.message, err.name);
+    } else {
+      console.log(err);
+      messageError(res, SERVER_ERROR, err.message, err.name);
+    }
+  }
+};
+
 const getTicket = async (req: any, res: any) => {
   try {
     const ticket = await ticketService.getTicketService({ _id: req.params.id });
@@ -141,4 +171,5 @@ export default {
   getTicket,
   allTickets,
   checkIn,
+  allTicketsForUser,
 };

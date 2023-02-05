@@ -20,7 +20,7 @@ import fs from "fs";
 
 moment.suppressDeprecationWarnings = true;
 
-export const addEvent = async (req: any, res: any) => {
+const addEvent = async (req: any, res: any) => {
   try {
     req.body.createdBy = req.volunteer._id;
 
@@ -94,7 +94,29 @@ export const addEvent = async (req: any, res: any) => {
 
 const getAllEvents = async (req: any, res: any) => {
   try {
-    let events: any = await eventService.getAllEventsService();
+    let page = !req.query.page ? 1 : Number(req.query.page);
+    let dpp = !req.query.dpp ? 20 : Number(req.query.dpp);
+
+    let events: any = await eventService.getAllEventsService({}, page, dpp);
+
+    let return_object: any = {
+      events: events,
+    };
+
+    messageCustom(res, OK, "Events fetched successfully", return_object);
+  } catch (err: any) {
+    if (err.error === "ValidationError") {
+      messageError(res, BAD_REQUEST, err.message, err.name);
+    } else {
+      console.log(err);
+      messageError(res, SERVER_ERROR, err.message, err.name);
+    }
+  }
+};
+
+const searchEvents = async (req: any, res: any) => {
+  try {
+    let events: any = await eventService.findEventByNameService(req.query.q);
 
     let return_object: any = {
       events: events,
@@ -628,4 +650,5 @@ export default {
   deleteEventImages,
   registerEvent,
   eventCheckIn,
+  searchEvents,
 };
