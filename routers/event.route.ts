@@ -14,6 +14,8 @@ const Router = express.Router();
 
 Router.route("/all").get(eventController.getAllEvents);
 
+Router.route("/search").get(eventController.searchEvents);
+
 Router.route("/add").post(
   volunteerAuthorize(3),
   validateAddEvent(),
