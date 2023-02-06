@@ -97,7 +97,15 @@ const getAllEvents = async (req: any, res: any) => {
     let page = !req.query.page ? 1 : Number(req.query.page);
     let dpp = !req.query.dpp ? 20 : Number(req.query.dpp);
 
-    let events: any = await eventService.getAllEventsService({}, page, dpp);
+    let searchParams = req.query;
+    if (searchParams.page) delete searchParams.page;
+    if (searchParams.dpp) delete searchParams.dpp;
+
+    let events: any = await eventService.getAllEventsService(
+      searchParams,
+      page,
+      dpp
+    );
 
     let return_object: any = {
       events: events,
