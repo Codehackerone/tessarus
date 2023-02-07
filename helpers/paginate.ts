@@ -1,10 +1,28 @@
 export const paginate = async (
   schema: any,
   query: any,
-  page: number = 1,
-  documentPerPage: number = 20,
+  page: any = 1,
+  documentPerPage: any = 20,
   sortFilter: object = { createdAt: -1 }
 ) => {
+  if (Number.isNaN(Number(page)) || Number.isNaN(Number(documentPerPage)))
+    throw {
+      error: "ValidationError",
+      message: "page or dpp must be a number",
+      name: "ValidationError",
+    };
+  else {
+    page = parseInt(page);
+    documentPerPage = parseInt(documentPerPage);
+  }
+
+  if (page < 1 || documentPerPage < 1)
+    throw {
+      error: "ValidationError",
+      message: "page and dpp must be greater than 0",
+      name: "ValidationError",
+    };
+
   var total_documents = await schema.countDocuments(query);
   var total_pages = Math.ceil(total_documents / documentPerPage);
   var limit = documentPerPage;
