@@ -94,8 +94,8 @@ const addEvent = async (req: any, res: any) => {
 
 const getAllEvents = async (req: any, res: any) => {
   try {
-    let page = !req.query.page ? 1 : Number(req.query.page);
-    let dpp = !req.query.dpp ? 20 : Number(req.query.dpp);
+    let page = !req.query.page ? 1 : req.query.page;
+    let dpp = !req.query.dpp ? 20 : req.query.dpp;
 
     let searchParams = req.query;
     if (searchParams.page) delete searchParams.page;
