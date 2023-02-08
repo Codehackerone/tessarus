@@ -17,6 +17,7 @@ import sendMail from "../helpers/sendEmail";
 import otpService from "../services/otp.service";
 import { uploadFile } from "../helpers/s3";
 import fs from "fs";
+import { alert } from "../helpers/webhookAlert";
 
 const expiry_length = 30 * 86400;
 const jwt_headers: any = {
@@ -63,6 +64,7 @@ const signUp = async (req: any, res: any) => {
         );
       } else {
         console.log(err);
+        alert(req.originalUrl, JSON.stringify(err));
         messageError(res, SERVER_ERROR, err.message, err.name);
       }
     }
@@ -110,6 +112,7 @@ const login = async (req: any, res: any) => {
       messageError(res, err.statusObj, err.name, err.type);
     } else {
       console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
       messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
     }
   }
@@ -140,6 +143,7 @@ const sendVerificationMail = async (req: any, res: any) => {
       messageError(res, err.statusObj, err.name, err.type);
     } else {
       console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
       messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
     }
   }
@@ -179,6 +183,7 @@ const sendOTP = async (req: any, res: any) => {
       messageError(res, err.statusObj, err.name, err.type);
     } else {
       console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
       messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
     }
   }
@@ -210,6 +215,7 @@ const verifyOTPForUserVerification = async (req: any, res: any) => {
       messageError(res, err.statusObj, err.name, err.type);
     } else {
       console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
       messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
     }
   }
@@ -249,6 +255,7 @@ const sendOTPForReset = async (req: any, res: any) => {
       messageError(res, err.statusObj, err.name, err.type);
     } else {
       console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
       messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
     }
   }
@@ -292,6 +299,7 @@ const verifyOTPForResetPassword = async (req: any, res: any) => {
       messageError(res, err.statusObj, err.name, err.type);
     } else {
       console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
       messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
     }
   }
@@ -315,6 +323,7 @@ const verifyToken = async (req: any, res: any) => {
       messageError(res, err.statusObj, err.name, err.type);
     } else {
       console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
       messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
     }
   }
@@ -335,6 +344,7 @@ const updateUser = async (req: any, res: any) => {
       messageError(res, err.statusObj, err.name, err.type);
     } else {
       console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
       messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
     }
   }
@@ -354,6 +364,7 @@ const userProfile = async (req: any, res: any) => {
       messageError(res, err.statusObj, err.name, err.type);
     } else {
       console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
       messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
     }
   }
@@ -388,6 +399,7 @@ const updateProfilePic = async (req: any, res: any) => {
       messageError(res, err.statusObj, err.name, err.type);
     } else {
       console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
       messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
     }
   }
@@ -437,6 +449,7 @@ const forgotPassword = async (req: any, res: any) => {
       messageError(res, err.statusObj, err.name, err.type);
     } else {
       console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
       messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
     }
   }
@@ -470,6 +483,7 @@ const resetPassword = async (req: any, res: any) => {
       messageError(res, err.statusObj, err.name, err.type);
     } else {
       console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
       messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
     }
   }

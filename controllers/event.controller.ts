@@ -17,6 +17,7 @@ import {
 import moment from "moment";
 import { uploadFile } from "../helpers/s3";
 import fs from "fs";
+import { alert } from "../helpers/webhookAlert";
 
 moment.suppressDeprecationWarnings = true;
 
@@ -86,6 +87,7 @@ const addEvent = async (req: any, res: any) => {
         );
       } else {
         console.log(err);
+        alert(req.originalUrl, JSON.stringify(err));
         messageError(res, SERVER_ERROR, err.message, err.name);
       }
     }
@@ -117,6 +119,7 @@ const getAllEvents = async (req: any, res: any) => {
       messageError(res, BAD_REQUEST, err.message, err.name);
     } else {
       console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
       messageError(res, SERVER_ERROR, err.message, err.name);
     }
   }
@@ -136,6 +139,7 @@ const searchEvents = async (req: any, res: any) => {
       messageError(res, BAD_REQUEST, err.message, err.name);
     } else {
       console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
       messageError(res, SERVER_ERROR, err.message, err.name);
     }
   }
@@ -162,6 +166,7 @@ const getEvent = async (req: any, res: any) => {
       messageError(res, BAD_REQUEST, err.message, err.name);
     } else {
       console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
       messageError(res, SERVER_ERROR, err.message, err.name);
     }
   }
@@ -260,6 +265,7 @@ export const updateEvent = async (req: any, res: any) => {
         );
       } else {
         console.log(err);
+        alert(req.originalUrl, JSON.stringify(err));
         messageError(res, SERVER_ERROR, err.message, err.name);
       }
     }
@@ -304,6 +310,7 @@ export const deleteEvent = async (req: any, res: any) => {
       messageError(res, BAD_REQUEST, err.message, err.name);
     } else {
       console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
       messageError(res, SERVER_ERROR, err.message, err.name);
     }
   }
@@ -364,6 +371,7 @@ const addImages = async (req: any, res: any) => {
       messageError(res, BAD_REQUEST, err.message, err.name);
     } else {
       console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
       messageError(res, SERVER_ERROR, err.message, err.name);
     }
   }
@@ -432,6 +440,7 @@ const deleteEventImages = async (req: any, res: any) => {
       messageError(res, BAD_REQUEST, err.message, err.name);
     } else {
       console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
       messageError(res, SERVER_ERROR, err.message, err.name);
     }
   }
@@ -573,6 +582,7 @@ const registerEvent = async (req: any, res: any) => {
       messageError(res, BAD_REQUEST, err.message, err.name);
     } else {
       console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
       messageError(res, SERVER_ERROR, err.message, err.name);
     }
   }
@@ -643,6 +653,7 @@ const eventCheckIn = async (req: any, res: any) => {
       messageError(res, BAD_REQUEST, err.message, err.name);
     } else {
       console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
       messageError(res, SERVER_ERROR, err.message, err.name);
     }
   }

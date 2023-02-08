@@ -4,6 +4,7 @@ import ticketService from "../services/ticket.service";
 import eventService from "../services/event.service";
 import userService from "../services/user.service";
 import getRandomId from "../helpers/randomTextGenerator";
+import { alert } from "../helpers/webhookAlert";
 
 import {
   OK,
@@ -30,6 +31,7 @@ const allTickets = async (req: any, res: any) => {
       messageError(res, BAD_REQUEST, err.message, err.name);
     } else {
       console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
       messageError(res, SERVER_ERROR, err.message, err.name);
     }
   }
@@ -60,6 +62,7 @@ const allTicketsForUser = async (req: any, res: any) => {
       messageError(res, BAD_REQUEST, err.message, err.name);
     } else {
       console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
       messageError(res, SERVER_ERROR, err.message, err.name);
     }
   }
@@ -93,6 +96,7 @@ const getTicket = async (req: any, res: any) => {
       messageError(res, BAD_REQUEST, err.message, err.name);
     } else {
       console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
       messageError(res, SERVER_ERROR, err.message, err.name);
     }
   }
@@ -162,6 +166,7 @@ const checkIn = async (req: any, res: any) => {
       messageError(res, BAD_REQUEST, err.message, err.name);
     } else {
       console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
       messageError(res, SERVER_ERROR, err.message, err.name);
     }
   }
