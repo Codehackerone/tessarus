@@ -30,7 +30,7 @@ try {
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/api', authLimiter);
+app.use("/api", authLimiter);
 
 mongoose.connection.once("open", () => {
   console.log("MongoDB connected");
