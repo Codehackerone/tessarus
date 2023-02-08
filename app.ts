@@ -8,6 +8,7 @@ import userRouter from "./routers/user.route";
 import volunterRouter from "./routers/volunteer.route";
 import eventRouter from "./routers/event.route";
 import ticketRouter from "./routers/ticket.route";
+import authLimiter from "./helpers/rateLimiter";
 
 config();
 
@@ -29,6 +30,7 @@ try {
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/api', authLimiter);
 
 mongoose.connection.once("open", () => {
   console.log("MongoDB connected");
