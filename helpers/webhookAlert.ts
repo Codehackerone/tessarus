@@ -5,6 +5,7 @@ dotenv.config();
 
 export const alert = (route: any, err: any) => {
   try {
+    if (process.env.ENABLE_WEBHOOK_ALERT === "false") return;
     var config = {
       method: "post",
       url: process.env.WEBHOOK_URL,
