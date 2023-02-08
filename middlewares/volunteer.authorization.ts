@@ -11,52 +11,53 @@ import { messageError } from "../helpers/message";
  */
 
 export const authorize = (accessLevel: number) => {
-  return async (req: any, res: any, next: any) => {
-    if (req.headers["authorization"] === undefined) {
-      return messageError(
-        res,
-        BAD_REQUEST,
-        "No auth token found",
-        "AuthenticationError"
-      );
-    } else {
-      try {
-        let decoded: any = "";
-        let authorizationHeaderArray = req.headers["authorization"].split(" ");
-        if (authorizationHeaderArray[0] !== "Bearer") {
-          return messageError(
-            res,
-            BAD_REQUEST,
-            "We dont accept any token other than Bearer",
-            "AuthenticationError"
-          );
-        }
-        decoded = jwt.verify(
-          authorizationHeaderArray[1],
-          String(process.env.JWT_SECRET)
-        );
-        let volunteer: any = await volunteerService.findVolunteerService({
-          email: decoded.email,
-        });
-        if (volunteer.accessLevel < accessLevel) {
-          return messageError(
-            res,
-            UNAUTHORIZED,
-            "Volunteer not authorized.",
-            "AuthorizationError"
-          );
-        }
-        req.volunteer = volunteer;
-        next();
-      } catch (err) {
-        console.log(err);
-        return messageError(
-          res,
-          UNAUTHORIZED,
-          "Expired or invalid token",
-          "AuthenticationError"
-        );
-      }
-    }
-  };
+	return async (req: any, res: any, next: any) => {
+		if (req.headers["authorization"] === undefined) {
+			return messageError(
+				res,
+				BAD_REQUEST,
+				"No auth token found",
+				"AuthenticationError",
+			);
+		} else {
+			try {
+				let decoded: any = "";
+				const authorizationHeaderArray =
+          req.headers["authorization"].split(" ");
+				if (authorizationHeaderArray[0] !== "Bearer") {
+					return messageError(
+						res,
+						BAD_REQUEST,
+						"We dont accept any token other than Bearer",
+						"AuthenticationError",
+					);
+				}
+				decoded = jwt.verify(
+					authorizationHeaderArray[1],
+					String(process.env.JWT_SECRET),
+				);
+				const volunteer: any = await volunteerService.findVolunteerService({
+					email: decoded.email,
+				});
+				if (volunteer.accessLevel < accessLevel) {
+					return messageError(
+						res,
+						UNAUTHORIZED,
+						"Volunteer not authorized.",
+						"AuthorizationError",
+					);
+				}
+				req.volunteer = volunteer;
+				next();
+			} catch (err) {
+				console.log(err);
+				return messageError(
+					res,
+					UNAUTHORIZED,
+					"Expired or invalid token",
+					"AuthenticationError",
+				);
+			}
+		}
+	};
 };

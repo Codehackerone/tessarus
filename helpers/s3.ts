@@ -10,19 +10,19 @@ const accessKeyId = process.env.S3_AWS_ACCESS_KEY;
 const secretAccessKey = process.env.S3_AWS_SECRET_KEY;
 
 const s3 = new S3({
-  region,
-  accessKeyId,
-  secretAccessKey,
+	region,
+	accessKeyId,
+	secretAccessKey,
 });
 
 export const uploadFile = async (file: any) => {
-  const fileStream = fs.createReadStream(file.path);
-  const uploadParams: any = {
-    Bucket: bucketName,
-    Body: fileStream,
-    Key: file.filename,
-    ContentType: file.mimetype,
-    ACL: "public-read",
-  };
-  return s3.upload(uploadParams).promise();
+	const fileStream = fs.createReadStream(file.path);
+	const uploadParams: any = {
+		Bucket: bucketName,
+		Body: fileStream,
+		Key: file.filename,
+		ContentType: file.mimetype,
+		ACL: "public-read",
+	};
+	return s3.upload(uploadParams).promise();
 };

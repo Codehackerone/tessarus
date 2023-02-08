@@ -1,5 +1,5 @@
 export const sendOTPTemplate = (name: string, otp: string) => {
-  return `<html>
+	return `<html>
     <body>
     <p>
         <h3>Hello ${name},<br>        
@@ -18,7 +18,7 @@ export const sendOTPTemplate = (name: string, otp: string) => {
 };
 
 export const sendOTPResetPasswordTemplate = (name: string, otp: string) => {
-  return `<html>
+	return `<html>
         <body>
         <p>
             <h3>Hello ${name},<br>        
@@ -35,12 +35,12 @@ export const sendOTPResetPasswordTemplate = (name: string, otp: string) => {
 };
 
 export const addVolunteerTemplate = (
-  name: string,
-  email: string,
-  password: string,
-  volunteerName: string = "Admin"
+	name: string,
+	email: string,
+	password: string,
+	volunteerName = "Admin",
 ) => {
-  return `<html>
+	return `<html>
         <body>
         <p>
             <h3>Hello ${name},<br>        

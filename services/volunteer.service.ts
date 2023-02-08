@@ -1,30 +1,30 @@
 import Volunteer from "../models/volunteer.model";
 
 const addVolunteerService = async (volunteer: any) => {
-  const newUser = new Volunteer(volunteer);
-  return newUser.save();
+	const newUser = new Volunteer(volunteer);
+	return newUser.save();
 };
 
 const findVolunteerService = async (volunteer: any) => {
-  return Volunteer.findOne(volunteer);
+	return Volunteer.findOne(volunteer);
 };
 
 const findAllVolunteersService = async () => {
-  return Volunteer.find().select("-password");
+	return Volunteer.find().select("-password");
 };
 
 const updateVolunteerService = async (volunteerId: any, volunteer: any) => {
-  return Volunteer.findByIdAndUpdate(volunteerId, volunteer, { new: true });
+	return Volunteer.findByIdAndUpdate(volunteerId, volunteer, { new: true });
 };
 
 const deleteVolunteerService = async (volunteerId: any) => {
-  return Volunteer.findByIdAndDelete(volunteerId);
+	return Volunteer.findByIdAndDelete(volunteerId);
 };
 
 export default {
-  addVolunteerService,
-  findVolunteerService,
-  findAllVolunteersService,
-  updateVolunteerService,
-  deleteVolunteerService,
+	addVolunteerService,
+	findVolunteerService,
+	findAllVolunteersService,
+	updateVolunteerService,
+	deleteVolunteerService,
 };
