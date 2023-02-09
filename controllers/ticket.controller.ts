@@ -6,11 +6,7 @@ import userService from "../services/user.service";
 import getRandomId from "../helpers/randomTextGenerator";
 import { alert } from "../helpers/webhookAlert";
 
-import {
-  OK,
-  BAD_REQUEST,	
-  SERVER_ERROR,
-} from "../helpers/messageTypes";
+import { OK, BAD_REQUEST, SERVER_ERROR } from "../helpers/messageTypes";
 import { createLogService } from "../services/log.service";
 
 const allTickets = async (req: any, res: any) => {

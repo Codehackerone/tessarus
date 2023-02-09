@@ -8,7 +8,7 @@ import {
   CREATED,
   BAD_REQUEST,
   CONFLICT,
-  SERVER_ERROR,	
+  SERVER_ERROR,
 } from "../helpers/messageTypes";
 import getRandomId from "../helpers/randomTextGenerator";
 import { createLogService } from "../services/log.service";

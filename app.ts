@@ -9,6 +9,9 @@ import volunterRouter from "./routers/volunteer.route";
 import eventRouter from "./routers/event.route";
 import ticketRouter from "./routers/ticket.route";
 import authLimiter from "./helpers/rateLimiter";
+import morgan from "morgan";
+import { createStream } from "rotating-file-stream";
+import path from "path";
 
 config();
 
@@ -31,6 +34,12 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/api", authLimiter);
+
+const logStream: any = createStream("access.log", {
+  interval: "1d",
+  path: path.join(__dirname, "logs"),
+});
+app.use(morgan("combined", { stream: logStream }));
 
 mongoose.connection.once("open", () => {
   console.log("MongoDB connected");
