@@ -6,19 +6,19 @@ import eventService from "../services/event.service";
 import { getAllLogsService } from "../services/log.service";
 import { message, messageCustom, messageError } from "../helpers/message";
 import {
-	OK,
-	CREATED,
-	BAD_REQUEST,
-	CONFLICT,
-	SERVER_ERROR,
-	FORBIDDEN,
-	NOT_FOUND,
+  OK,
+  CREATED,
+  BAD_REQUEST,
+  CONFLICT,
+  SERVER_ERROR,
+  FORBIDDEN,
+  NOT_FOUND,
 } from "../helpers/messageTypes";
 import getRandomId from "../helpers/randomTextGenerator";
 import {
-	createLogService,
-	createPaymentLogService,
-	getAllPaymentLogsService,
+  createLogService,
+  createPaymentLogService,
+  getAllPaymentLogsService,
 } from "../services/log.service";
 import sendMail from "../helpers/sendEmail";
 import bcrypt from "bcryptjs";
@@ -30,461 +30,461 @@ config();
 
 const expiry_length = 30 * 86400;
 const jwt_headers: any = {
-	algorithm: "HS256",
-	expiresIn: expiry_length,
+  algorithm: "HS256",
+  expiresIn: expiry_length,
 };
 
 const addVolunteer = async (req: any, res: any) => {
-	try {
-		const password = getRandomId(8);
+  try {
+    const password = getRandomId(8);
 
-		req.body.password = password;
+    req.body.password = password;
 
-		if (req.body.events) {
-			for (const eventId of req.body.events) {
-				const event: any = await eventService.getEventService({
-					_id: eventId,
-				});
-				if (!event) {
-					const err: any = {
-						statusObj: NOT_FOUND,
-						type: "NotFoundError",
-						name: "No event found with id: " + eventId,
-					};
-					throw err;
-				}
-			}
-		}
+    if (req.body.events) {
+      for (const eventId of req.body.events) {
+        const event: any = await eventService.getEventService({
+          _id: eventId,
+        });
+        if (!event) {
+          const err: any = {
+            statusObj: NOT_FOUND,
+            type: "NotFoundError",
+            name: "No event found with id: " + eventId,
+          };
+          throw err;
+        }
+      }
+    }
 
-		const volunteer: any = await volunteerService.addVolunteerService(req.body);
-		const text: any = addVolunteerTemplate(
-			volunteer.name,
-			volunteer.email,
-			password,
-			req.volunteer.name,
-		);
+    const volunteer: any = await volunteerService.addVolunteerService(req.body);
+    const text: any = addVolunteerTemplate(
+      volunteer.name,
+      volunteer.email,
+      password,
+      req.volunteer.name,
+    );
 
-		const resMail: any = await sendMail(
-			volunteer.email,
-			"Espektro KGEC - Added as a volunteer!",
-			text,
-		);
+    const resMail: any = await sendMail(
+      volunteer.email,
+      "Espektro KGEC - Added as a volunteer!",
+      text,
+    );
 
-		if (resMail.hasError === true) throw resMail.error;
+    if (resMail.hasError === true) throw resMail.error;
 
-		await createLogService({
-			logType: "EMAIL_SENT",
-			volunteerId: new ObjectId(volunteer._id),
-			description: `Email sent to ${volunteer.email} with password as newly created volunteer.`,
-		});
+    await createLogService({
+      logType: "EMAIL_SENT",
+      volunteerId: new ObjectId(volunteer._id),
+      description: `Email sent to ${volunteer.email} with password as newly created volunteer.`,
+    });
 
-		await createLogService({
-			logType: "VOLUNTEER_CREATED",
-			volunteerId: new ObjectId(req.volunteer._id),
-			description: `New volunteer created with email ${volunteer.email}. by ${req.volunteer.name}`,
-		});
+    await createLogService({
+      logType: "VOLUNTEER_CREATED",
+      volunteerId: new ObjectId(req.volunteer._id),
+      description: `New volunteer created with email ${volunteer.email}. by ${req.volunteer.name}`,
+    });
 
-		messageCustom(res, CREATED, "Volunteer added successfully.", volunteer);
-	} catch (err: any) {
-		if (err.error === "ValidationError") {
-			messageError(res, BAD_REQUEST, err.message, err.name);
-		} else {
-			if (Number(err.code) === 11000) {
-				messageError(
-					res,
-					CONFLICT,
-					`${Object.keys(err.keyValue)[0]} '${
-						Object.values(err.keyValue)[0]
-					}' already exists.`,
-					err.name,
-				);
-			} else {
-				console.log(err);
-				alert(req.originalUrl, JSON.stringify(err));
-				messageError(res, SERVER_ERROR, err.message, err.name);
-			}
-		}
-	}
+    messageCustom(res, CREATED, "Volunteer added successfully.", volunteer);
+  } catch (err: any) {
+    if (err.error === "ValidationError") {
+      messageError(res, BAD_REQUEST, err.message, err.name);
+    } else {
+      if (Number(err.code) === 11000) {
+        messageError(
+          res,
+          CONFLICT,
+          `${Object.keys(err.keyValue)[0]} '${
+            Object.values(err.keyValue)[0]
+          }' already exists.`,
+          err.name,
+        );
+      } else {
+        console.log(err);
+        alert(req.originalUrl, JSON.stringify(err));
+        messageError(res, SERVER_ERROR, err.message, err.name);
+      }
+    }
+  }
 };
 
 const login = async (req: any, res: any) => {
-	try {
-		const email = req.body.email;
-		const password = req.body.password;
-		const volunteer: any = await volunteerService.findVolunteerService({
-			email,
-		});
-		if (!volunteer) {
-			const err: any = {
-				statusObj: BAD_REQUEST,
-				type: "AuthenticationError",
-				name: "Email or Password doesn't match.",
-			};
-			throw err;
-		}
-		if (!bcrypt.compareSync(password, volunteer.password)) {
-			const err: any = {
-				statusObj: BAD_REQUEST,
-				type: "AuthenticationError",
-				name: "Email or Password doesn't match.",
-			};
-			throw err;
-		}
-		const access_token = jwt.sign(
-			{ email: volunteer.email, user_id: volunteer._id },
-			String(process.env.JWT_SECRET),
-			jwt_headers,
-		);
-		const return_object: any = {};
-		return_object.auth_token = access_token;
-		return_object.volunteer = Object.assign({}, volunteer)["_doc"];
-		delete return_object.volunteer.password;
-		await createLogService({
-			logType: "VOLUNTEER_LOGIN",
-			userId: new ObjectId(volunteer._id),
-			description: volunteer.name + " logged in",
-		});
-		messageCustom(res, OK, "Successfully logged in", return_object);
-	} catch (err: any) {
-		if (err.statusObj !== undefined) {
-			messageError(res, err.statusObj, err.name, err.type);
-		} else {
-			console.log(err);
-			alert(req.originalUrl, JSON.stringify(err));
-			messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-		}
-	}
+  try {
+    const email = req.body.email;
+    const password = req.body.password;
+    const volunteer: any = await volunteerService.findVolunteerService({
+      email,
+    });
+    if (!volunteer) {
+      const err: any = {
+        statusObj: BAD_REQUEST,
+        type: "AuthenticationError",
+        name: "Email or Password doesn't match.",
+      };
+      throw err;
+    }
+    if (!bcrypt.compareSync(password, volunteer.password)) {
+      const err: any = {
+        statusObj: BAD_REQUEST,
+        type: "AuthenticationError",
+        name: "Email or Password doesn't match.",
+      };
+      throw err;
+    }
+    const access_token = jwt.sign(
+      { email: volunteer.email, user_id: volunteer._id },
+      String(process.env.JWT_SECRET),
+      jwt_headers,
+    );
+    const return_object: any = {};
+    return_object.auth_token = access_token;
+    return_object.volunteer = Object.assign({}, volunteer)["_doc"];
+    delete return_object.volunteer.password;
+    await createLogService({
+      logType: "VOLUNTEER_LOGIN",
+      userId: new ObjectId(volunteer._id),
+      description: volunteer.name + " logged in",
+    });
+    messageCustom(res, OK, "Successfully logged in", return_object);
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
 };
 
 const getAllVolunteers = async (req: any, res: any) => {
-	try {
-		const volunteers: any = await volunteerService.findAllVolunteersService();
+  try {
+    const volunteers: any = await volunteerService.findAllVolunteersService();
 
-		if (volunteers.length === 0) {
-			const err: any = {
-				statusObj: NOT_FOUND,
-				type: "NotFoundError",
-				name: "No volunteers found",
-			};
-			throw err;
-		}
-		const return_object: any = {};
-		return_object.volunteers = volunteers;
+    if (volunteers.length === 0) {
+      const err: any = {
+        statusObj: NOT_FOUND,
+        type: "NotFoundError",
+        name: "No volunteers found",
+      };
+      throw err;
+    }
+    const return_object: any = {};
+    return_object.volunteers = volunteers;
 
-		messageCustom(res, OK, "Volunteers fetched successfully", return_object);
-	} catch (err: any) {
-		if (err.statusObj !== undefined) {
-			messageError(res, err.statusObj, err.name, err.type);
-		} else {
-			console.log(err);
-			alert(req.originalUrl, JSON.stringify(err));
-			messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-		}
-	}
+    messageCustom(res, OK, "Volunteers fetched successfully", return_object);
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
 };
 
 const getVolunteer = async (req: any, res: any) => {
-	try {
-		const volunteerId = req.params.id;
+  try {
+    const volunteerId = req.params.id;
 
-		const volunteer: any = await volunteerService.findVolunteerService({
-			_id: volunteerId,
-		});
+    const volunteer: any = await volunteerService.findVolunteerService({
+      _id: volunteerId,
+    });
 
-		if (!volunteer) {
-			const err: any = {
-				statusObj: NOT_FOUND,
-				type: "NotFoundError",
-				name: "No volunteer found",
-			};
-			throw err;
-		}
-		const return_object: any = {};
-		return_object.volunteer = Object.assign({}, volunteer)["_doc"];
-		delete return_object.volunteer.password;
+    if (!volunteer) {
+      const err: any = {
+        statusObj: NOT_FOUND,
+        type: "NotFoundError",
+        name: "No volunteer found",
+      };
+      throw err;
+    }
+    const return_object: any = {};
+    return_object.volunteer = Object.assign({}, volunteer)["_doc"];
+    delete return_object.volunteer.password;
 
-		messageCustom(res, OK, "Volunteer fetched successfully", return_object);
-	} catch (err: any) {
-		if (err.statusObj !== undefined) {
-			messageError(res, err.statusObj, err.name, err.type);
-		} else {
-			console.log(err);
-			alert(req.originalUrl, JSON.stringify(err));
-			messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-		}
-	}
+    messageCustom(res, OK, "Volunteer fetched successfully", return_object);
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
 };
 
 const updateVolunteer = async (req: any, res: any) => {
-	try {
-		const volunteerId = req.params.id;
-		const volunteer: any = await volunteerService.findVolunteerService({
-			_id: volunteerId,
-		});
-		if (!volunteer) {
-			const err: any = {
-				statusObj: NOT_FOUND,
-				type: "NotFoundError",
-				name: "No volunteer found",
-			};
-			throw err;
-		}
+  try {
+    const volunteerId = req.params.id;
+    const volunteer: any = await volunteerService.findVolunteerService({
+      _id: volunteerId,
+    });
+    if (!volunteer) {
+      const err: any = {
+        statusObj: NOT_FOUND,
+        type: "NotFoundError",
+        name: "No volunteer found",
+      };
+      throw err;
+    }
 
-		for (const eventId of req.body.events) {
-			const event: any = await eventService.getEventService({
-				_id: eventId,
-			});
-			if (!event) {
-				const err: any = {
-					statusObj: NOT_FOUND,
-					type: "NotFoundError",
-					name: "No event found with id: " + eventId,
-				};
-				throw err;
-			}
-		}
+    for (const eventId of req.body.events) {
+      const event: any = await eventService.getEventService({
+        _id: eventId,
+      });
+      if (!event) {
+        const err: any = {
+          statusObj: NOT_FOUND,
+          type: "NotFoundError",
+          name: "No event found with id: " + eventId,
+        };
+        throw err;
+      }
+    }
 
-		const updatedVolunteer: any = await volunteerService.updateVolunteerService(
-			volunteerId,
-			req.body,
-		);
+    const updatedVolunteer: any = await volunteerService.updateVolunteerService(
+      volunteerId,
+      req.body,
+    );
 
-		const return_object: any = {};
-		return_object.volunteer = Object.assign({}, updatedVolunteer)["_doc"];
-		delete return_object.volunteer.password;
+    const return_object: any = {};
+    return_object.volunteer = Object.assign({}, updatedVolunteer)["_doc"];
+    delete return_object.volunteer.password;
 
-		await createLogService({
-			logType: "VOLUNTEER_UPDATED",
-			userId: new ObjectId(req.volunteer._id),
-			description:
+    await createLogService({
+      logType: "VOLUNTEER_UPDATED",
+      userId: new ObjectId(req.volunteer._id),
+      description:
         req.volunteer.name + " updated Volunteer " + updatedVolunteer.name,
-		});
+    });
 
-		messageCustom(res, OK, "Volunteer updated successfully", return_object);
-	} catch (err: any) {
-		if (err.statusObj !== undefined) {
-			messageError(res, err.statusObj, err.name, err.type);
-		} else {
-			console.log(err);
-			alert(req.originalUrl, JSON.stringify(err));
-			messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-		}
-	}
+    messageCustom(res, OK, "Volunteer updated successfully", return_object);
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
 };
 
 const getAllUsers = async (req: any, res: any) => {
-	try {
-		const users: any = await userService.getAllUsersService();
-		if (users.length === 0) {
-			const err: any = {
-				statusObj: NOT_FOUND,
-				type: "NotFoundError",
-				name: "No users found",
-			};
-			throw err;
-		}
-		const return_object: any = {};
-		return_object.users = users;
-		messageCustom(res, OK, "Users fetched successfully", return_object);
-	} catch (err: any) {
-		if (err.statusObj !== undefined) {
-			messageError(res, err.statusObj, err.name, err.type);
-		} else {
-			console.log(err);
-			alert(req.originalUrl, JSON.stringify(err));
-			messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-		}
-	}
+  try {
+    const users: any = await userService.getAllUsersService();
+    if (users.length === 0) {
+      const err: any = {
+        statusObj: NOT_FOUND,
+        type: "NotFoundError",
+        name: "No users found",
+      };
+      throw err;
+    }
+    const return_object: any = {};
+    return_object.users = users;
+    messageCustom(res, OK, "Users fetched successfully", return_object);
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
 };
 
 const getAllLogs = async (req: any, res: any) => {
-	try {
-		const logType = !req.query.logType ? {} : { logType: req.query.logType };
-		const page = !req.query.page ? 1 : req.query.page;
-		const dpp = !req.query.dpp ? 20 : req.query.dpp;
+  try {
+    const logType = !req.query.logType ? {} : { logType: req.query.logType };
+    const page = !req.query.page ? 1 : req.query.page;
+    const dpp = !req.query.dpp ? 20 : req.query.dpp;
 
-		const logs: any = await getAllLogsService(logType, page, dpp);
-		if (logs.length === 0) {
-			const err: any = {
-				statusObj: NOT_FOUND,
-				type: "NotFoundError",
-				name: "No logs found",
-			};
-			throw err;
-		}
-		const return_object: any = {};
-		return_object.logs = logs;
-		messageCustom(res, OK, "Logs fetched successfully", return_object);
-	} catch (err: any) {
-		if (err.statusObj !== undefined) {
-			messageError(res, err.statusObj, err.name, err.type);
-		} else {
-			console.log(err);
-			alert(req.originalUrl, JSON.stringify(err));
-			messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-		}
-	}
+    const logs: any = await getAllLogsService(logType, page, dpp);
+    if (logs.length === 0) {
+      const err: any = {
+        statusObj: NOT_FOUND,
+        type: "NotFoundError",
+        name: "No logs found",
+      };
+      throw err;
+    }
+    const return_object: any = {};
+    return_object.logs = logs;
+    messageCustom(res, OK, "Logs fetched successfully", return_object);
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
 };
 
 const getAllPaymentLogs = async (req: any, res: any) => {
-	try {
-		const logType = !req.query.logType ? {} : { logType: req.query.logType };
-		const page = !req.query.page ? 1 : req.query.page;
-		const dpp = !req.query.dpp ? 20 : req.query.dpp;
+  try {
+    const logType = !req.query.logType ? {} : { logType: req.query.logType };
+    const page = !req.query.page ? 1 : req.query.page;
+    const dpp = !req.query.dpp ? 20 : req.query.dpp;
 
-		const logs: any = await getAllPaymentLogsService(logType, page, dpp);
-		if (logs.length === 0) {
-			const err: any = {
-				statusObj: NOT_FOUND,
-				type: "NotFoundError",
-				name: "No logs found",
-			};
-			throw err;
-		}
-		const return_object: any = {};
-		return_object.logs = logs;
-		messageCustom(res, OK, "Logs fetched successfully", return_object);
-	} catch (err: any) {
-		if (err.statusObj !== undefined) {
-			messageError(res, err.statusObj, err.name, err.type);
-		} else {
-			console.log(err);
-			alert(req.originalUrl, JSON.stringify(err));
-			messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-		}
-	}
+    const logs: any = await getAllPaymentLogsService(logType, page, dpp);
+    if (logs.length === 0) {
+      const err: any = {
+        statusObj: NOT_FOUND,
+        type: "NotFoundError",
+        name: "No logs found",
+      };
+      throw err;
+    }
+    const return_object: any = {};
+    return_object.logs = logs;
+    messageCustom(res, OK, "Logs fetched successfully", return_object);
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
 };
 
 const deleteVolunteer = async (req: any, res: any) => {
-	try {
-		const volunteerId = req.params.id;
-		const volunteer: any = await volunteerService.findVolunteerService({
-			_id: volunteerId,
-		});
-		if (!volunteer) {
-			const err: any = {
-				statusObj: NOT_FOUND,
-				type: "NotFoundError",
-				name: "No volunteer found",
-			};
-			throw err;
-		}
+  try {
+    const volunteerId = req.params.id;
+    const volunteer: any = await volunteerService.findVolunteerService({
+      _id: volunteerId,
+    });
+    if (!volunteer) {
+      const err: any = {
+        statusObj: NOT_FOUND,
+        type: "NotFoundError",
+        name: "No volunteer found",
+      };
+      throw err;
+    }
 
-		if (volunteer.accessLevel >= 4) {
-			const err: any = {
-				statusObj: FORBIDDEN,
-				type: "ForbiddenError",
-				name: "You are not authorized to perform this action",
-			};
-			throw err;
-		}
+    if (volunteer.accessLevel >= 4) {
+      const err: any = {
+        statusObj: FORBIDDEN,
+        type: "ForbiddenError",
+        name: "You are not authorized to perform this action",
+      };
+      throw err;
+    }
 
-		const deletedVolunteer: any = await volunteerService.deleteVolunteerService(
-			volunteerId,
-		);
+    const deletedVolunteer: any = await volunteerService.deleteVolunteerService(
+      volunteerId,
+    );
 
-		await createLogService({
-			logType: "VOLUNTEER_DELETED",
-			userId: new ObjectId(req.volunteer._id),
-			description:
+    await createLogService({
+      logType: "VOLUNTEER_DELETED",
+      userId: new ObjectId(req.volunteer._id),
+      description:
         req.volunteer.name + " deleted Volunteer " + deletedVolunteer.name,
-		});
+    });
 
-		message(res, OK, "Volunteer deleted successfully");
-	} catch (err: any) {
-		if (err.statusObj !== undefined) {
-			messageError(res, err.statusObj, err.name, err.type);
-		} else {
-			console.log(err);
-			alert(req.originalUrl, JSON.stringify(err));
-			messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-		}
-	}
+    message(res, OK, "Volunteer deleted successfully");
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
 };
 
 const userQRScan = async (req: any, res: any) => {
-	try {
-		const qrText = req.body.qrText;
-		const user: any = await userService.findUserService({
-			_id: qrText.split("-")[0],
-		});
-		if (!user) {
-			const err: any = {
-				statusObj: NOT_FOUND,
-				type: "NotFoundError",
-				name: "No user found",
-			};
-			throw err;
-		}
-		const return_object: any = {};
-		return_object.user = Object.assign({}, user)["_doc"];
-		delete return_object.user.password;
+  try {
+    const qrText = req.body.qrText;
+    const user: any = await userService.findUserService({
+      _id: qrText.split("-")[0],
+    });
+    if (!user) {
+      const err: any = {
+        statusObj: NOT_FOUND,
+        type: "NotFoundError",
+        name: "No user found",
+      };
+      throw err;
+    }
+    const return_object: any = {};
+    return_object.user = Object.assign({}, user)["_doc"];
+    delete return_object.user.password;
 
-		messageCustom(res, OK, "User fetched successfully", return_object);
-	} catch (err: any) {
-		if (err.statusObj !== undefined) {
-			messageError(res, err.statusObj, err.name, err.type);
-		} else {
-			console.log(err);
-			alert(req.originalUrl, JSON.stringify(err));
-			messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-		}
-	}
+    messageCustom(res, OK, "User fetched successfully", return_object);
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
 };
 
 const addCoins = async (req: any, res: any) => {
-	try {
-		const userId = req.body.userId;
-		const user: any = await userService.findUserService({
-			_id: userId,
-		});
-		if (!user) {
-			const err: any = {
-				statusObj: NOT_FOUND,
-				type: "NotFoundError",
-				name: "No user found",
-			};
-			throw err;
-		}
-		const updatedUser: any = await userService.updateUserService(userId, {
-			coins:
+  try {
+    const userId = req.body.userId;
+    const user: any = await userService.findUserService({
+      _id: userId,
+    });
+    if (!user) {
+      const err: any = {
+        statusObj: NOT_FOUND,
+        type: "NotFoundError",
+        name: "No user found",
+      };
+      throw err;
+    }
+    const updatedUser: any = await userService.updateUserService(userId, {
+      coins:
         user.coins + req.body.amount * Number(process.env.COIN_RUPEE_RATIO),
-		});
+    });
 
-		const return_object: any = {};
-		return_object.user = Object.assign({}, updatedUser)["_doc"];
-		delete return_object.user.password;
+    const return_object: any = {};
+    return_object.user = Object.assign({}, updatedUser)["_doc"];
+    delete return_object.user.password;
 
-		await createPaymentLogService({
-			logType: "COINS_ADDED",
-			userId: new ObjectId(userId),
-			volunteerId: new ObjectId(req.volunteer._id),
-			amount: req.body.amount,
-			description: `Coins added to user ${updatedUser.name} by volunteer ${req.volunteer.name}`,
-		});
+    await createPaymentLogService({
+      logType: "COINS_ADDED",
+      userId: new ObjectId(userId),
+      volunteerId: new ObjectId(req.volunteer._id),
+      amount: req.body.amount,
+      description: `Coins added to user ${updatedUser.name} by volunteer ${req.volunteer.name}`,
+    });
 
-		message(res, OK, "Coins added to user successfully");
-	} catch (err: any) {
-		if (err.statusObj !== undefined) {
-			messageError(res, err.statusObj, err.name, err.type);
-		} else {
-			console.log(err);
-			alert(req.originalUrl, JSON.stringify(err));
-			messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-		}
-	}
+    message(res, OK, "Coins added to user successfully");
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
 };
 
 export default {
-	addVolunteer,
-	login,
-	getAllVolunteers,
-	getVolunteer,
-	updateVolunteer,
-	getAllUsers,
-	getAllLogs,
-	deleteVolunteer,
-	userQRScan,
-	addCoins,
-	getAllPaymentLogs,
+  addVolunteer,
+  login,
+  getAllVolunteers,
+  getVolunteer,
+  updateVolunteer,
+  getAllUsers,
+  getAllLogs,
+  deleteVolunteer,
+  userQRScan,
+  addCoins,
+  getAllPaymentLogs,
 };

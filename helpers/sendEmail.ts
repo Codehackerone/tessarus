@@ -8,9 +8,9 @@ const accessKeyId = process.env.SES_AWS_ACCESS_KEY_ID;
 const secretAccessKey = process.env.SES_AWS_SECRET_ACCESS_KEY;
 const region = process.env.SES_AWS_REGION;
 aws.config.update({
-	accessKeyId,
-	secretAccessKey,
-	region,
+  accessKeyId,
+  secretAccessKey,
+  region,
 });
 const ses = new aws.SES();
 
@@ -67,41 +67,41 @@ const ses = new aws.SES();
 // }
 
 async function sendMail(to: string, subject: string, emailContent: string) {
-	const sender = "Espektro 2023 <espektro@gdsckgec.in>";
-	const charset = "UTF-8";
-	const params = {
-		Source: sender,
-		Destination: {
-			ToAddresses: [to],
-		},
-		Message: {
-			Subject: {
-				Data: subject,
-				Charset: charset,
-			},
-			Body: {
-				Html: {
-					Data: emailContent,
-					Charset: charset,
-				},
-			},
-		},
-	};
-	try {
-		const data = await ses.sendEmail(params).promise();
-		console.log("Email sent: " + to);
-		return {
-			hasError: false,
-			response: data,
-		};
-	} catch (err) {
-		console.log("Email not sent: " + to);
-		console.error(err);
-		return {
-			hasError: true,
-			error: err,
-		};
-	}
+  const sender = "Espektro 2023 <espektro@gdsckgec.in>";
+  const charset = "UTF-8";
+  const params = {
+    Source: sender,
+    Destination: {
+      ToAddresses: [to],
+    },
+    Message: {
+      Subject: {
+        Data: subject,
+        Charset: charset,
+      },
+      Body: {
+        Html: {
+          Data: emailContent,
+          Charset: charset,
+        },
+      },
+    },
+  };
+  try {
+    const data = await ses.sendEmail(params).promise();
+    console.log("Email sent: " + to);
+    return {
+      hasError: false,
+      response: data,
+    };
+  } catch (err) {
+    console.log("Email not sent: " + to);
+    console.error(err);
+    return {
+      hasError: true,
+      error: err,
+    };
+  }
 }
 
 export default sendMail;
