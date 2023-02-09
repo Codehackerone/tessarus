@@ -11,39 +11,39 @@ config();
  */
 
 export const issuperadmin = () => {
-	return async (req: any, res: any, next: any) => {
-		if (req.body.accessLevel < 4) next();
-		else if (req.headers["admin_secret"] === undefined) {
-			return messageError(
-				res,
-				BAD_REQUEST,
-				"You cant create a superadmin",
-				"AuthenticationError",
-			);
-		} else {
-			try {
-				const admin_secret = req.headers["admin_secret"];
+  return async (req: any, res: any, next: any) => {
+    if (req.body.accessLevel < 4) next();
+    else if (req.headers["admin_secret"] === undefined) {
+      return messageError(
+        res,
+        BAD_REQUEST,
+        "You cant create a superadmin",
+        "AuthenticationError",
+      );
+    } else {
+      try {
+        const admin_secret = req.headers["admin_secret"];
 
-				if (admin_secret !== String(process.env.ADMIN_SECRET)) {
-					return messageError(
-						res,
-						UNAUTHORIZED,
-						"Incorrect admin secret",
-						"AuthenticationError",
-					);
-				}
-				next();
-			} catch (err) {
-				console.log(err);
-				return messageError(
-					res,
-					UNAUTHORIZED,
-					"Expired or invalid token",
-					"AuthenticationError",
-				);
-			}
-		}
-	};
+        if (admin_secret !== String(process.env.ADMIN_SECRET)) {
+          return messageError(
+            res,
+            UNAUTHORIZED,
+            "Incorrect admin secret",
+            "AuthenticationError",
+          );
+        }
+        next();
+      } catch (err) {
+        console.log(err);
+        return messageError(
+          res,
+          UNAUTHORIZED,
+          "Expired or invalid token",
+          "AuthenticationError",
+        );
+      }
+    }
+  };
 };
 
 export default issuperadmin;
