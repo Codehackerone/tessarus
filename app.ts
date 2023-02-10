@@ -1,17 +1,12 @@
 import express from "express";
 import cors from "cors";
 import { config } from "dotenv";
-import { message } from "./helpers/message";
-import { OK, NOT_FOUND } from "./helpers/messageTypes";
 import mongoose from "mongoose";
-import userRouter from "./routers/user.route";
-import volunterRouter from "./routers/volunteer.route";
-import eventRouter from "./routers/event.route";
-import ticketRouter from "./routers/ticket.route";
 import authLimiter from "./helpers/rateLimiter";
 import morgan from "morgan";
 import { createStream } from "rotating-file-stream";
 import path from "path";
+import { router } from "./router";
 
 config();
 
@@ -45,18 +40,7 @@ mongoose.connection.once("open", () => {
   console.log("MongoDB connected");
 });
 
-app.get("/", (req: any, res: any) => {
-  message(res, OK, "Welcome to tessarus API system");
-});
-
-app.use("/api/users", userRouter);
-app.use("/api/volunteers", volunterRouter);
-app.use("/api/events", eventRouter);
-app.use("/api/tickets", ticketRouter);
-
-app.all("*", (req: any, res: any) => {
-  message(res, NOT_FOUND, "Route does not exist");
-});
+app.use(router);
 
 app.listen(PORT, () => {
   console.log(`Tessarus listening on ${PORT}. \nURL:http://localhost:${PORT}`);

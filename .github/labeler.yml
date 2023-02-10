@@ -1,0 +1,36 @@
+docs:
+  - any: ["*/md", ".env.example"]
+
+actions:
+  - ".github/*"
+
+test:
+  - "*/tests/*"
+
+features:
+  - any:
+      [
+        "controllers/*",
+        "models/*",
+        "routes/*",
+        "middlewares/*",
+        "services/*",
+        "helpers/*",
+        "app.ts",
+        "router.ts",
+      ]
+
+config:
+  - any:
+      [
+        "tsconfig.json",
+        "eslintrc.json",
+        "Dockerfile",
+        ".dockerignore",
+        ".gitignore",
+        ".prettierrc",
+        "jest.config.js",
+      ]
+
+packages:
+  - any: ["package.json", "package-lock.json", "yarn.lock"]
