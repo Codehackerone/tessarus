@@ -35,6 +35,12 @@ const getAllUsersService = async () => {
   return users;
 };
 
+const fetchEspekroIdService = async (espektroId: any) => {
+  return await User.find({ espektroId: espektroId }).select(
+    "name email espektroId college degree year stream -_id",
+  );
+};
+
 export default {
   signUpService,
   findUserService,
@@ -42,4 +48,5 @@ export default {
   updateUserService,
   resetPasswordService,
   getAllUsersService,
+  fetchEspekroIdService,
 };
