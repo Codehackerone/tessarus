@@ -58,4 +58,6 @@ Router.route("/forgotpassword")
   .post(userController.forgotPassword)
   .put(validateResetPassword(), userController.resetPassword);
 
+Router.route("/verifyespektroid/:id").get(userController.verifyEspektroId);
+
 export default Router;

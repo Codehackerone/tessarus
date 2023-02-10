@@ -9,6 +9,7 @@ import {
   BAD_REQUEST,
   CONFLICT,
   SERVER_ERROR,
+  NOT_FOUND,
 } from "../helpers/messageTypes";
 import getRandomId from "../helpers/randomTextGenerator";
 import { createLogService } from "../services/log.service";
@@ -493,6 +494,32 @@ const resetPassword = async (req: any, res: any) => {
   }
 };
 
+const verifyEspektroId = async (req: any, res: any) => {
+  try {
+    const espektroId: string = req.params.id;
+    const user: any = await userService.fetchEspekroIdService(espektroId);
+    if (!user || user.length === 0) {
+      throw {
+        statusObj: NOT_FOUND,
+        name: "No such user exists",
+        type: "NOT_FOUND",
+      };
+    }
+    const return_object: any = {
+      user: user[0],
+    };
+    messageCustom(res, OK, "Espektro ID is available", return_object);
+  } catch (err: any) {
+    if (err.statusObj !== undefined) {
+      messageError(res, err.statusObj, err.name, err.type);
+    } else {
+      console.log(err);
+      alert(req.originalUrl, JSON.stringify(err));
+      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
+    }
+  }
+};
+
 export default {
   verifyToken,
   signUp,
@@ -507,4 +534,5 @@ export default {
   verifyOTPForUserVerification,
   sendOTPForReset,
   verifyOTPForResetPassword,
+  verifyEspektroId,
 };
