@@ -1,6 +1,6 @@
 docs:
   - "*.md"
-  - "".env.example"
+  - ".env.example"
 
 actions:
   - ".github/*"
@@ -23,7 +23,7 @@ config:
   - "eslintrc.json"
   - "Dockerfile"
   - ".dockerignore"
-  - ".gitignore"        
+  - ".gitignore"
   - ".prettierrc"
   - "jest.config.js"
 
