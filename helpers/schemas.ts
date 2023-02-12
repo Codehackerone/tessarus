@@ -36,6 +36,7 @@ const userSignUpSchema = Joi.object({
   degree: Joi.string().valid("B.Tech", "M.Tech", "MCA"),
   year: Joi.string().valid("1", "2", "3", "4"),
   stream: Joi.string(),
+  profileImageUrl: Joi.string().escapeHTML(),
 });
 
 const userLoginSchema = Joi.object({
@@ -51,6 +52,7 @@ const updateUserSchema = Joi.object({
   degree: Joi.string().valid("B.Tech", "M.Tech", "MCA"),
   year: Joi.string().valid("1", "2", "3", "4"),
   stream: Joi.string(),
+  profileImageUrl: Joi.string().escapeHTML(),
 });
 
 const resetPasswordSchema = Joi.object({
