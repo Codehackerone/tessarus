@@ -96,5 +96,11 @@ describe("config", () => {
       expect(process.env.ENABLE_WEBHOOK_ALERT).toBeDefined();
       expect(process.env.ENABLE_WEBHOOK_ALERT).toBeOneOf(["true", "false"]);
     });
+    it("Should contain STAGING_URL", () => {
+      expect(process.env.STAGING_URL).toBeDefined();
+    });
+    it("Should contain PRODUCTION_URL", () => {
+      expect(process.env.PRODUCTION_URL).toBeDefined();
+    });
   });
 });
