@@ -25,6 +25,7 @@ const logSchema = new Schema(
         "VOLUNTEER_LOGIN",
         "OTP_SENT",
         "OTP_VERIFIED",
+        "IMAGES_UPLOADED",
       ],
       required: true,
     },

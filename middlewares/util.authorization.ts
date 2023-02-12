@@ -4,18 +4,19 @@ import { config } from "dotenv";
 
 config();
 
-const utilMiddleware = () => {
+export const authorize = () => {
   return async (req: any, res: any, next: any) => {
-    if (req.headers["UTILS-API-KEY"] === undefined) {
+    if (req.headers["utils-api-key"] === undefined) {
+      console.log(req.headers);
       return messageError(
         res,
         BAD_REQUEST,
-        "No util api key provided",
+        "No UTILS-API-KEY provided",
         "AuthenticationError",
       );
     } else {
       try {
-        const utilsApiKey = req.headers["UTILS-API-KEY"];
+        const utilsApiKey = req.headers["utils-api-key"];
 
         if (utilsApiKey !== String(process.env.UTILS_API_KEY)) {
           return messageError(
@@ -38,5 +39,3 @@ const utilMiddleware = () => {
     }
   };
 };
-
-export default utilMiddleware;
