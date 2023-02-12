@@ -7,6 +7,7 @@ import morgan from "morgan";
 import { createStream } from "rotating-file-stream";
 import path from "path";
 import { router } from "./router";
+import { deploy } from "./helpers/webhookAlert";
 
 config();
 
@@ -43,5 +44,6 @@ mongoose.connection.once("open", () => {
 app.use(router);
 
 app.listen(PORT, () => {
+  deploy();
   console.log(`Tessarus listening on ${PORT}. \nURL:http://localhost:${PORT}`);
 });

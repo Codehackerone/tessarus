@@ -7,8 +7,8 @@ import {
   validateRegisterEvent,
   validateEventCheckIn,
 } from "../middlewares/validator.middleware";
-import multer from "multer";
-const upload = multer({ dest: "./uploads/" });
+// import multer from "multer";
+// const upload = multer({ dest: "./uploads/" });
 
 const Router = express.Router();
 
@@ -22,9 +22,9 @@ Router.route("/add").post(
   eventController.addEvent,
 );
 
-Router.route("/images/:id")
-  .put(volunteerAuthorize(3), upload.array("images"), eventController.addImages)
-  .delete(volunteerAuthorize(3), eventController.deleteEventImages);
+// Router.route("/images/:id")
+//   .put(volunteerAuthorize(3), upload.array("images"), eventController.addImages)
+//   .delete(volunteerAuthorize(3), eventController.deleteEventImages);
 
 Router.route("/register").post(
   userAuthorize(),

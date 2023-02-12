@@ -8,8 +8,8 @@ import {
   validateOTPSchema,
 } from "../middlewares/validator.middleware";
 import { authorize } from "../middlewares/user.authorization";
-import multer from "multer";
-const upload = multer({ dest: "./uploads/" });
+// import multer from "multer";
+// const upload = multer({ dest: "./uploads/" });
 
 const Router = express.Router();
 
@@ -48,11 +48,11 @@ Router.route("/update").put(
 
 Router.route("/profile").get(authorize(), userController.userProfile);
 
-Router.route("/updateprofilepic").put(
-  authorize(),
-  upload.single("image"),
-  userController.updateProfilePic,
-);
+// Router.route("/updateprofilepic").put(
+//   authorize(),
+//   upload.single("image"),
+//   userController.updateProfilePic,
+// );
 
 Router.route("/forgotpassword")
   .post(userController.forgotPassword)
