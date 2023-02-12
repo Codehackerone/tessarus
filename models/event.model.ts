@@ -12,6 +12,12 @@ const eventSchema = new Schema(
       type: String,
       required: true,
     },
+    rules: {
+      type: String,
+    },
+    prizes: {
+      type: String,
+    },
     tagLine: {
       type: String,
     },

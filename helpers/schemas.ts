@@ -75,7 +75,9 @@ const updateVolunteerSchema = Joi.object({
 
 const addEventSchema = Joi.object({
   title: Joi.string().required().escapeHTML(),
-  description: Joi.string().required().escapeHTML(),
+  description: Joi.string().required(),
+  rules: Joi.string(),
+  prizes: Joi.string(),
   tagLine: Joi.string().escapeHTML(),
   startTime: Joi.date().format("YYYY-MM-DD HH:mm:ss").required(),
   endTime: Joi.date().format("YYYY-MM-DD HH:mm:ss").required(),
@@ -92,6 +94,11 @@ const addEventSchema = Joi.object({
     Joi.object({
       name: Joi.string().required().escapeHTML(),
       phone: Joi.string().max(10, "utf-8").required().escapeHTML(),
+    }),
+  ),
+  eventImages: Joi.array().items(
+    Joi.object({
+      url: Joi.string().required().escapeHTML(),
     }),
   ),
 });
