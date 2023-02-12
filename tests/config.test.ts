@@ -57,6 +57,9 @@ describe("config", () => {
       expect(process.env.COIN_RUPEE_RATIO).toBeDefined();
       expect(Number(process.env.COIN_RUPEE_RATIO)).toBeGreaterThan(0);
     });
+    it("should contain UTILS_API_KEY", () => {
+      expect(process.env.UTILS_API_KEY).toBeDefined();
+    });
   });
   describe("AWS", () => {
     describe("S3", () => {
