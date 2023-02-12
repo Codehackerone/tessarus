@@ -274,6 +274,16 @@ export const updateEvent = async (req: any, res: any) => {
 
 export const deleteEvent = async (req: any, res: any) => {
   try {
+    if (process.env.ENV === "prod") {
+      messageError(
+        res,
+        BAD_REQUEST,
+        "You cannot delete a live event. Please contact admins.",
+        "BAD_REQUEST",
+      );
+      return;
+    }
+
     const event: any = await eventService.getEventService({
       _id: req.params.id,
     });
@@ -291,6 +301,20 @@ export const deleteEvent = async (req: any, res: any) => {
         res,
         BAD_REQUEST,
         "You are not authorized to delete this event",
+        "BAD_REQUEST",
+      );
+      return;
+    }
+
+    const tickets: any = await ticketService.getTicketService({
+      eventId: req.params.id,
+    });
+
+    if (tickets.length > 0) {
+      messageError(
+        res,
+        BAD_REQUEST,
+        "You cannot delete a prebooked event",
         "BAD_REQUEST",
       );
       return;
