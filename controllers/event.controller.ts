@@ -174,13 +174,31 @@ const searchEvents = async (req: any, res: any) => {
 
 const getEvent = async (req: any, res: any) => {
   try {
-    const event: any = await eventService.getEventService({
+    let event: any = await eventService.getEventService({
       _id: req.params.id,
     });
 
     if (event.length === 0) {
       messageError(res, BAD_REQUEST, "Event not found", "BAD_REQUEST");
       return;
+    }
+
+    if (req.user) {
+      const tickets: any = await ticketService.getTicketService({
+        userId: new ObjectId(req.user._id),
+      });
+      const eventTicketDict: any = {};
+      for (const ticket of tickets) {
+        eventTicketDict[ticket.eventId] = ticket;
+      }
+
+      event = event[0].toObject();
+      if (eventTicketDict[event._id]) {
+        event.isRegistered = true;
+        event.ticketId = eventTicketDict[event._id]._id;
+      } else {
+        event.isRegistered = false;
+      }
     }
 
     const return_object: any = {
