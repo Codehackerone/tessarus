@@ -87,7 +87,10 @@ export const deploy = () => {
                 value:
                   "```" +
                   "New Deployment on " +
-                  new Date().toLocaleString() +
+                  //date in ist
+                  new Date().toLocaleString("en-US", {
+                    timeZone: "Asia/Kolkata",
+                  }) +
                   "```",
               },
             ],

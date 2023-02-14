@@ -6,6 +6,7 @@ Backend for Expectro'23 Ticketing System
 
 - https://tessarus.gdsckgec.in/
 - https://tessarus-staging.gdsckgec.in/
+
 # Documentation
 
 Click [here](https://documenter.getpostman.com/view/15506921/2s8ZDczzci) to view the documentation.
@@ -21,7 +22,7 @@ Click [here](https://documenter.getpostman.com/view/15506921/2s8ZDczzci) to view
 # 3rd Party Services Used
 
 - MongoDB
-- AWS 
+- AWS
   - S3(Storing Files)
   - SES(Emailing)
   - EC2(Deployment)
@@ -42,7 +43,7 @@ Click [here](https://documenter.getpostman.com/view/15506921/2s8ZDczzci) to view
 
 - Fork the repo
 - Create a new branch with format 'dev-(your name)'
-- After making changes, dont forget to run   
+- After making changes, dont forget to run
   - `yarn preffyfix` (This will format your code)
   - `yarn test`
 - Commit your changes

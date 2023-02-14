@@ -12,7 +12,7 @@ import {
 
 const Router = express.Router();
 
-Router.route("/all").get(eventController.getAllEvents);
+Router.route("/all").get(userAuthorize(true), eventController.getAllEvents);
 
 Router.route("/search").get(eventController.searchEvents);
 
@@ -38,7 +38,7 @@ Router.route("/checkin").post(
 );
 
 Router.route("/:id")
-  .get(eventController.getEvent)
+  .get(userAuthorize(true), eventController.getEvent)
   .put(volunteerAuthorize(3), validateAddEvent(), eventController.updateEvent)
   .delete(volunteerAuthorize(4), eventController.deleteEvent);
 

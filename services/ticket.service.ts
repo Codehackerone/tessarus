@@ -15,8 +15,19 @@ const updateTicketService = async (ticketId: any, ticketBody: any) => {
   });
 };
 
+const checkWhetherUserIsRegisteredInEventService = async (
+  espektroId: any,
+  eventId: any,
+) => {
+  return await Ticket.find({
+    "team.members.espektroId": espektroId,
+    eventId: eventId,
+  });
+};
+
 export default {
   createTicketService,
   getTicketService,
   updateTicketService,
+  checkWhetherUserIsRegisteredInEventService,
 };

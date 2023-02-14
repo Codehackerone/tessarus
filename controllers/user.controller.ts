@@ -18,6 +18,8 @@ import otpService from "../services/otp.service";
 import { uploadFile } from "../helpers/s3";
 import fs from "fs";
 import { alert } from "../helpers/webhookAlert";
+import eventService from "../services/event.service";
+import ticketService from "../services/ticket.service";
 
 const expiry_length = 30 * 86400;
 const jwt_headers: any = {
@@ -505,10 +507,40 @@ const verifyEspektroId = async (req: any, res: any) => {
         type: "NOT_FOUND",
       };
     }
+    if (user[0].isVerified === false) {
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "User is not verified",
+        type: "BAD_REQUEST",
+      };
+    }
+
     const return_object: any = {
-      user: user[0],
+      user: user[0].toObject(),
     };
-    messageCustom(res, OK, "Espektro ID is available", return_object);
+    return_object.user.isRegisteredInEvent = false;
+    if (req.body.eventId) {
+      const event: any = await eventService.getEventService({
+        _id: new ObjectId(req.body.eventId),
+      });
+      if (!event || event.length === 0) {
+        throw {
+          statusObj: NOT_FOUND,
+          name: "No such event exists",
+          type: "NOT_FOUND",
+        };
+      }
+
+      const tickets: any =
+        await ticketService.checkWhetherUserIsRegisteredInEventService(
+          espektroId,
+          new ObjectId(req.body.eventId),
+        );
+      return_object.user.isRegisteredInEvent =
+        tickets.length > 0 ? true : false;
+    }
+
+    messageCustom(res, OK, "User details", return_object);
   } catch (err: any) {
     if (err.statusObj !== undefined) {
       messageError(res, err.statusObj, err.name, err.type);

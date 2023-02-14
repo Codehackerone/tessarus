@@ -103,11 +103,38 @@ const getAllEvents = async (req: any, res: any) => {
     if (searchParams.page) delete searchParams.page;
     if (searchParams.dpp) delete searchParams.dpp;
 
-    const events: any = await eventService.getAllEventsService(
+    // eslint-disable-next-line prefer-const
+    let events: any = await eventService.getAllEventsService(
       searchParams,
       page,
       dpp,
     );
+
+    if (req.user) {
+      const newEventDocs: any = [];
+
+      const tickets: any = await ticketService.getTicketService({
+        userId: new ObjectId(req.user._id),
+      });
+      const eventTicketDict: any = {};
+      for (const ticket of tickets) {
+        eventTicketDict[ticket.eventId] = ticket;
+      }
+
+      for (let event of events.documents) {
+        event = event.toObject();
+        if (eventTicketDict[event._id]) {
+          event.isRegistered = true;
+          event.ticketId = eventTicketDict[event._id]._id;
+          newEventDocs.push(event);
+        } else {
+          event.isRegistered = false;
+          newEventDocs.push(event);
+        }
+      }
+
+      events.documents = newEventDocs;
+    }
 
     const return_object: any = {
       events: events,
@@ -147,13 +174,31 @@ const searchEvents = async (req: any, res: any) => {
 
 const getEvent = async (req: any, res: any) => {
   try {
-    const event: any = await eventService.getEventService({
+    let event: any = await eventService.getEventService({
       _id: req.params.id,
     });
 
     if (event.length === 0) {
       messageError(res, BAD_REQUEST, "Event not found", "BAD_REQUEST");
       return;
+    }
+
+    if (req.user) {
+      const tickets: any = await ticketService.getTicketService({
+        userId: new ObjectId(req.user._id),
+      });
+      const eventTicketDict: any = {};
+      for (const ticket of tickets) {
+        eventTicketDict[ticket.eventId] = ticket;
+      }
+
+      event = event[0].toObject();
+      if (eventTicketDict[event._id]) {
+        event.isRegistered = true;
+        event.ticketId = eventTicketDict[event._id]._id;
+      } else {
+        event.isRegistered = false;
+      }
     }
 
     const return_object: any = {
