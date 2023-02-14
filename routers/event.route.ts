@@ -12,7 +12,7 @@ import {
 
 const Router = express.Router();
 
-Router.route("/all").get(eventController.getAllEvents);
+Router.route("/all").get(userAuthorize(true), eventController.getAllEvents);
 
 Router.route("/search").get(eventController.searchEvents);
 

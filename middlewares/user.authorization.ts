@@ -3,15 +3,20 @@ import { BAD_REQUEST, UNAUTHORIZED } from "../helpers/messageTypes";
 import userService from "../services/user.service";
 import { messageError } from "../helpers/message";
 
-export const authorize = () => {
+export const authorize = (softPass = false) => {
   return async (req: any, res: any, next: any) => {
-    if (req.headers["authorization"] === undefined) {
+    if (req.headers["authorization"] === undefined && softPass === false) {
       return messageError(
         res,
         BAD_REQUEST,
         "No auth token found",
         "AuthenticationError",
       );
+    } else if (
+      req.headers["authorization"] === undefined &&
+      softPass === true
+    ) {
+      next();
     } else {
       try {
         let decoded: any = "";
