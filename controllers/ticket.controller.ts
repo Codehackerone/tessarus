@@ -1,18 +1,17 @@
 import { ObjectId } from "mongodb";
-import { message, messageCustom, messageError } from "../helpers/message";
+import { message, messageCustom } from "../helpers/message";
 import ticketService from "../services/ticket.service";
 import eventService from "../services/event.service";
 import userService from "../services/user.service";
 import getRandomId from "../helpers/randomTextGenerator";
-import { alert } from "../helpers/webhookAlert";
-
-import { OK, BAD_REQUEST, SERVER_ERROR } from "../helpers/messageTypes";
+import { OK, BAD_REQUEST, FORBIDDEN } from "../helpers/messageTypes";
 import { createLogService } from "../services/log.service";
+import { handleError } from "../helpers/errorHandler";
 
 const allTickets = async (req: any, res: any) => {
   try {
-    const tickets = await ticketService.getTicketService({
-      userId: req.user._id,
+    const tickets = await ticketService.getAllTicketsService({
+      userId: new ObjectId(req.user._id),
     });
 
     const return_object = {
@@ -21,26 +20,18 @@ const allTickets = async (req: any, res: any) => {
 
     messageCustom(res, OK, "Tickets fetched successfully", return_object);
   } catch (err: any) {
-    if (err.error === "ValidationError") {
-      messageError(res, BAD_REQUEST, err.message, err.name);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, err.message, err.name);
-    }
+    await handleError(req, res, err);
   }
 };
 
 const allTicketsForUser = async (req: any, res: any) => {
   try {
     if (!req.params.id) {
-      messageError(
-        res,
-        BAD_REQUEST,
-        "User ID not provided",
-        "User ID not provided",
-      );
-      return;
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "User ID not provided",
+        type: "ValidationError",
+      };
     }
     const tickets = await ticketService.getTicketService({
       userId: req.params.id,
@@ -52,13 +43,7 @@ const allTicketsForUser = async (req: any, res: any) => {
 
     messageCustom(res, OK, "Tickets fetched successfully", return_object);
   } catch (err: any) {
-    if (err.error === "ValidationError") {
-      messageError(res, BAD_REQUEST, err.message, err.name);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, err.message, err.name);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -66,8 +51,11 @@ const getTicket = async (req: any, res: any) => {
   try {
     const ticket = await ticketService.getTicketService({ _id: req.params.id });
     if (ticket.length === 0) {
-      messageError(res, BAD_REQUEST, "Ticket not found", "Ticket not found");
-      return;
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "Ticket not found",
+        type: "NotFoundError",
+      };
     }
 
     const event: any = await eventService.getEventService({
@@ -86,13 +74,7 @@ const getTicket = async (req: any, res: any) => {
 
     messageCustom(res, OK, "Ticket fetched successfully", return_object);
   } catch (err: any) {
-    if (err.error === "ValidationError") {
-      messageError(res, BAD_REQUEST, err.message, err.name);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, err.message, err.name);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -100,17 +82,18 @@ const checkIn = async (req: any, res: any) => {
   try {
     const ticket = await ticketService.getTicketService({ _id: req.params.id });
     if (ticket.length === 0) {
-      messageError(res, BAD_REQUEST, "Ticket not found", "Ticket not found");
-      return;
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "Ticket not found",
+        type: "NotFoundError",
+      };
     }
     if (ticket[0].checkedIn) {
-      messageError(
-        res,
-        BAD_REQUEST,
-        "Ticket already checked in",
-        "Ticket already checked in",
-      );
-      return;
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "Ticket already checked in",
+        type: "ValidationError",
+      };
     }
 
     const eventsPermitted = req.volunteer.events;
@@ -118,13 +101,11 @@ const checkIn = async (req: any, res: any) => {
       (event: ObjectId) => event.equals(ticket[0].eventId),
     );
     if (!eventPermitted) {
-      messageError(
-        res,
-        BAD_REQUEST,
-        "You are not permitted to check in for this event",
-        "Not Authorized",
-      );
-      return;
+      throw {
+        statusObj: FORBIDDEN,
+        name: "You are not permitted to check in participants for this event",
+        type: "AuthorizationError",
+      };
     }
 
     const ticketNo = getRandomId(8);
@@ -156,13 +137,7 @@ const checkIn = async (req: any, res: any) => {
     });
     message(res, OK, "Ticket checked in successfully");
   } catch (err: any) {
-    if (err.error === "ValidationError") {
-      messageError(res, BAD_REQUEST, err.message, err.name);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, err.message, err.name);
-    }
+    await handleError(req, res, err);
   }
 };
 

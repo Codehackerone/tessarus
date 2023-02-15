@@ -2,24 +2,17 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { ObjectId } from "mongodb";
 import userService from "../services/user.service";
-import { message, messageCustom, messageError } from "../helpers/message";
-import {
-  OK,
-  CREATED,
-  BAD_REQUEST,
-  CONFLICT,
-  SERVER_ERROR,
-  NOT_FOUND,
-} from "../helpers/messageTypes";
+import { message, messageCustom } from "../helpers/message";
+import { OK, CREATED, BAD_REQUEST, NOT_FOUND } from "../helpers/messageTypes";
 import getRandomId from "../helpers/randomTextGenerator";
 import { createLogService } from "../services/log.service";
 import sendMail from "../helpers/sendEmail";
 import otpService from "../services/otp.service";
 import { uploadFile } from "../helpers/s3";
 import fs from "fs";
-import { alert } from "../helpers/webhookAlert";
 import eventService from "../services/event.service";
 import ticketService from "../services/ticket.service";
+import { handleError } from "../helpers/errorHandler";
 
 const expiry_length = 30 * 86400;
 const jwt_headers: any = {
@@ -52,24 +45,7 @@ const signUp = async (req: any, res: any) => {
       return_object,
     );
   } catch (err: any) {
-    if (err.error === "ValidationError") {
-      messageError(res, BAD_REQUEST, err.message, err.name);
-    } else {
-      if (Number(err.code) === 11000) {
-        messageError(
-          res,
-          CONFLICT,
-          `${Object.keys(err.keyValue)[0]} '${
-            Object.values(err.keyValue)[0]
-          }' already exists.`,
-          err.name,
-        );
-      } else {
-        console.log(err);
-        alert(req.originalUrl, JSON.stringify(err));
-        messageError(res, SERVER_ERROR, err.message, err.name);
-      }
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -110,13 +86,7 @@ const login = async (req: any, res: any) => {
     });
     messageCustom(res, OK, "Successfully logged in", return_object);
   } catch (err: any) {
-    if (err.statusObj !== undefined) {
-      messageError(res, err.statusObj, err.name, err.type);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -141,13 +111,7 @@ const sendVerificationMail = async (req: any, res: any) => {
     });
     message(res, OK, "Verification code sent to your email");
   } catch (err: any) {
-    if (err.statusObj !== undefined) {
-      messageError(res, err.statusObj, err.name, err.type);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -181,13 +145,7 @@ const sendOTP = async (req: any, res: any) => {
 
     messageCustom(res, OK, "OTP sent to your email", return_object);
   } catch (err: any) {
-    if (err.statusObj !== undefined) {
-      messageError(res, err.statusObj, err.name, err.type);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -213,13 +171,7 @@ const verifyOTPForUserVerification = async (req: any, res: any) => {
 
     message(res, OK, "OTP verified successfully and user verified");
   } catch (err: any) {
-    if (err.statusObj !== undefined) {
-      messageError(res, err.statusObj, err.name, err.type);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -253,13 +205,7 @@ const sendOTPForReset = async (req: any, res: any) => {
 
     messageCustom(res, OK, "OTP sent to your email", return_object);
   } catch (err: any) {
-    if (err.statusObj !== undefined) {
-      messageError(res, err.statusObj, err.name, err.type);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -267,13 +213,11 @@ const verifyOTPForResetPassword = async (req: any, res: any) => {
   try {
     const password = req.body.password;
     if (!password) {
-      messageError(
-        res,
-        BAD_REQUEST,
-        "New Password is required",
-        "Password is required",
-      );
-      return;
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "Password is required",
+        type: "ValidationError",
+      };
     }
 
     const otp_token = req.body.otp_token;
@@ -297,13 +241,7 @@ const verifyOTPForResetPassword = async (req: any, res: any) => {
 
     message(res, OK, "Password reset successfully");
   } catch (err: any) {
-    if (err.statusObj !== undefined) {
-      messageError(res, err.statusObj, err.name, err.type);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -321,13 +259,7 @@ const verifyToken = async (req: any, res: any) => {
     });
     message(res, OK, "User verified Successfully");
   } catch (err: any) {
-    if (err.statusObj !== undefined) {
-      messageError(res, err.statusObj, err.name, err.type);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -345,13 +277,7 @@ const updateUser = async (req: any, res: any) => {
     });
     message(res, OK, "User updated Successfully");
   } catch (err: any) {
-    if (err.statusObj !== undefined) {
-      messageError(res, err.statusObj, err.name, err.type);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -365,13 +291,7 @@ const userProfile = async (req: any, res: any) => {
     delete return_object.user.password;
     messageCustom(res, OK, "User Profile fetched successfully", return_object);
   } catch (err: any) {
-    if (err.statusObj !== undefined) {
-      messageError(res, err.statusObj, err.name, err.type);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -400,13 +320,7 @@ const updateProfilePic = async (req: any, res: any) => {
 
     message(res, OK, "Profile picture updated successfully");
   } catch (err: any) {
-    if (err.statusObj !== undefined) {
-      messageError(res, err.statusObj, err.name, err.type);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -450,13 +364,7 @@ const forgotPassword = async (req: any, res: any) => {
 
     message(res, OK, "Password reset link sent to your email");
   } catch (err: any) {
-    if (err.statusObj !== undefined) {
-      messageError(res, err.statusObj, err.name, err.type);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -486,13 +394,7 @@ const resetPassword = async (req: any, res: any) => {
 
     message(res, OK, "Password reset successfully");
   } catch (err: any) {
-    if (err.statusObj !== undefined) {
-      messageError(res, err.statusObj, err.name, err.type);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -542,13 +444,7 @@ const verifyEspektroId = async (req: any, res: any) => {
 
     messageCustom(res, OK, "User details", return_object);
   } catch (err: any) {
-    if (err.statusObj !== undefined) {
-      messageError(res, err.statusObj, err.name, err.type);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-    }
+    await handleError(req, res, err);
   }
 };
 

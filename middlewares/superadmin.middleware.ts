@@ -1,6 +1,6 @@
 import { BAD_REQUEST, UNAUTHORIZED } from "../helpers/messageTypes";
-import { messageError } from "../helpers/message";
 import { config } from "dotenv";
+import { handleError } from "../helpers/errorHandler";
 
 config();
 /*
@@ -12,36 +12,35 @@ config();
 
 export const issuperadmin = () => {
   return async (req: any, res: any, next: any) => {
-    if (req.body.accessLevel < 4) next();
-    else if (req.headers["admin_secret"] === undefined) {
-      return messageError(
-        res,
-        BAD_REQUEST,
-        "You cant create a superadmin",
-        "AuthenticationError",
-      );
-    } else {
-      try {
-        const admin_secret = req.headers["admin_secret"];
-
-        if (admin_secret !== String(process.env.ADMIN_SECRET)) {
-          return messageError(
-            res,
-            UNAUTHORIZED,
-            "Incorrect admin secret",
-            "AuthenticationError",
-          );
+    try {
+      if (req.body.accessLevel < 4) next();
+      else if (req.headers["admin_secret"] === undefined) {
+        throw {
+          statusObj: UNAUTHORIZED,
+          name: "You cant create a superadmin",
+          type: "AuthorizationError",
+        };
+      } else {
+        try {
+          const admin_secret = req.headers["admin_secret"];
+          if (admin_secret !== String(process.env.ADMIN_SECRET)) {
+            throw {
+              statusObj: BAD_REQUEST,
+              name: "Incorrect admin secret",
+              type: "ValidationError",
+            };
+          }
+          next();
+        } catch (err) {
+          throw {
+            statusObj: BAD_REQUEST,
+            name: "Expired or invalid token",
+            type: "JWTError",
+          };
         }
-        next();
-      } catch (err) {
-        console.log(err);
-        return messageError(
-          res,
-          UNAUTHORIZED,
-          "Expired or invalid token",
-          "AuthenticationError",
-        );
       }
+    } catch (err) {
+      await handleError(req, res, err);
     }
   };
 };

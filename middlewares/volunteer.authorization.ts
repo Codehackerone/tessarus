@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
-import { BAD_REQUEST, UNAUTHORIZED } from "../helpers/messageTypes";
+import { BAD_REQUEST, FORBIDDEN, UNAUTHORIZED } from "../helpers/messageTypes";
 import volunteerService from "../services/volunteer.service";
-import { messageError } from "../helpers/message";
+import { handleError } from "../helpers/errorHandler";
 
 /*
  * @accessLevel: 1 - Volunteer
@@ -12,52 +12,51 @@ import { messageError } from "../helpers/message";
 
 export const authorize = (accessLevel: number) => {
   return async (req: any, res: any, next: any) => {
-    if (req.headers["authorization"] === undefined) {
-      return messageError(
-        res,
-        BAD_REQUEST,
-        "No auth token found",
-        "AuthenticationError",
-      );
-    } else {
-      try {
-        let decoded: any = "";
-        const authorizationHeaderArray =
-          req.headers["authorization"].split(" ");
-        if (authorizationHeaderArray[0] !== "Bearer") {
-          return messageError(
-            res,
-            BAD_REQUEST,
-            "We dont accept any token other than Bearer",
-            "AuthenticationError",
+    try {
+      if (req.headers["authorization"] === undefined) {
+        throw {
+          statusObj: BAD_REQUEST,
+          name: "No authorization token found",
+          type: "AuthenticationError",
+        };
+      } else {
+        try {
+          let decoded: any = "";
+          const authorizationHeaderArray =
+            req.headers["authorization"].split(" ");
+          if (authorizationHeaderArray[0] !== "Bearer") {
+            throw {
+              statusObj: BAD_REQUEST,
+              name: "We dont accept any token other than Bearer",
+              type: "ValidationError",
+            };
+          }
+          decoded = jwt.verify(
+            authorizationHeaderArray[1],
+            String(process.env.JWT_SECRET),
           );
+          const volunteer: any = await volunteerService.findVolunteerService({
+            email: decoded.email,
+          });
+          if (volunteer.accessLevel < accessLevel) {
+            throw {
+              statusObj: FORBIDDEN,
+              name: "Volunteer not authorized to peform this action.",
+              type: "AuthorizationError",
+            };
+          }
+          req.volunteer = volunteer;
+          next();
+        } catch (err) {
+          throw {
+            statusObj: UNAUTHORIZED,
+            name: "Expired or invalid token",
+            type: "JWTError",
+          };
         }
-        decoded = jwt.verify(
-          authorizationHeaderArray[1],
-          String(process.env.JWT_SECRET),
-        );
-        const volunteer: any = await volunteerService.findVolunteerService({
-          email: decoded.email,
-        });
-        if (volunteer.accessLevel < accessLevel) {
-          return messageError(
-            res,
-            UNAUTHORIZED,
-            "Volunteer not authorized.",
-            "AuthorizationError",
-          );
-        }
-        req.volunteer = volunteer;
-        next();
-      } catch (err) {
-        console.log(err);
-        return messageError(
-          res,
-          UNAUTHORIZED,
-          "Expired or invalid token",
-          "AuthenticationError",
-        );
       }
+    } catch (err) {
+      await handleError(req, res, err);
     }
   };
 };

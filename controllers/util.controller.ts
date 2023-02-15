@@ -1,9 +1,9 @@
-import { messageCustom, messageError } from "../helpers/message";
-import { CREATED, BAD_REQUEST, SERVER_ERROR } from "../helpers/messageTypes";
+import { messageCustom } from "../helpers/message";
+import { CREATED, BAD_REQUEST } from "../helpers/messageTypes";
 import { uploadFile } from "../helpers/s3";
 import fs from "fs";
 import { createLogService } from "../services/log.service";
-import { alert } from "../helpers/webhookAlert";
+import { handleError } from "../helpers/errorHandler";
 
 const uploadImages = async (req: any, res: any) => {
   try {
@@ -11,8 +11,11 @@ const uploadImages = async (req: any, res: any) => {
     let imagesArray: any = [];
 
     if (req.files.length === 0) {
-      messageError(res, BAD_REQUEST, "No files were uploaded", "No files");
-      return;
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "No files were uploaded",
+        type: "ValidationError",
+      };
     }
 
     for (const file of req.files) {
@@ -32,13 +35,7 @@ const uploadImages = async (req: any, res: any) => {
 
     messageCustom(res, CREATED, "Images added successfully", return_object);
   } catch (err: any) {
-    if (err.error === "ValidationError") {
-      messageError(res, BAD_REQUEST, err.message, err.name);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, err.message, err.name);
-    }
+    await handleError(req, res, err);
   }
 };
 

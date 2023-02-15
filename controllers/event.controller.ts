@@ -1,15 +1,9 @@
 import { ObjectId } from "mongodb";
-import { message, messageCustom, messageError } from "../helpers/message";
+import { message, messageCustom } from "../helpers/message";
 import eventService from "../services/event.service";
 import userService from "../services/user.service";
 import ticketService from "../services/ticket.service";
-import {
-  OK,
-  CREATED,
-  BAD_REQUEST,
-  CONFLICT,
-  SERVER_ERROR,
-} from "../helpers/messageTypes";
+import { OK, CREATED, BAD_REQUEST, FORBIDDEN } from "../helpers/messageTypes";
 import {
   createLogService,
   createPaymentLogService,
@@ -17,7 +11,7 @@ import {
 import moment from "moment";
 import { uploadFile } from "../helpers/s3";
 import fs from "fs";
-import { alert } from "../helpers/webhookAlert";
+import { handleError } from "../helpers/errorHandler";
 
 moment.suppressDeprecationWarnings = true;
 
@@ -26,37 +20,31 @@ const addEvent = async (req: any, res: any) => {
     req.body.createdBy = req.volunteer._id;
 
     if (new Date(req.body.startTime) >= new Date(req.body.endTime)) {
-      messageError(
-        res,
-        BAD_REQUEST,
-        "Start time cannot be greater than end time",
-        "BAD_REQUEST",
-      );
-      return;
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "Start time cannot be greater than end time",
+        type: "ValidationError",
+      };
     }
 
     if (req.body.eventType === "group") {
       if (!req.body.eventMaxParticipants || !req.body.eventMinParticipants) {
-        messageError(
-          res,
-          BAD_REQUEST,
-          "Max and min participants are required for group events",
-          "BAD_REQUEST",
-        );
-        return;
+        throw {
+          statusObj: BAD_REQUEST,
+          name: "Max and min participants are required for group events",
+          type: "ValidationError",
+        };
       }
 
       const maxParticipants = req.body.eventMaxParticipants;
       const minParticipants = req.body.eventMinParticipants;
 
       if (maxParticipants <= minParticipants) {
-        messageError(
-          res,
-          BAD_REQUEST,
-          "Max participants cannot be less than or equal to min participants",
-          "BAD_REQUEST",
-        );
-        return;
+        throw {
+          statusObj: BAD_REQUEST,
+          name: "Max participants cannot be less than or equal to min participants",
+          type: "ValidationError",
+        };
       }
     }
 
@@ -73,24 +61,7 @@ const addEvent = async (req: any, res: any) => {
 
     messageCustom(res, CREATED, "Event added successfully", return_object);
   } catch (err: any) {
-    if (err.error === "ValidationError") {
-      messageError(res, BAD_REQUEST, err.message, err.name);
-    } else {
-      if (Number(err.code) === 11000) {
-        messageError(
-          res,
-          CONFLICT,
-          `${Object.keys(err.keyValue)[0]} '${
-            Object.values(err.keyValue)[0]
-          }' already exists.`,
-          err.name,
-        );
-      } else {
-        console.log(err);
-        alert(req.originalUrl, JSON.stringify(err));
-        messageError(res, SERVER_ERROR, err.message, err.name);
-      }
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -142,13 +113,7 @@ const getAllEvents = async (req: any, res: any) => {
 
     messageCustom(res, OK, "Events fetched successfully", return_object);
   } catch (err: any) {
-    if (err.error === "ValidationError") {
-      messageError(res, BAD_REQUEST, err.message, err.name);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, err.message, err.name);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -162,13 +127,7 @@ const searchEvents = async (req: any, res: any) => {
 
     messageCustom(res, OK, "Events fetched successfully", return_object);
   } catch (err: any) {
-    if (err.error === "ValidationError") {
-      messageError(res, BAD_REQUEST, err.message, err.name);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, err.message, err.name);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -179,8 +138,11 @@ const getEvent = async (req: any, res: any) => {
     });
 
     if (event.length === 0) {
-      messageError(res, BAD_REQUEST, "Event not found", "BAD_REQUEST");
-      return;
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "Event not found",
+        type: "NotFoundError",
+      };
     }
 
     if (req.user) {
@@ -207,13 +169,7 @@ const getEvent = async (req: any, res: any) => {
 
     messageCustom(res, OK, "Event fetched successfully", return_object);
   } catch (err: any) {
-    if (err.error === "ValidationError") {
-      messageError(res, BAD_REQUEST, err.message, err.name);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, err.message, err.name);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -224,55 +180,50 @@ export const updateEvent = async (req: any, res: any) => {
     });
 
     if (event.length === 0) {
-      messageError(res, BAD_REQUEST, "Event not found", "BAD_REQUEST");
-      return;
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "Event not found",
+        type: "NotFoundError",
+      };
     }
 
     if (
       req.volunteer.accessLevel <= 3 &&
       event[0].createdBy.toString() !== req.volunteer._id.toString()
     ) {
-      messageError(
-        res,
-        BAD_REQUEST,
-        "You are not authorized to update this event",
-        "BAD_REQUEST",
-      );
-      return;
+      throw {
+        statusObj: FORBIDDEN,
+        name: "You are not authorized to update this event",
+        type: "AuthorizationError",
+      };
     }
 
     if (new Date(req.body.startTime) >= new Date(req.body.endTime)) {
-      messageError(
-        res,
-        BAD_REQUEST,
-        "Start time cannot be greater than end time",
-        "BAD_REQUEST",
-      );
-      return;
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "Start time cannot be greater than end time",
+        type: "ValidationError",
+      };
     }
 
     if (req.body.eventType === "group") {
       if (!req.body.eventMaxParticipants || !req.body.eventMinParticipants) {
-        messageError(
-          res,
-          BAD_REQUEST,
-          "Max and min participants are required for group events",
-          "BAD_REQUEST",
-        );
-        return;
+        throw {
+          statusObj: BAD_REQUEST,
+          name: "Max and min participants are required for group events",
+          type: "ValidationError",
+        };
       }
 
       const maxParticipants = req.body.eventMaxParticipants;
       const minParticipants = req.body.eventMinParticipants;
 
       if (maxParticipants <= minParticipants) {
-        messageError(
-          res,
-          BAD_REQUEST,
-          "Max participants cannot be less than or equal to min participants",
-          "BAD_REQUEST",
-        );
-        return;
+        throw {
+          statusObj: BAD_REQUEST,
+          name: "Max participants cannot be less than or equal to min participants",
+          type: "ValidationError",
+        };
       }
     } else {
       if (req.body.eventMaxParticipants) delete req.body.eventMaxParticipants;
@@ -296,37 +247,18 @@ export const updateEvent = async (req: any, res: any) => {
 
     messageCustom(res, OK, "Event updated successfully", return_object);
   } catch (err: any) {
-    if (err.error === "ValidationError") {
-      messageError(res, BAD_REQUEST, err.message, err.name);
-    } else {
-      if (Number(err.code) === 11000) {
-        messageError(
-          res,
-          CONFLICT,
-          `${Object.keys(err.keyValue)[0]} '${
-            Object.values(err.keyValue)[0]
-          }' already exists.`,
-          err.name,
-        );
-      } else {
-        console.log(err);
-        alert(req.originalUrl, JSON.stringify(err));
-        messageError(res, SERVER_ERROR, err.message, err.name);
-      }
-    }
+    await handleError(req, res, err);
   }
 };
 
 export const deleteEvent = async (req: any, res: any) => {
   try {
     if (process.env.ENV === "prod") {
-      messageError(
-        res,
-        BAD_REQUEST,
-        "You cannot delete a live event. Please contact admins.",
-        "BAD_REQUEST",
-      );
-      return;
+      throw {
+        statusObj: FORBIDDEN,
+        name: "You cannot delete a live event. Please contact admins.",
+        type: "AuthorizationError",
+      };
     }
 
     const event: any = await eventService.getEventService({
@@ -334,21 +266,22 @@ export const deleteEvent = async (req: any, res: any) => {
     });
 
     if (event.length === 0) {
-      messageError(res, BAD_REQUEST, "Event not found", "BAD_REQUEST");
-      return;
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "Event not found",
+        type: "NotFoundError",
+      };
     }
 
     if (
       req.volunteer.accessLevel <= 3 &&
       event[0].createdBy.toString() !== req.volunteer._id.toString()
     ) {
-      messageError(
-        res,
-        BAD_REQUEST,
-        "You are not authorized to delete this event",
-        "BAD_REQUEST",
-      );
-      return;
+      throw {
+        statusObj: FORBIDDEN,
+        name: "You are not authorized to delete this event",
+        type: "AuthorizationError",
+      };
     }
 
     const tickets: any = await ticketService.getTicketService({
@@ -356,13 +289,11 @@ export const deleteEvent = async (req: any, res: any) => {
     });
 
     if (tickets.length > 0) {
-      messageError(
-        res,
-        BAD_REQUEST,
-        "You cannot delete a prebooked event",
-        "BAD_REQUEST",
-      );
-      return;
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "You cannot delete a prebooked event",
+        type: "ValidationError",
+      };
     }
 
     await eventService.deleteEventByIdService(req.params.id);
@@ -375,13 +306,7 @@ export const deleteEvent = async (req: any, res: any) => {
 
     message(res, OK, "Event deleted successfully");
   } catch (err: any) {
-    if (err.error === "ValidationError") {
-      messageError(res, BAD_REQUEST, err.message, err.name);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, err.message, err.name);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -392,21 +317,22 @@ const addImages = async (req: any, res: any) => {
     });
 
     if (event.length === 0) {
-      messageError(res, BAD_REQUEST, "Event not found", "BAD_REQUEST");
-      return;
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "Event not found",
+        type: "NotFoundError",
+      };
     }
 
     if (
       req.volunteer.accessLevel <= 3 &&
       event[0].createdBy.toString() !== req.volunteer._id.toString()
     ) {
-      messageError(
-        res,
-        BAD_REQUEST,
-        "You are not authorized to add images to this event",
-        "BAD_REQUEST",
-      );
-      return;
+      throw {
+        statusObj: FORBIDDEN,
+        name: "You are not authorized to add images to this event",
+        type: "AuthorizationError",
+      };
     }
     event = event[0];
 
@@ -439,13 +365,7 @@ const addImages = async (req: any, res: any) => {
 
     messageCustom(res, OK, "Images added successfully", return_object);
   } catch (err: any) {
-    if (err.error === "ValidationError") {
-      messageError(res, BAD_REQUEST, err.message, err.name);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, err.message, err.name);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -456,21 +376,22 @@ const deleteEventImages = async (req: any, res: any) => {
     });
 
     if (event.length === 0) {
-      messageError(res, BAD_REQUEST, "Event not found", "BAD_REQUEST");
-      return;
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "Event not found",
+        type: "NotFoundError",
+      };
     }
 
     if (
       req.volunteer.accessLevel <= 3 &&
       event[0].createdBy.toString() !== req.volunteer._id.toString()
     ) {
-      messageError(
-        res,
-        BAD_REQUEST,
-        "You are not authorized to delete images from this event",
-        "BAD_REQUEST",
-      );
-      return;
+      throw {
+        statusObj: FORBIDDEN,
+        name: "You are not authorized to delete images from this event",
+        type: "AuthorizationError",
+      };
     }
     event = event[0];
 
@@ -483,13 +404,11 @@ const deleteEventImages = async (req: any, res: any) => {
     );
 
     if (imagesArray.length === imagesArraycopy.length) {
-      messageError(
-        res,
-        BAD_REQUEST,
-        "No images found to delete",
-        "BAD_REQUEST",
-      );
-      return;
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "No images found to delete",
+        type: "ValidationError",
+      };
     }
 
     const images: any = await eventService.updateEventByIdService(
@@ -511,13 +430,7 @@ const deleteEventImages = async (req: any, res: any) => {
 
     messageCustom(res, OK, "Images deleted successfully", return_object);
   } catch (err: any) {
-    if (err.error === "ValidationError") {
-      messageError(res, BAD_REQUEST, err.message, err.name);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, err.message, err.name);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -528,8 +441,11 @@ const registerEvent = async (req: any, res: any) => {
     });
 
     if (event.length === 0) {
-      messageError(res, BAD_REQUEST, "Event not found", "BAD_REQUEST");
-      return;
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "Event not found",
+        type: "NotFoundError",
+      };
     }
 
     event = event[0];
@@ -541,26 +457,21 @@ const registerEvent = async (req: any, res: any) => {
     });
 
     if (alreadyRegistered.length > 0) {
-      messageError(
-        res,
-        BAD_REQUEST,
-        "You have already registered for this event",
-        "BAD_REQUEST",
-      );
-      return;
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "You have already registered for this event",
+        type: "ValidationError",
+      };
     }
 
     if (
-      new Date(event.startTime) <
-      new Date(moment("YYYY-MM-DD HH:mm:ss").format())
+      new Date(event.endTime) < new Date(moment("YYYY-MM-DD HH:mm:ss").format())
     ) {
-      messageError(
-        res,
-        BAD_REQUEST,
-        "Event has already started",
-        "BAD_REQUEST",
-      );
-      return;
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "Event has already ended",
+        type: "ValidationError",
+      };
     }
 
     if (event.eventType === "group") {
@@ -572,27 +483,26 @@ const registerEvent = async (req: any, res: any) => {
       });
 
       if (!req.body.team) {
-        messageError(
-          res,
-          BAD_REQUEST,
-          "This is a team event. Team is required",
-          "BAD_REQUEST",
-        );
-        return;
+        throw {
+          statusObj: BAD_REQUEST,
+          name: "This is a team event. Team is required",
+          type: "ValidationError",
+        };
       }
 
       if (req.body.team.members.length + 1 > event.eventMaxParticipants) {
-        messageError(res, BAD_REQUEST, "Team size exceeded", "BAD_REQUEST");
-        return;
+        throw {
+          statusObj: BAD_REQUEST,
+          name: "Team size exceeded",
+          type: "ValidationError",
+        };
       }
       if (req.body.team.members.length + 1 < event.eventMinParticipants) {
-        messageError(
-          res,
-          BAD_REQUEST,
-          "Team size is less than minimum",
-          "BAD_REQUEST",
-        );
-        return;
+        throw {
+          statusObj: BAD_REQUEST,
+          name: "Team size is less than minimum",
+          type: "ValidationError",
+        };
       }
 
       for (const teamMember of req.body.team.members) {
@@ -600,13 +510,11 @@ const registerEvent = async (req: any, res: any) => {
           espektroId: teamMember.espektroId,
         });
         if (!user || user.length === 0) {
-          messageError(
-            res,
-            BAD_REQUEST,
-            "User of Espektro ID " + teamMember.espektroId + "not found",
-            "BAD_REQUEST",
-          );
-          return;
+          throw {
+            statusObj: BAD_REQUEST,
+            name: "User of Espektro ID " + teamMember.espektroId + "not found",
+            type: "NotFoundError",
+          };
         }
         teamMembersArray.push({
           name: user.name,
@@ -619,13 +527,11 @@ const registerEvent = async (req: any, res: any) => {
     }
 
     if (event.eventPrice > 0 && req.user.coins < event.eventPrice) {
-      messageError(
-        res,
-        BAD_REQUEST,
-        "Insufficient coins. Please recharge",
-        "BAD_REQUEST",
-      );
-      return;
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "You do not have enough coins to register for this event",
+        type: "ValidationError",
+      };
     }
     req.body.userId = req.user._id;
     const ticket: any = await ticketService.createTicketService(req.body);
@@ -653,13 +559,7 @@ const registerEvent = async (req: any, res: any) => {
 
     messageCustom(res, OK, "Event registered successfully", return_object);
   } catch (err: any) {
-    if (err.error === "ValidationError") {
-      messageError(res, BAD_REQUEST, err.message, err.name);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, err.message, err.name);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -670,13 +570,11 @@ const eventCheckIn = async (req: any, res: any) => {
     });
 
     if (!user || user.length === 0) {
-      messageError(
-        res,
-        BAD_REQUEST,
-        "User of Espektro ID " + req.body.espektroId + " not found",
-        "BAD_REQUEST",
-      );
-      return;
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "User of Espektro ID " + req.body.espektroId + " not found",
+        type: "NotFoundError",
+      };
     }
 
     let ticket: any = await ticketService.getTicketService({
@@ -685,34 +583,32 @@ const eventCheckIn = async (req: any, res: any) => {
     });
 
     if (ticket.length === 0) {
-      messageError(
-        res,
-        BAD_REQUEST,
-        "User of Espektro ID " +
-          req.body.espektroId +
-          " is not registered for this event",
-        "BAD_REQUEST",
-      );
-      return;
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "User of Espektro ID " + req.body.espektroId + " not found",
+        type: "NotFoundError",
+      };
     }
 
     ticket = ticket[0];
 
     if (!ticket.checkedIn) {
-      messageError(
-        res,
-        BAD_REQUEST,
-        "User of Espektro ID " +
+      throw {
+        statusObj: BAD_REQUEST,
+        name:
+          "User of Espektro ID " +
           req.body.espektroId +
           " still not checked in for this event",
-        "BAD_REQUEST",
-      );
-      return;
+        type: "NotFoundError",
+      };
     }
 
     if (String(req.body.password) !== String(ticket.ticketNumber)) {
-      messageError(res, BAD_REQUEST, "Invalid password", "BAD_REQUEST");
-      return;
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "Invalid password",
+        type: "ValidationError",
+      };
     }
 
     const return_object: any = {
@@ -724,13 +620,7 @@ const eventCheckIn = async (req: any, res: any) => {
 
     messageCustom(res, OK, "User logged in successfully", return_object);
   } catch (err: any) {
-    if (err.error === "ValidationError") {
-      messageError(res, BAD_REQUEST, err.message, err.name);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, err.message, err.name);
-    }
+    await handleError(req, res, err);
   }
 };
 
