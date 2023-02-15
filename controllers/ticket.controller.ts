@@ -11,8 +11,8 @@ import { createLogService } from "../services/log.service";
 
 const allTickets = async (req: any, res: any) => {
   try {
-    const tickets = await ticketService.getTicketService({
-      userId: req.user._id,
+    const tickets = await ticketService.getAllTicketsService({
+      userId: new ObjectId(req.user._id),
     });
 
     const return_object = {

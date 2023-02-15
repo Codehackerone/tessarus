@@ -9,6 +9,24 @@ const getTicketService = async (ticketBody: any) => {
   return await Ticket.find(ticketBody);
 };
 
+const getAllTicketsService = async (ticketBody: any) => {
+  return await Ticket.aggregate([
+    {
+      $match: {
+        ...ticketBody,
+      },
+    },
+    {
+      $lookup: {
+        from: "events",
+        localField: "eventId",
+        foreignField: "_id",
+        as: "event",
+      },
+    },
+  ]);
+};
+
 const updateTicketService = async (ticketId: any, ticketBody: any) => {
   return await Ticket.findOneAndUpdate({ _id: ticketId }, ticketBody, {
     new: true,
@@ -30,4 +48,5 @@ export default {
   getTicketService,
   updateTicketService,
   checkWhetherUserIsRegisteredInEventService,
+  getAllTicketsService,
 };
