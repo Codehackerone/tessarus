@@ -4,13 +4,11 @@ import volunteerService from "../services/volunteer.service";
 import userService from "../services/user.service";
 import eventService from "../services/event.service";
 import { getAllLogsService } from "../services/log.service";
-import { message, messageCustom, messageError } from "../helpers/message";
+import { message, messageCustom } from "../helpers/message";
 import {
   OK,
   CREATED,
   BAD_REQUEST,
-  CONFLICT,
-  SERVER_ERROR,
   FORBIDDEN,
   NOT_FOUND,
 } from "../helpers/messageTypes";
@@ -24,7 +22,7 @@ import sendMail from "../helpers/sendEmail";
 import bcrypt from "bcryptjs";
 import { config } from "dotenv";
 import { addVolunteerTemplate } from "../helpers/emailTemplate";
-import { alert } from "../helpers/webhookAlert";
+import { handleError } from "../helpers/errorHandler";
 
 config();
 
@@ -86,24 +84,7 @@ const addVolunteer = async (req: any, res: any) => {
 
     messageCustom(res, CREATED, "Volunteer added successfully.", volunteer);
   } catch (err: any) {
-    if (err.error === "ValidationError") {
-      messageError(res, BAD_REQUEST, err.message, err.name);
-    } else {
-      if (Number(err.code) === 11000) {
-        messageError(
-          res,
-          CONFLICT,
-          `${Object.keys(err.keyValue)[0]} '${
-            Object.values(err.keyValue)[0]
-          }' already exists.`,
-          err.name,
-        );
-      } else {
-        console.log(err);
-        alert(req.originalUrl, JSON.stringify(err));
-        messageError(res, SERVER_ERROR, err.message, err.name);
-      }
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -146,13 +127,7 @@ const login = async (req: any, res: any) => {
     });
     messageCustom(res, OK, "Successfully logged in", return_object);
   } catch (err: any) {
-    if (err.statusObj !== undefined) {
-      messageError(res, err.statusObj, err.name, err.type);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -173,13 +148,7 @@ const getAllVolunteers = async (req: any, res: any) => {
 
     messageCustom(res, OK, "Volunteers fetched successfully", return_object);
   } catch (err: any) {
-    if (err.statusObj !== undefined) {
-      messageError(res, err.statusObj, err.name, err.type);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -205,13 +174,7 @@ const getVolunteer = async (req: any, res: any) => {
 
     messageCustom(res, OK, "Volunteer fetched successfully", return_object);
   } catch (err: any) {
-    if (err.statusObj !== undefined) {
-      messageError(res, err.statusObj, err.name, err.type);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -262,13 +225,7 @@ const updateVolunteer = async (req: any, res: any) => {
 
     messageCustom(res, OK, "Volunteer updated successfully", return_object);
   } catch (err: any) {
-    if (err.statusObj !== undefined) {
-      messageError(res, err.statusObj, err.name, err.type);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -287,13 +244,7 @@ const getAllUsers = async (req: any, res: any) => {
     return_object.users = users;
     messageCustom(res, OK, "Users fetched successfully", return_object);
   } catch (err: any) {
-    if (err.statusObj !== undefined) {
-      messageError(res, err.statusObj, err.name, err.type);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -316,13 +267,7 @@ const getAllLogs = async (req: any, res: any) => {
     return_object.logs = logs;
     messageCustom(res, OK, "Logs fetched successfully", return_object);
   } catch (err: any) {
-    if (err.statusObj !== undefined) {
-      messageError(res, err.statusObj, err.name, err.type);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -345,13 +290,7 @@ const getAllPaymentLogs = async (req: any, res: any) => {
     return_object.logs = logs;
     messageCustom(res, OK, "Logs fetched successfully", return_object);
   } catch (err: any) {
-    if (err.statusObj !== undefined) {
-      messageError(res, err.statusObj, err.name, err.type);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -392,13 +331,7 @@ const deleteVolunteer = async (req: any, res: any) => {
 
     message(res, OK, "Volunteer deleted successfully");
   } catch (err: any) {
-    if (err.statusObj !== undefined) {
-      messageError(res, err.statusObj, err.name, err.type);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -422,13 +355,7 @@ const userQRScan = async (req: any, res: any) => {
 
     messageCustom(res, OK, "User fetched successfully", return_object);
   } catch (err: any) {
-    if (err.statusObj !== undefined) {
-      messageError(res, err.statusObj, err.name, err.type);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-    }
+    await handleError(req, res, err);
   }
 };
 
@@ -465,13 +392,7 @@ const addCoins = async (req: any, res: any) => {
 
     message(res, OK, "Coins added to user successfully");
   } catch (err: any) {
-    if (err.statusObj !== undefined) {
-      messageError(res, err.statusObj, err.name, err.type);
-    } else {
-      console.log(err);
-      alert(req.originalUrl, JSON.stringify(err));
-      messageError(res, SERVER_ERROR, "Hold on! We are looking into it", err);
-    }
+    await handleError(req, res, err);
   }
 };
 

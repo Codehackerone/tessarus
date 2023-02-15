@@ -1,41 +1,40 @@
 import { BAD_REQUEST, UNAUTHORIZED } from "../helpers/messageTypes";
-import { messageError } from "../helpers/message";
 import { config } from "dotenv";
+import { handleError } from "../helpers/errorHandler";
 
 config();
 
 export const authorize = () => {
   return async (req: any, res: any, next: any) => {
-    if (req.headers["utils-api-key"] === undefined) {
-      console.log(req.headers);
-      return messageError(
-        res,
-        BAD_REQUEST,
-        "No UTILS-API-KEY provided",
-        "AuthenticationError",
-      );
-    } else {
-      try {
-        const utilsApiKey = req.headers["utils-api-key"];
+    try {
+      if (req.headers["utils-api-key"] === undefined) {
+        throw {
+          statusObj: BAD_REQUEST,
+          name: "No UTILS-API-KEY provided",
+          type: "ValidationError",
+        };
+      } else {
+        try {
+          const utilsApiKey = req.headers["utils-api-key"];
 
-        if (utilsApiKey !== String(process.env.UTILS_API_KEY)) {
-          return messageError(
-            res,
-            UNAUTHORIZED,
-            "Invalid util api key",
-            "AuthenticationError",
-          );
+          if (utilsApiKey !== String(process.env.UTILS_API_KEY)) {
+            throw {
+              statusObj: BAD_REQUEST,
+              name: "Incorrect UTILS-API-KEY",
+              type: "ValidationError",
+            };
+          }
+          next();
+        } catch (err) {
+          throw {
+            statusObj: UNAUTHORIZED,
+            name: "Expired or invalid token",
+            type: "ValidationError",
+          };
         }
-        next();
-      } catch (err) {
-        console.log(err);
-        return messageError(
-          res,
-          UNAUTHORIZED,
-          "Expired or invalid UTILS-API-KEY token",
-          "AuthenticationError",
-        );
       }
+    } catch (err) {
+      await handleError(req, res, err);
     }
   };
 };
