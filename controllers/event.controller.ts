@@ -145,6 +145,8 @@ const getEvent = async (req: any, res: any) => {
       };
     }
 
+    event = event[0].toObject();
+
     if (req.user) {
       const tickets: any = await ticketService.getTicketService({
         userId: new ObjectId(req.user._id),
@@ -154,7 +156,6 @@ const getEvent = async (req: any, res: any) => {
         eventTicketDict[ticket.eventId] = ticket;
       }
 
-      event = event[0].toObject();
       if (eventTicketDict[event._id]) {
         event.isRegistered = true;
         event.ticketId = eventTicketDict[event._id]._id;
