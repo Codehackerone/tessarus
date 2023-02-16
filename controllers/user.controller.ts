@@ -364,8 +364,7 @@ const forgotPassword = async (req: any, res: any) => {
       logType: "EMAIL_SENT",
       userId: new ObjectId(user._id),
       description: user.name + " requested for password reset",
-    });
-    console.log(reset_token);
+    });    
 
     message(res, OK, "Password reset link sent to your email");
   } catch (err: any) {
