@@ -100,7 +100,7 @@ const checkIn = async (req: any, res: any) => {
     const eventPermitted = (eventsPermitted as Array<ObjectId>).find(
       (event: ObjectId) => event.equals(ticket[0].eventId),
     );
-    if (!eventPermitted) {
+    if (!eventPermitted && req.volunteer.accessLevel < 4) {
       throw {
         statusObj: FORBIDDEN,
         name: "You are not permitted to check in participants for this event",
