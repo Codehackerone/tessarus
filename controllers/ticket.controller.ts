@@ -126,8 +126,6 @@ const checkIn = async (req: any, res: any) => {
       _id: updatedTicket.eventId,
     });
 
-    console.log(event);
-
     createLogService({
       logType: "CHECKED_IN",
       userId: updatedTicket.userId,
