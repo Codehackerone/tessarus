@@ -34,7 +34,7 @@ const userSignUpSchema = Joi.object({
   dateOfBirth: Joi.date().format("YYYY-MM-DD").required(),
   college: Joi.string().required().escapeHTML(),
   degree: Joi.string().valid("B.Tech", "M.Tech", "MCA"),
-  year: Joi.string().valid("1", "2", "3", "4"),
+  year: Joi.string().valid("1", "2", "3", "4", "5", "Alumni"),
   stream: Joi.string(),
   profileImageUrl: Joi.string().escapeHTML(),
 });
