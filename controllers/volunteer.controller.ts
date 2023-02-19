@@ -88,6 +88,50 @@ const addVolunteer = async (req: any, res: any) => {
   }
 };
 
+const resendCredentials = async (req: any, res: any) => {
+  try {
+    const volunteer: any = await volunteerService.findVolunteerService({
+      _id: req.params.id,
+    });
+    if (!volunteer) {
+      const err: any = {
+        statusObj: NOT_FOUND,
+        type: "NotFoundError",
+        name: "No volunteer found with id: " + req.params.id,
+      };
+      throw err;
+    }
+
+    const newPassword: string = getRandomId(8);
+    await volunteerService.resendCredentialsService(volunteer._id, newPassword);
+
+    const text: any = addVolunteerTemplate(
+      volunteer.name,
+      volunteer.email,
+      newPassword,
+      req.volunteer.name,
+    );
+
+    const resMail: any = await sendMail(
+      volunteer.email,
+      "Espektro KGEC - Added as a volunteer (Credentials Resent)!",
+      text,
+    );
+
+    if (resMail.hasError === true) throw resMail.error;
+
+    await createLogService({
+      logType: "EMAIL_SENT",
+      volunteerId: new ObjectId(volunteer._id),
+      description: `Email resent to ${volunteer.email} with newly created password as volunteer.`,
+    });
+
+    message(res, OK, "Credentials resent successfully");
+  } catch (err: any) {
+    await handleError(req, res, err);
+  }
+};
+
 const login = async (req: any, res: any) => {
   try {
     const email = req.body.email;
@@ -408,4 +452,5 @@ export default {
   userQRScan,
   addCoins,
   getAllPaymentLogs,
+  resendCredentials,
 };
