@@ -7,6 +7,7 @@ import { OK, CREATED, BAD_REQUEST, NOT_FOUND } from "../helpers/messageTypes";
 import getRandomId from "../helpers/randomTextGenerator";
 import { createLogService } from "../services/log.service";
 import sendMail from "../helpers/sendEmail";
+import { registerTemplate } from "../helpers/emailTemplate";
 import otpService from "../services/otp.service";
 import { uploadFile } from "../helpers/s3";
 import fs from "fs";
@@ -173,6 +174,17 @@ const verifyOTPForUserVerification = async (req: any, res: any) => {
       userId: new ObjectId(user._id),
       description: req.user.name + " verified their account",
     });
+
+    const subject: any =
+      "Espektro KGEC - Ready to get started with Espektro KGEC?";
+
+    const resMail: any = await sendMail(
+      user.email,
+      subject,
+      registerTemplate(user.name),
+    );
+
+    if (resMail.hasError === true) throw resMail.error;
 
     message(res, OK, "OTP verified successfully and user verified");
   } catch (err: any) {
