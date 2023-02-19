@@ -35,7 +35,11 @@ export const verifyOtp = async (otp_token: any, otp: any) => {
   const response = await OTP.findOne({
     otp_token: otp_token,
   });
-  if (!response) throw "OTP Token Not Found";
+  if (!response)
+    throw {
+      message: "OTP Token Not Found",
+      error: true,
+    };
   else if (response.done === true) {
     throw {
       error: true,

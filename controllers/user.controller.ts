@@ -7,6 +7,7 @@ import { OK, CREATED, BAD_REQUEST, NOT_FOUND } from "../helpers/messageTypes";
 import getRandomId from "../helpers/randomTextGenerator";
 import { createLogService } from "../services/log.service";
 import sendMail from "../helpers/sendEmail";
+import { registerTemplate } from "../helpers/emailTemplate";
 import otpService from "../services/otp.service";
 import { uploadFile } from "../helpers/s3";
 import fs from "fs";
@@ -154,7 +155,12 @@ const verifyOTPForUserVerification = async (req: any, res: any) => {
     const otp_token = req.body.otp_token;
     const otp = req.body.otp;
     const otpResponse: any = await otpService.verifyOtp(otp_token, otp);
-    if (otpResponse.hasError === true) throw otpResponse.error;
+    if (otpResponse.error === true)
+      throw {
+        statusObj: BAD_REQUEST,
+        type: "AuthenticationError",
+        name: otpResponse.message,
+      };
 
     await createLogService({
       logType: "OTP_VERIFIED",
@@ -168,6 +174,17 @@ const verifyOTPForUserVerification = async (req: any, res: any) => {
       userId: new ObjectId(user._id),
       description: req.user.name + " verified their account",
     });
+
+    const subject: any =
+      "Espektro KGEC - Ready to get started with Espektro KGEC?";
+
+    const resMail: any = await sendMail(
+      user.email,
+      subject,
+      registerTemplate(user.name),
+    );
+
+    if (resMail.hasError === true) throw resMail.error;
 
     message(res, OK, "OTP verified successfully and user verified");
   } catch (err: any) {
@@ -306,7 +323,7 @@ const updateProfilePic = async (req: any, res: any) => {
       throw {
         statusObj: BAD_REQUEST,
         name: "User not found",
-        type: "User not found",
+        type: "NotFoundError",
       };
     }
 
@@ -330,7 +347,7 @@ const forgotPassword = async (req: any, res: any) => {
       throw {
         statusObj: BAD_REQUEST,
         name: "Email not provided",
-        type: "BAD_REQUEST",
+        type: "ValidationError",
       };
     const email = req.body.email;
     const user: any = await userService.findUserService({ email: email });
@@ -338,7 +355,7 @@ const forgotPassword = async (req: any, res: any) => {
       throw {
         statusObj: BAD_REQUEST,
         name: "No such user exists",
-        type: "BAD_REQUEST",
+        type: "NotFoundError",
       };
     const frontEndUrl = String(process.env.FRONTEND_HOSTED_URL);
     const reset_token = jwt.sign(
@@ -360,7 +377,6 @@ const forgotPassword = async (req: any, res: any) => {
       userId: new ObjectId(user._id),
       description: user.name + " requested for password reset",
     });
-    console.log(reset_token);
 
     message(res, OK, "Password reset link sent to your email");
   } catch (err: any) {
@@ -382,7 +398,7 @@ const resetPassword = async (req: any, res: any) => {
       throw {
         statusObj: BAD_REQUEST,
         name: "No such user exists",
-        type: "BAD_REQUEST",
+        type: "NotFoundError",
       };
 
     await userService.resetPasswordService(user._id, password);
@@ -406,14 +422,14 @@ const verifyEspektroId = async (req: any, res: any) => {
       throw {
         statusObj: NOT_FOUND,
         name: "No such user exists",
-        type: "NOT_FOUND",
+        type: "NotFoundError",
       };
     }
     if (user[0].isVerified === false) {
       throw {
         statusObj: BAD_REQUEST,
         name: "User is not verified",
-        type: "BAD_REQUEST",
+        type: "ValidationError",
       };
     }
 
@@ -429,7 +445,7 @@ const verifyEspektroId = async (req: any, res: any) => {
         throw {
           statusObj: NOT_FOUND,
           name: "No such event exists",
-          type: "NOT_FOUND",
+          type: "NotFoundError",
         };
       }
 

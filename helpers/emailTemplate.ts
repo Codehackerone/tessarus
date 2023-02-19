@@ -5,7 +5,6 @@ export const sendOTPTemplate = (name: string, otp: string) => {
         <h3>Hello ${name},<br>        
         Welcome to Especkro 2023.</h3><br>
 
-        Thank you for registering with us.<br>
         Please use the following OTP to verify your account.<br>
         <b>OTP: ${otp}</b><br>
         
@@ -15,6 +14,32 @@ export const sendOTPTemplate = (name: string, otp: string) => {
     </body>
     </html>
     `;
+};
+
+export const registerTemplate = (name: string) => {
+  return `<html>
+        <body>
+        <p>
+            <h3>Hello ${name},<br>        
+            Welcome to Especkro 2023.</h3><br>
+
+            You have successfully registered for Espektro 2023.<br>
+            
+            Using this platform, you can register for events, check-in for events, and much more.<br>
+            Here are some of the rules you need to follow:<br>
+            <ul>
+                <li>Be on time for the events.</li>                
+                <li>Follow the rules of the event.</li>
+                <li>Have fun!</li>
+            </ul>
+            
+            <br>
+            Contact us for any queries.<br>            
+            <br>
+        </p>
+        </body>
+        </html>
+        `;
 };
 
 export const sendOTPResetPasswordTemplate = (name: string, otp: string) => {

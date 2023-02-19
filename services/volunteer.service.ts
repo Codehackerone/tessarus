@@ -21,10 +21,18 @@ const deleteVolunteerService = async (volunteerId: any) => {
   return Volunteer.findByIdAndDelete(volunteerId);
 };
 
+const resendCredentialsService = async (volunteerId: any, password: string) => {
+  const volunteer: any = await Volunteer.findById(volunteerId);
+  volunteer.password = password;
+  await volunteer.save();
+  return volunteer;
+};
+
 export default {
   addVolunteerService,
   findVolunteerService,
   findAllVolunteersService,
   updateVolunteerService,
   deleteVolunteerService,
+  resendCredentialsService,
 };

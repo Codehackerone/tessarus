@@ -41,6 +41,8 @@ Router.post(
 
 Router.post("/userqrscan", authorize(1), volunteerController.userQRScan);
 
+Router.post("/resend/:id", authorize(4), volunteerController.resendCredentials);
+
 Router.route("/:id")
   .get(authorize(3), volunteerController.getVolunteer)
   .put(
