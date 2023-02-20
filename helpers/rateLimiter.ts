@@ -1,9 +1,20 @@
 import rateLimit from "express-rate-limit";
 
-const authLimiter = rateLimit({
+const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 20,
-  skipSuccessfulRequests: true,
+  max: 1000,
+  message:
+    "Too many requests from this IP, please try again after an 15 minutes",
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
-export default authLimiter;
+const mailLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  message: "Too many requests from this IP, please try again after an hour",
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+export { apiLimiter, mailLimiter };
