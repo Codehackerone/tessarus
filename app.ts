@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import { config } from "dotenv";
 import mongoose from "mongoose";
-import authLimiter from "./helpers/rateLimiter";
+import { apiLimiter } from "./helpers/rateLimiter";
 import morgan from "morgan";
 import { createStream } from "rotating-file-stream";
 import path from "path";
@@ -29,7 +29,7 @@ try {
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use("/api", authLimiter);
+app.use("/api", apiLimiter);
 
 const logStream: any = createStream("access.log", {
   interval: "1d",

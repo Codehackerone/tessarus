@@ -4,10 +4,11 @@ import {
   validateSignUp,
   validateLogin,
   validateUpdateUser,
-  validateResetPassword,
+  //validateResetPassword,
   validateOTPSchema,
 } from "../middlewares/validator.middleware";
 import { authorize } from "../middlewares/user.authorization";
+import { mailLimiter } from "../helpers/rateLimiter";
 // import multer from "multer";
 // const upload = multer({ dest: "./uploads/" });
 
@@ -17,14 +18,18 @@ Router.route("/login").post(validateLogin(), userController.login);
 
 Router.route("/signup").post(validateSignUp(), userController.signUp);
 
-Router.route("/sendmail").patch(
+// Router.route("/sendmail").patch(
+//   authorize(),
+//   userController.sendVerificationMail,
+// );
+
+Router.route("/sendotp").post(authorize(), mailLimiter, userController.sendOTP);
+
+Router.route("/sendotpreset").post(
   authorize(),
-  userController.sendVerificationMail,
+  mailLimiter,
+  userController.sendOTPForReset,
 );
-
-Router.route("/sendotp").post(authorize(), userController.sendOTP);
-
-Router.route("/sendotpreset").post(authorize(), userController.sendOTPForReset);
 
 Router.route("/verifyotpforuser").post(
   authorize(),
@@ -54,9 +59,9 @@ Router.route("/profile").get(authorize(), userController.userProfile);
 //   userController.updateProfilePic,
 // );
 
-Router.route("/forgotpassword")
-  .post(userController.forgotPassword)
-  .put(validateResetPassword(), userController.resetPassword);
+// Router.route("/forgotpassword")
+//   .post(userController.forgotPassword)
+//   .put(validateResetPassword(), userController.resetPassword);
 
 Router.route("/verifyespektroid/:id").get(userController.verifyEspektroId);
 
