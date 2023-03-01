@@ -82,6 +82,20 @@ const eventSchema = new Schema(
       ref: "Volunteer",
       required: true,
     },
+    sponsors: [
+      {
+        name: {
+          type: String,
+          required: true,
+        },
+        type: {
+          type: String,
+        },
+        image: {
+          type: String,
+        },
+      },
+    ],
   },
   {
     timestamps: true,

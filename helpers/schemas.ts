@@ -101,6 +101,13 @@ const addEventSchema = Joi.object({
       url: Joi.string().required().escapeHTML(),
     }),
   ),
+  sponsors: Joi.array().items(
+    Joi.object({
+      name: Joi.string().required().escapeHTML(),
+      image: Joi.string().required().escapeHTML(),
+      type: Joi.string(),
+    }),
+  ),
 });
 
 const addCoinsSchema = Joi.object({
