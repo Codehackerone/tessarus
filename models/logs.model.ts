@@ -51,31 +51,36 @@ const logSchema = new Schema(
   },
 );
 
-const paymentLogSchema = new Schema({
-  logType: {
-    type: String,
-    enum: ["COINS_ADDED", "COINS_REDEEMED", "COINS_USED"],
-    required: true,
+const paymentLogSchema = new Schema(
+  {
+    logType: {
+      type: String,
+      enum: ["COINS_ADDED", "COINS_REDEEMED", "COINS_USED"],
+      required: true,
+    },
+    volunteerId: {
+      type: Schema.Types.ObjectId,
+      ref: "Volunteer",
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    amount: {
+      type: Number,
+    },
+    coins: {
+      type: Number,
+    },
+    description: {
+      type: String,
+    },
   },
-  volunteerId: {
-    type: Schema.Types.ObjectId,
-    ref: "Volunteer",
+  {
+    timestamps: true,
   },
-  userId: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
-  amount: {
-    type: Number,
-  },
-  coins: {
-    type: Number,
-  },
-  description: {
-    type: String,
-  },
-});
+);
 
 const Log = mongoose.model("Log", logSchema);
 const paymentLog = mongoose.model("PaymentLog", paymentLogSchema);

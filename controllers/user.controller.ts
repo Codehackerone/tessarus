@@ -5,9 +5,15 @@ import userService from "../services/user.service";
 import { message, messageCustom } from "../helpers/message";
 import { OK, CREATED, BAD_REQUEST, NOT_FOUND } from "../helpers/messageTypes";
 import getRandomId from "../helpers/randomTextGenerator";
-import { createLogService } from "../services/log.service";
+import {
+  createLogService,
+  createPaymentLogService,
+} from "../services/log.service";
 import sendMail from "../helpers/sendEmail";
-import { registerTemplate } from "../helpers/emailTemplate";
+import {
+  inviteParticipantTemplate,
+  registerTemplate,
+} from "../helpers/emailTemplate";
 import otpService from "../services/otp.service";
 import { uploadFile } from "../helpers/s3";
 import fs from "fs";
@@ -24,12 +30,32 @@ const jwt_headers: any = {
 const signUp = async (req: any, res: any) => {
   try {
     req.body.espektroId = "E" + getRandomId(10);
+    req.body.referralCode = getRandomId(10);
     const user: any = await userService.signUpService(req.body);
     const access_token = jwt.sign(
       { email: user.email, user_id: user._id },
       String(process.env.JWT_SECRET),
       jwt_headers,
     );
+
+    if (req.body.rcode) {
+      const userReferral: any = await userService.findUserService({
+        referralCode: req.body.rcode,
+      });
+      if (userReferral) {
+        await userService.updateUserService(userReferral._id, {
+          coins: userReferral.coins + Number(process.env.REFERRAL_BONUS),
+        });
+
+        await createPaymentLogService({
+          logType: "COINS_ADDED",
+          userId: new ObjectId(userReferral._id),
+          amount: req.body.amount,
+          description: `Coins added to ${userReferral.name} for referring ${user.name}`,
+        });
+      }
+    }
+
     const return_object: any = {
       user: user,
       auth_token: access_token,
@@ -302,6 +328,9 @@ const userProfile = async (req: any, res: any) => {
   try {
     const user: any = req.user;
 
+    if (!user.referralCode) {
+      await userService.addReferralCodeService(user._id, getRandomId(10));
+    }
     const return_object: any = {};
     return_object.user = Object.assign({}, user)["_doc"];
     return_object.user.qrText = req.user._id + "-" + user.espektroId;
@@ -464,6 +493,56 @@ const verifyEspektroId = async (req: any, res: any) => {
   }
 };
 
+const inviteUser = async (req: any, res: any) => {
+  try {
+    if (!req.body.email) {
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "Email not provided",
+        type: "ValidationError",
+      };
+    }
+    const user: any = req.user;
+    const email = req.body.email;
+    const url = String(process.env.FRONTEND_HOSTED_URL);
+    const referralCode = user.referralCode;
+
+    const userExists: any = await userService.findUserService({ email: email });
+    if (userExists && process.env.ENV === "prod") {
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "User already exists",
+        type: "ValidationError",
+      };
+    }
+
+    const text = inviteParticipantTemplate(user.name, referralCode, url);
+    const resMail: any = await sendMail(
+      email,
+      "Espektro KGEC - Invitation",
+      text,
+    );
+
+    if (resMail.hasError === true) throw res.error;
+
+    await createLogService({
+      logType: "EMAIL_SENT",
+      userId: new ObjectId(user._id),
+      description: user.name + " invited " + email,
+    });
+
+    message(
+      res,
+      OK,
+      "Invitation sent successfully. You will receive " +
+        process.env.REFERRAL_BONUS +
+        " points on successful registration",
+    );
+  } catch (err) {
+    await handleError(req, res, err);
+  }
+};
+
 export default {
   verifyToken,
   signUp,
@@ -479,4 +558,5 @@ export default {
   sendOTPForReset,
   verifyOTPForResetPassword,
   verifyEspektroId,
+  inviteUser,
 };

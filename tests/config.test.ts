@@ -60,6 +60,13 @@ describe("config", () => {
     it("should contain UTILS_API_KEY", () => {
       expect(process.env.UTILS_API_KEY).toBeDefined();
     });
+    it("should contain FRONTEND_HOSTED_URL", () => {
+      expect(process.env.FRONTEND_HOSTED_URL).toBeDefined();
+    });
+    it("should contain REFERRAL_BONUS", () => {
+      expect(process.env.REFERRAL_BONUS).toBeDefined();
+      expect(Number(process.env.REFERRAL_BONUS)).toBeGreaterThan(0);
+    });
   });
   describe("AWS", () => {
     describe("S3", () => {

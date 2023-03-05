@@ -65,4 +65,10 @@ Router.route("/profile").get(authorize(), userController.userProfile);
 
 Router.route("/verifyespektroid/:id").get(userController.verifyEspektroId);
 
+Router.route("/inviteuser").post(
+  authorize(),
+  mailLimiter,
+  userController.inviteUser,
+);
+
 export default Router;

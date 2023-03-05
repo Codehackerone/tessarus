@@ -61,6 +61,10 @@ const userSchema = new Schema(
       default:
         "https://res.cloudinary.com/dfediigxy/image/upload/v1676061086/d7f2503eaaae267553edb4fe69b476e2_ieahvh.jpg",
     },
+    referralCode: {
+      type: String,
+      unique: true,
+    },
   },
   {
     timestamps: true,

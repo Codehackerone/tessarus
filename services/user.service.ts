@@ -41,6 +41,10 @@ const fetchEspekroIdService = async (espektroId: any) => {
   );
 };
 
+const addReferralCodeService = async (userId: any, referralCode: string) => {
+  return await User.findByIdAndUpdate(userId, { referralCode: referralCode });
+};
+
 export default {
   signUpService,
   findUserService,
@@ -49,4 +53,5 @@ export default {
   resetPasswordService,
   getAllUsersService,
   fetchEspekroIdService,
+  addReferralCodeService,
 };
