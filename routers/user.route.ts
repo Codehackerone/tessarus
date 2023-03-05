@@ -25,11 +25,7 @@ Router.route("/signup").post(validateSignUp(), userController.signUp);
 
 Router.route("/sendotp").post(authorize(), mailLimiter, userController.sendOTP);
 
-Router.route("/sendotpreset").post(
-  authorize(),
-  mailLimiter,
-  userController.sendOTPForReset,
-);
+Router.route("/sendotpreset").post(mailLimiter, userController.sendOTPForReset);
 
 Router.route("/verifyotpforuser").post(
   authorize(),

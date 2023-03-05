@@ -69,7 +69,6 @@ export const verifyOtp = async (otp_token: any, otp: any) => {
 };
 
 const createAndSendOtpForResetPassword = async (
-  name: any,
   subject: any,
   email: any,
   otp: any,
@@ -77,7 +76,7 @@ const createAndSendOtpForResetPassword = async (
   const resMail: any = await sendMail(
     email,
     subject,
-    sendOTPResetPasswordTemplate(name, otp),
+    sendOTPResetPasswordTemplate(otp),
   );
 
   if (resMail.hasError === true) throw resMail.error;
