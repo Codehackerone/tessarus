@@ -26,6 +26,7 @@ const logSchema = new Schema(
         "OTP_SENT",
         "OTP_VERIFIED",
         "IMAGES_UPLOADED",
+        "INVITE",
       ],
       required: true,
     },

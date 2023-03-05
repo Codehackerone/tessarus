@@ -7,7 +7,10 @@ import { OK, CREATED, BAD_REQUEST, NOT_FOUND } from "../helpers/messageTypes";
 import getRandomId from "../helpers/randomTextGenerator";
 import { createLogService } from "../services/log.service";
 import sendMail from "../helpers/sendEmail";
-import { registerTemplate } from "../helpers/emailTemplate";
+import {
+  inviteParticipantTemplate,
+  registerTemplate,
+} from "../helpers/emailTemplate";
 import otpService from "../services/otp.service";
 import { uploadFile } from "../helpers/s3";
 import fs from "fs";
@@ -464,6 +467,56 @@ const verifyEspektroId = async (req: any, res: any) => {
   }
 };
 
+const inviteUser = async (req: any, res: any) => {
+  try {
+    if (!req.body.email) {
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "Email not provided",
+        type: "ValidationError",
+      };
+    }
+    const user: any = req.user;
+    const email = req.body.email;
+    const url = String(process.env.FRONTEND_HOSTED_URL);
+    const referralCode = getRandomId(10);
+
+    const userExists: any = await userService.findUserService({ email: email });
+    if (userExists && process.env.ENV === "prod") {
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "User already exists",
+        type: "ValidationError",
+      };
+    }
+
+    const text = inviteParticipantTemplate(user.name, referralCode, url);
+    const resMail: any = await sendMail(
+      email,
+      "Espektro KGEC - Invitation",
+      text,
+    );
+
+    if (resMail.hasError === true) throw res.error;
+
+    await createLogService({
+      logType: "INVITE",
+      userId: new ObjectId(user._id),
+      description: user.name + " invited " + email,
+    });
+
+    message(
+      res,
+      OK,
+      "Invitation sent successfully. You will receive " +
+        process.env.REFERRAL_BONUS +
+        " points on successful registration",
+    );
+  } catch (err) {
+    await handleError(req, res, err);
+  }
+};
+
 export default {
   verifyToken,
   signUp,
@@ -479,4 +532,5 @@ export default {
   sendOTPForReset,
   verifyOTPForResetPassword,
   verifyEspektroId,
+  inviteUser,
 };
