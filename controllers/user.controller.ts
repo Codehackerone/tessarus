@@ -220,22 +220,36 @@ const verifyOTPForUserVerification = async (req: any, res: any) => {
 
 const sendOTPForReset = async (req: any, res: any) => {
   try {
-    const email = req.user.email;
-    const name = req.user.name;
+    if (!req.body.email) {
+      throw {
+        statusObj: BAD_REQUEST,
+        type: "AuthenticationError",
+        name: "Email is required",
+      };
+    }
+
+    const user = await userService.findUserService({ email: req.body.email });
+    if (!user) {
+      throw {
+        statusObj: BAD_REQUEST,
+        type: "AuthenticationError",
+        name: "User doesn't exist",
+      };
+    }
+
+    const email = req.body.email;
     const otp: any = (Math.floor(Math.random() * 10000) + 10000)
       .toString()
       .substring(1);
 
     const otpResponse: any = await otpService.createAndSendOtpForResetPassword(
-      name,
       "Espekro KGEC - OTP to reset your password for your account",
       email,
       otp,
     );
     await createLogService({
       logType: "OTP_SENT",
-      userId: new ObjectId(req.user._id),
-      description: req.user.name + " requested for OTP to reset password",
+      description: req.body.email + " requested for OTP to reset password",
     });
 
     const return_object = {

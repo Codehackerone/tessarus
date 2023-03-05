@@ -42,11 +42,11 @@ export const registerTemplate = (name: string) => {
         `;
 };
 
-export const sendOTPResetPasswordTemplate = (name: string, otp: string) => {
+export const sendOTPResetPasswordTemplate = (otp: string) => {
   return `<html>
         <body>
         <p>
-            <h3>Hello ${name},<br>        
+            <h3>Hello participant,<br>        
             You requested to reset your password.</h3><br>
 
             Please use the following OTP to reset your password.<br>
