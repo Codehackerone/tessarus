@@ -91,10 +91,11 @@ export const inviteParticipantTemplate = (
   return `<html>
         <body>
         <p>
-            <h3>Hello ${name},<br>        
-            You are invited to Espektro 2023 by ${name}.</h3><br>
+            <h3>Hello,<br>        
+            ${name} has invited you to Espektro 2023
+            </h3><br>
 
-            Please use the following link to register for Espektro 2023.<br>
+            Please use the following link to register for events at Espektro 2023.<br>
             <b>Link: ${url}?referralcode=${referralCode} </b><br>
             or use the following referral code to register.<br>
             <b>Referral Code: ${referralCode}</b><br>
