@@ -239,7 +239,7 @@ export const updateEvent = async (req: any, res: any) => {
     await createLogService({
       logType: "EVENT_UPDATED",
       volunteer: new ObjectId(req.volunteer._id),
-      description: `Event ${event.title} updated by ${req.volunteer.name}`,
+      description: `Event ${event[0].title} updated by ${req.volunteer.name}`,
     });
 
     const return_object: any = {
@@ -527,12 +527,23 @@ const registerEvent = async (req: any, res: any) => {
       req.body.team.members = teamMembersArray;
     }
 
-    if (event.eventPrice > 0 && req.user.coins < event.eventPrice) {
-      throw {
-        statusObj: BAD_REQUEST,
-        name: "You do not have enough coins to register for this event",
-        type: "ValidationError",
-      };
+    const college = req.user.college;
+    const kgecNames = [
+      "kalyani government engineering college",
+      "Kalyani Government Engineering college, kalyani",
+      "kgec",
+      "kalyani govt. engineering college",
+      "kalyani govt. engg. college",
+    ];
+
+    if (!kgecNames.includes(college.toLowerCase())) {
+      if (event.eventPrice > 0 && req.user.coins < event.eventPrice) {
+        throw {
+          statusObj: BAD_REQUEST,
+          name: "You do not have enough coins to register for this event",
+          type: "ValidationError",
+        };
+      }
     }
     req.body.userId = req.user._id;
     const ticket: any = await ticketService.createTicketService(req.body);
@@ -540,17 +551,25 @@ const registerEvent = async (req: any, res: any) => {
     const return_object: any = {
       ticket: ticket,
     };
+    if (!kgecNames.includes(college.toLowerCase())) {
+      await userService.updateUserService(req.user._id, {
+        coins: req.user.coins - event.eventPrice,
+      });
 
-    await userService.updateUserService(req.user._id, {
-      coins: req.user.coins - event.eventPrice,
-    });
-
-    await createPaymentLogService({
-      logType: "COINS_USED",
-      userId: new ObjectId(req.user._id),
-      coins: event.eventPrice,
-      description: `${req.user.name} used ${event.eventPrice} coins to register for event ${event.title}`,
-    });
+      await createPaymentLogService({
+        logType: "COINS_USED",
+        userId: new ObjectId(req.user._id),
+        coins: event.eventPrice,
+        description: `${req.user.name} used ${event.eventPrice} coins to register for event ${event.title}`,
+      });
+    } else {
+      await createPaymentLogService({
+        logType: "COINS_USED",
+        userId: new ObjectId(req.user._id),
+        coins: event.eventPrice,
+        description: `${req.user.name} used 0 coins to register for event ${event.title}`,
+      });
+    }
 
     await createLogService({
       logType: "EVENT_REGISTERED",
