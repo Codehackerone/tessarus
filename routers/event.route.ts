@@ -37,6 +37,11 @@ Router.route("/checkin").post(
   eventController.eventCheckIn,
 );
 
+Router.route("/getparticipants/:id").get(
+  volunteerAuthorize(1),
+  eventController.getParticipantsfromEvent,
+);
+
 Router.route("/:id")
   .get(userAuthorize(true), eventController.getEvent)
   .put(volunteerAuthorize(3), validateAddEvent(), eventController.updateEvent)
