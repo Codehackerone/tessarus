@@ -147,6 +147,13 @@ const eventCheckInSchema = Joi.object({
   password: Joi.string().required().escapeHTML(),
 });
 
+const prizeAddSchema = Joi.object({
+  userId: Joi.string().required().escapeHTML(),
+  eventId: Joi.string().required().escapeHTML(),
+  position: Joi.number().required(),
+  prize: Joi.string().required().escapeHTML(),
+});
+
 export default {
   userSignUpSchema,
   userLoginSchema,
@@ -160,4 +167,5 @@ export default {
   registerEventTeamSchema,
   verifyOTPSchema,
   eventCheckInSchema,
+  prizeAddSchema,
 };

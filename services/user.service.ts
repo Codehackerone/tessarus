@@ -45,6 +45,25 @@ const addReferralCodeService = async (userId: any, referralCode: string) => {
   return await User.findByIdAndUpdate(userId, { referralCode: referralCode });
 };
 
+const updatePrizeWinnerService = async (
+  userId: any,
+  eventName: string,
+  eventId: any,
+  position: number,
+  prize: string,
+) => {
+  return User.findByIdAndUpdate(userId, {
+    $push: {
+      eventWinList: {
+        eventName: eventName,
+        eventId: eventId,
+        position: position,
+        prize: prize,
+      },
+    },
+  });
+};
+
 export default {
   signUpService,
   findUserService,
@@ -54,4 +73,5 @@ export default {
   getAllUsersService,
   fetchEspekroIdService,
   addReferralCodeService,
+  updatePrizeWinnerService,
 };

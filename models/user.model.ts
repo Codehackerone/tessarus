@@ -65,6 +65,23 @@ const userSchema = new Schema(
       type: String,
       unique: true,
     },
+    eventWinList: [
+      {
+        eventName: {
+          type: String,
+        },
+        eventId: {
+          type: Schema.Types.ObjectId,
+          ref: "Event",
+        },
+        position: {
+          type: Number,
+        },
+        prize: {
+          type: String,
+        },
+      },
+    ],
   },
   {
     timestamps: true,

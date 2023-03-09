@@ -6,8 +6,10 @@ import {
   validateUpdateUser,
   //validateResetPassword,
   validateOTPSchema,
+  validatePrizeAddSchema,
 } from "../middlewares/validator.middleware";
 import { authorize } from "../middlewares/user.authorization";
+import { authorize as volunteerAuthorize } from "../middlewares/volunteer.authorization";
 import { mailLimiter } from "../helpers/rateLimiter";
 // import multer from "multer";
 // const upload = multer({ dest: "./uploads/" });
@@ -34,7 +36,6 @@ Router.route("/verifyotpforuser").post(
 );
 
 Router.route("/verifyotpforreset").post(
-  authorize(),
   validateOTPSchema(),
   userController.verifyOTPForResetPassword,
 );
@@ -65,6 +66,12 @@ Router.route("/inviteuser").post(
   authorize(),
   mailLimiter,
   userController.inviteUser,
+);
+
+Router.route("/addprizetouser").post(
+  volunteerAuthorize(1),
+  validatePrizeAddSchema(),
+  userController.addPrizeWinner,
 );
 
 export default Router;
