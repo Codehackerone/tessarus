@@ -557,6 +557,40 @@ const inviteUser = async (req: any, res: any) => {
   }
 };
 
+const addPrizeWinner = async (req: any, res: any) => {
+  try {
+    const { userId, eventId, position, prize } = req.body;
+    let event: any = await eventService.getEventService({
+      _id: new ObjectId(eventId),
+    });
+    if (event.length === 0) {
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "No such event exists",
+        type: "NotFoundError",
+      };
+    }
+    event = event[0];
+    const updatedEvent: any = await userService.updatePrizeWinnerService(
+      userId,
+      event.title,
+      eventId,
+      position,
+      prize,
+    );
+    if (!updatedEvent) {
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "Something went wrong",
+        type: "InternalError",
+      };
+    }
+    message(res, OK, "Prize winner updated successfully");
+  } catch (err) {
+    await handleError(req, res, err);
+  }
+};
+
 export default {
   verifyToken,
   signUp,
@@ -573,4 +607,5 @@ export default {
   verifyOTPForResetPassword,
   verifyEspektroId,
   inviteUser,
+  addPrizeWinner,
 };

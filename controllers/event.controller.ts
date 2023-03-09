@@ -644,6 +644,21 @@ const eventCheckIn = async (req: any, res: any) => {
   }
 };
 
+const getParticipantsfromEvent = async (req: any, res: any) => {
+  try {
+    const events: any = await ticketService.getParticipantsfromEventService(
+      new ObjectId(req.params.id),
+    );
+    const return_object: any = {
+      events: events,
+    };
+
+    messageCustom(res, OK, "Event fetched successfully", return_object);
+  } catch (err) {
+    await handleError(req, res, err);
+  }
+};
+
 export default {
   addEvent,
   getAllEvents,
@@ -655,4 +670,5 @@ export default {
   registerEvent,
   eventCheckIn,
   searchEvents,
+  getParticipantsfromEvent,
 };
