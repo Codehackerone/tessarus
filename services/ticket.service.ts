@@ -66,6 +66,7 @@ const getParticipantsfromEventService = async (eventId: any) => {
         userCollege: { $arrayElemAt: ["$user.college", 0] },
         userYear: { $arrayElemAt: ["$user.year", 0] },
         userEspektroId: { $arrayElemAt: ["$user.espektroId", 0] },
+        userId: { $arrayElemAt: ["$user._id", 0] },
       },
     },
     {
