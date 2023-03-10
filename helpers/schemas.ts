@@ -139,6 +139,7 @@ const verifyOTPSchema = Joi.object({
   otp: Joi.string().required().escapeHTML(),
   otp_token: Joi.string().required().escapeHTML(),
   password: Joi.string().escapeHTML(),
+  email: Joi.string().escapeHTML(),
 });
 
 const eventCheckInSchema = Joi.object({

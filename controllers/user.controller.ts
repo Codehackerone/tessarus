@@ -269,10 +269,11 @@ const sendOTPForReset = async (req: any, res: any) => {
 const verifyOTPForResetPassword = async (req: any, res: any) => {
   try {
     const password = req.body.password;
-    if (!password) {
+    const email = req.body.email;
+    if (!password || !email) {
       throw {
         statusObj: BAD_REQUEST,
-        name: "Password is required",
+        name: "Password and email are required",
         type: "ValidationError",
       };
     }
@@ -280,13 +281,26 @@ const verifyOTPForResetPassword = async (req: any, res: any) => {
     const otp_token = req.body.otp_token;
     const otp = req.body.otp;
     const otpResponse: any = await otpService.verifyOtp(otp_token, otp);
-    if (otpResponse.hasError === true) throw otpResponse.error;
-    const user = req.user;
+    if (otpResponse.error === true)
+      throw {
+        statusObj: BAD_REQUEST,
+        type: "AuthenticationError",
+        name: otpResponse.message,
+      };
+
+    const user = await userService.findUserService({ email: email });
+    if (!user) {
+      throw {
+        statusObj: BAD_REQUEST,
+        type: "AuthenticationError",
+        name: "User doesn't exist",
+      };
+    }
 
     await createLogService({
       logType: "OTP_VERIFIED",
-      userId: new ObjectId(req.user._id),
-      description: req.user.name + " verified OTP",
+      userId: new ObjectId(user._id),
+      description: user.name + " verified OTP",
     });
 
     await userService.resetPasswordService(user._id, password);
