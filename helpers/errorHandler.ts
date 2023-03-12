@@ -20,6 +20,8 @@ export const handleError = async (req: any, res: any, err: any) => {
     messageError(res, BAD_REQUEST, err.message, "MongoError");
   } else if (err.name === "CastError") {
     messageError(res, BAD_REQUEST, err.message, "MongoError");
+  } else if (err.errorTag === "otp") {
+    messageError(res, BAD_REQUEST, err.message, "ValidationError");
   } else {
     console.log(err);
     alert(req.originalUrl, JSON.stringify(err));

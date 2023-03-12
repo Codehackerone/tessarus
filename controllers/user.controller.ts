@@ -181,7 +181,7 @@ const verifyOTPForUserVerification = async (req: any, res: any) => {
     const otp_token = req.body.otp_token;
     const otp = req.body.otp;
     const otpResponse: any = await otpService.verifyOtp(otp_token, otp);
-    if (otpResponse.error === true)
+    if ("error" in otpResponse && otpResponse.error === true)
       throw {
         statusObj: BAD_REQUEST,
         type: "AuthenticationError",
@@ -278,16 +278,6 @@ const verifyOTPForResetPassword = async (req: any, res: any) => {
       };
     }
 
-    const otp_token = req.body.otp_token;
-    const otp = req.body.otp;
-    const otpResponse: any = await otpService.verifyOtp(otp_token, otp);
-    if (otpResponse.error === true)
-      throw {
-        statusObj: BAD_REQUEST,
-        type: "AuthenticationError",
-        name: otpResponse.message,
-      };
-
     const user = await userService.findUserService({ email: email });
     if (!user) {
       throw {
@@ -296,6 +286,17 @@ const verifyOTPForResetPassword = async (req: any, res: any) => {
         name: "User doesn't exist",
       };
     }
+
+    const otp_token = req.body.otp_token;
+    const otp = req.body.otp;
+    const otpResponse: any = await otpService.verifyOtp(otp_token, otp);
+
+    if (otpResponse.error === true)
+      throw {
+        statusObj: BAD_REQUEST,
+        type: "AuthenticationError",
+        name: otpResponse.message,
+      };
 
     await createLogService({
       logType: "OTP_VERIFIED",

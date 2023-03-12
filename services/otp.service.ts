@@ -38,21 +38,25 @@ export const verifyOtp = async (otp_token: any, otp: any) => {
   if (!response)
     throw {
       message: "OTP Token Not Found",
+      errorTag: "otp",
       error: true,
     };
   else if (response.done === true) {
     throw {
       error: true,
+      errorTag: "otp",
       message: "OTP Already Used",
     };
   } else if (response.expiry <= new Date().getTime()) {
     throw {
       error: true,
+      errorTag: "otp",
       message: "OTP Expired",
     };
   } else if (response.attempts === 0) {
     throw {
       error: true,
+      errorTag: "otp",
       message: "OTP Attempts Exhausted",
     };
   } else if (response.otp !== otp) {
@@ -60,6 +64,7 @@ export const verifyOtp = async (otp_token: any, otp: any) => {
     await response.save();
     throw {
       error: true,
+      errorTag: "otp",
       message: "OTP Incorrect",
     };
   }
