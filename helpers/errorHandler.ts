@@ -22,6 +22,13 @@ export const handleError = async (req: any, res: any, err: any) => {
     messageError(res, BAD_REQUEST, err.message, "MongoError");
   } else if (err.errorTag === "otp") {
     messageError(res, BAD_REQUEST, err.message, "ValidationError");
+  } else if (req.originalUrl == "./api/utils/uploadimages") {
+    messageError(
+      res,
+      BAD_REQUEST,
+      "There was an error uploading the image. Either the image is too large or the image is not in the correct format. Please try again.",
+      "ValidationError",
+    );
   } else {
     console.log(err);
     alert(req.originalUrl, JSON.stringify(err));
