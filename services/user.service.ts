@@ -1,4 +1,5 @@
 import User from "../models/user.model";
+import Event from "../models/event.model";
 
 const signUpService = async (userBody: any) => {
   const user = await User.create(userBody);
@@ -52,16 +53,32 @@ const updatePrizeWinnerService = async (
   position: number,
   prize: string,
 ) => {
-  return User.findByIdAndUpdate(userId, {
+  const user: any = await User.findByIdAndUpdate(
+    userId,
+    {
+      $push: {
+        eventWinList: {
+          eventName: eventName,
+          eventId: eventId,
+          position: position,
+          prize: prize,
+        },
+      },
+    },
+    { new: true },
+  );
+  await Event.findByIdAndUpdate(eventId, {
     $push: {
       eventWinList: {
-        eventName: eventName,
-        eventId: eventId,
+        userId: userId,
+        userName: user.name,
+        userCollege: user.college,
         position: position,
         prize: prize,
       },
     },
   });
+  return user;
 };
 
 export default {
