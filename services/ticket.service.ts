@@ -24,6 +24,11 @@ const getAllTicketsService = async (ticketBody: any) => {
         as: "event",
       },
     },
+    {
+      $sort: {
+        createdAt: -1,
+      },
+    },
   ]);
 };
 

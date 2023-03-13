@@ -18,6 +18,12 @@ moment.suppressDeprecationWarnings = true;
 const addEvent = async (req: any, res: any) => {
   try {
     req.body.createdBy = req.volunteer._id;
+    req.body.eventPrice = Number(
+      req.body.eventPrice * Number(process.env.COIN_RUPEE_RATIO),
+    );
+    req.body.eventPriceForKGEC = Number(
+      req.body.eventPriceForKGEC * Number(process.env.COIN_RUPEE_RATIO),
+    );
 
     if (new Date(req.body.startTime) >= new Date(req.body.endTime)) {
       throw {
@@ -179,6 +185,13 @@ export const updateEvent = async (req: any, res: any) => {
     const event: any = await eventService.getEventService({
       _id: req.params.id,
     });
+
+    req.body.eventPrice = Number(
+      req.body.eventPrice * Number(process.env.COIN_RUPEE_RATIO),
+    );
+    req.body.eventPriceForKGEC = Number(
+      req.body.eventPriceForKGEC * Number(process.env.COIN_RUPEE_RATIO),
+    );
 
     if (event.length === 0) {
       throw {
@@ -536,40 +549,35 @@ const registerEvent = async (req: any, res: any) => {
       "kalyani govt. engg. college",
     ];
 
-    if (!kgecNames.includes(college.toLowerCase())) {
-      if (event.eventPrice > 0 && req.user.coins < event.eventPrice) {
-        throw {
-          statusObj: BAD_REQUEST,
-          name: "You do not have enough coins to register for this event",
-          type: "ValidationError",
-        };
-      }
+    let toPayForEvent = 0;
+
+    if (kgecNames.includes(college.toLowerCase())) {
+      toPayForEvent = !event.eventPriceForKGEC ? 0 : event.eventPriceForKGEC;
+    } else {
+      toPayForEvent = event.eventPrice;
+    }
+
+    if (toPayForEvent > 0 && req.user.coins < toPayForEvent) {
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "You do not have enough coins to register for this event",
+        type: "ValidationError",
+      };
     }
     req.body.userId = req.user._id;
     const ticket: any = await ticketService.createTicketService(req.body);
 
     const return_object: any = {
       ticket: ticket,
+      coinsSpent: toPayForEvent,
     };
-    if (!kgecNames.includes(college.toLowerCase())) {
-      await userService.updateUserService(req.user._id, {
-        coins: req.user.coins - event.eventPrice,
-      });
 
-      await createPaymentLogService({
-        logType: "COINS_USED",
-        userId: new ObjectId(req.user._id),
-        coins: event.eventPrice,
-        description: `${req.user.name} used ${event.eventPrice} coins to register for event ${event.title}`,
-      });
-    } else {
-      await createPaymentLogService({
-        logType: "COINS_USED",
-        userId: new ObjectId(req.user._id),
-        coins: event.eventPrice,
-        description: `${req.user.name} used 0 coins to register for event ${event.title}`,
-      });
-    }
+    await createPaymentLogService({
+      logType: "COINS_USED",
+      userId: new ObjectId(req.user._id),
+      coins: event.eventPrice,
+      description: `${req.user.name} used 0 coins to register for event ${event.title}`,
+    });
 
     await createLogService({
       logType: "EVENT_REGISTERED",
