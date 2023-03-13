@@ -55,6 +55,10 @@ const eventSchema = new Schema(
       type: Number,
       required: true,
     },
+    eventPriceForKGEC: {
+      type: Number,
+      default: 0,
+    },
     eventOrganiserClub: {
       name: {
         type: String,
