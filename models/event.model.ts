@@ -40,6 +40,9 @@ const eventSchema = new Schema(
         },
       },
     ],
+    otherPlatformUrl: {
+      type: String,
+    },
     eventType: {
       type: String,
       required: true,

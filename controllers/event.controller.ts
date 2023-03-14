@@ -464,6 +464,14 @@ const registerEvent = async (req: any, res: any) => {
 
     event = event[0];
 
+    if (event.otherPlatformUrl && event.otherPlatformUrl !== "") {
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "Event is already registered on another platform",
+        type: "ValidationError",
+      };
+    }
+
     // check event already registered
     const alreadyRegistered = await ticketService.getTicketService({
       eventId: new ObjectId(req.body.eventId),
