@@ -222,7 +222,7 @@ const basicHTMLTemplate = (content: string) => {
                                           <td align="center" valign="top" style="padding:0;Margin:0;width:520px">
                                              <table cellpadding="0" cellspacing="0" width="100%" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px">
                                                 <tr>
-                                                   <td align="center" style="padding:0;Margin:0;font-size:0px"><img class="adapt-img" src="https://pfhuer.stripocdn.email/content/guids/CABINET_7350cddb944e39c92e78c3a4d7d60b3ab8ec23ca9982f645b2d5a76fea7c894d/images/group_8.png" alt style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic" height="57" width="47"></td>
+                                                   <td align="center" style="padding:0;Margin:0;font-size:0px"><a target="_blank" href="https://espektro.in" style="-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;text-decoration:underline;color:#2D3142;font-size:14px"><img src="https://pfhuer.stripocdn.email/content/guids/CABINET_7350cddb944e39c92e78c3a4d7d60b3ab8ec23ca9982f645b2d5a76fea7c894d/images/group_8.png" alt="Logo" style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic" title="Logo" height="60" width="50"></a></td>
                                                 </tr>
                                              </table>
                                           </td>
@@ -286,7 +286,7 @@ const basicHTMLTemplate = (content: string) => {
                                              <table cellpadding="0" cellspacing="0" width="100%" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px">
                                                 <tr>
                                                    <td align="left" style="padding:0;Margin:0">
-                                                      <p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:Imprima, Arial, sans-serif;line-height:27px;color:#2D3142;font-size:18px"><br>Regards,<br>Espektro Team</p>
+                                                      <p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-family:Imprima, Arial, sans-serif;line-height:27px;color:#2D3142;font-size:18px"><br>Regards,<br>Espektro Team<br> For any queries, contact us at dsc@kgec.edu.in</p>
                                                    </td>
                                                 </tr>
                                                 <tr>

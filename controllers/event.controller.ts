@@ -551,7 +551,7 @@ const registerEvent = async (req: any, res: any) => {
 
     let toPayForEvent = 0;
 
-    if (kgecNames.includes(college.toLowerCase())) {
+    if (kgecNames.includes(college.toLowerCase().trim())) {
       toPayForEvent = !event.eventPriceForKGEC ? 0 : event.eventPriceForKGEC;
     } else {
       toPayForEvent = event.eventPrice;
