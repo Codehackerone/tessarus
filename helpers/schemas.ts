@@ -86,8 +86,9 @@ const addEventSchema = Joi.object({
   eventType: Joi.string().valid("solo", "group"),
   eventMinParticipants: Joi.number(),
   eventMaxParticipants: Joi.number(),
-  eventPrice: Joi.number().min(0),
-  eventPriceForKGEC: Joi.number().min(0),
+  eventPrice: Joi.number().min(0).required(),
+  eventPriceForKGEC: Joi.number().min(0).required(),
+  otherPlatformUrl: Joi.string().escapeHTML(),
   eventOrganiserClub: Joi.object({
     name: Joi.string().required().escapeHTML(),
     image: Joi.string().required().escapeHTML(),
