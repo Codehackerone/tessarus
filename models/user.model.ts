@@ -82,6 +82,23 @@ const userSchema = new Schema(
         },
       },
     ],
+    transactions: [
+      {
+        paymentId: {
+          type: String,
+          required: true,
+        },
+        amount: {
+          type: Number,
+          required: true,
+        },
+        status: {
+          type: String,
+          enum: ["success", "failed", "pending"],
+          default: "pending",
+        },
+      },
+    ],
   },
   {
     timestamps: true,
