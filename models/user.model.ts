@@ -82,23 +82,41 @@ const userSchema = new Schema(
         },
       },
     ],
-    transactions: [
-      {
-        paymentId: {
-          type: String,
-          required: true,
-        },
-        amount: {
-          type: Number,
-          required: true,
-        },
-        status: {
-          type: String,
-          enum: ["success", "failed", "pending"],
-          default: "pending",
-        },
-      },
-    ],
+  },
+  {
+    timestamps: true,
+  },
+);
+
+const transactionSchema = new Schema(
+  {
+    paymentId: {
+      type: String,
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    amount: {
+      type: Number,
+    },
+    coins: {
+      type: Number,
+    },
+    status: {
+      type: String,
+      // enum: ["success", "failed", "pending"],
+      default: "pending",
+    },
+    description: {
+      type: String,
+    },
+    type: {
+      type: String,
+      enum: ["credit", "debit"],
+      required: true,
+    },
   },
   {
     timestamps: true,
@@ -114,5 +132,7 @@ userSchema.pre("save", async function (next: any) {
 });
 
 const User = mongoose.model("User", userSchema);
+const Transaction = mongoose.model("Transaction", transactionSchema);
 
 export default User;
+export { Transaction };

@@ -364,6 +364,9 @@ const userProfile = async (req: any, res: any) => {
     return_object.user = Object.assign({}, user)["_doc"];
     return_object.user.qrText = req.user._id + "-" + user.espektroId;
     delete return_object.user.password;
+
+    return_object.user.transactions =
+      await userService.getTransactionByUserIdService(user._id);
     messageCustom(res, OK, "User Profile fetched successfully", return_object);
   } catch (err: any) {
     await handleError(req, res, err);
@@ -606,6 +609,89 @@ const addPrizeWinner = async (req: any, res: any) => {
   }
 };
 
+const createTransaction = async (req: any, res: any) => {
+  try {
+    if (!req.body.amount) {
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "Amount not provided",
+        type: "ValidationError",
+      };
+    }
+    const transactionBody = {
+      userId: req.user._id,
+      amount: req.body.amount,
+      coins: req.body.amount * Number(process.env.COIN_RUPEE_RATIO),
+      description: "Added Coins to wallet",
+      type: "credit",
+    };
+    const transaction: any = await userService.createTransactionService(
+      transactionBody,
+    );
+    if (!transaction) {
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "Something went wrong",
+        type: "InternalError",
+      };
+    }
+    const return_object: any = {
+      transaction: transaction,
+    };
+    messageCustom(res, OK, "Transaction created successfully", return_object);
+  } catch (err) {
+    await handleError(req, res, err);
+  }
+};
+
+const updateTransaction = async (req: any, res: any) => {
+  try {
+    if (!req.body.transactionId || !req.body.paymentId) {
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "Transaction Id or Payment Id not provided",
+        type: "ValidationError",
+      };
+    }
+
+    const transaction: any = await userService.updateTransactionService(
+      req.body.transactionId,
+      { paymentId: req.body.paymentId },
+    );
+    if (!transaction) {
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "Transaction not found",
+        type: "NotFoundError",
+      };
+    }
+    const return_object: any = {
+      transaction: transaction,
+    };
+    messageCustom(res, OK, "Transaction created successfully", return_object);
+  } catch (err) {
+    await handleError(req, res, err);
+  }
+};
+
+const refreshTransaction = async (req: any, res: any) => {
+  try {
+    if (!req.body.transactionId) {
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "Transaction Id not provided",
+        type: "ValidationError",
+      };
+    }
+
+    await userService.refreshTransactionService(req.body.transactionId);
+
+    message(res, OK, "Transaction refreshed successfully");
+  } catch (err) {
+    await handleError(req, res, err);
+  }
+};
+
 export default {
   verifyToken,
   signUp,
@@ -623,4 +709,7 @@ export default {
   verifyEspektroId,
   inviteUser,
   addPrizeWinner,
+  createTransaction,
+  updateTransaction,
+  refreshTransaction,
 };

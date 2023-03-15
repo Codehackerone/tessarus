@@ -110,4 +110,9 @@ describe("config", () => {
       expect(process.env.PRODUCTION_URL).toBeDefined();
     });
   });
+  describe("Razorpay", () => {
+    it("should contain RAZORPAY_KEY", () => {
+      expect(process.env.RAZORPAY_KEY).toBeDefined();
+    });
+  });
 });
