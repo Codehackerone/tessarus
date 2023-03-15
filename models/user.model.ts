@@ -92,7 +92,6 @@ const transactionSchema = new Schema(
   {
     paymentId: {
       type: String,
-      required: true,
     },
     userId: {
       type: Schema.Types.ObjectId,
@@ -101,15 +100,13 @@ const transactionSchema = new Schema(
     },
     amount: {
       type: Number,
-      required: true,
     },
     coins: {
       type: Number,
-      required: true,
     },
     status: {
       type: String,
-      enum: ["success", "failed", "pending"],
+      // enum: ["success", "failed", "pending"],
       default: "pending",
     },
     description: {
