@@ -364,6 +364,9 @@ const userProfile = async (req: any, res: any) => {
     return_object.user = Object.assign({}, user)["_doc"];
     return_object.user.qrText = req.user._id + "-" + user.espektroId;
     delete return_object.user.password;
+
+    return_object.user.transactions =
+      await userService.getTransactionByUserIdService(user._id);
     messageCustom(res, OK, "User Profile fetched successfully", return_object);
   } catch (err: any) {
     await handleError(req, res, err);

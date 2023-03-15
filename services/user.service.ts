@@ -1,5 +1,6 @@
 import User from "../models/user.model";
 import Event from "../models/event.model";
+import { Transaction } from "../models/user.model";
 
 const signUpService = async (userBody: any) => {
   const user = await User.create(userBody);
@@ -9,6 +10,10 @@ const signUpService = async (userBody: any) => {
 const findUserService = async (param: any) => {
   const user = await User.findOne(param);
   return user;
+};
+
+const getTransactionByUserIdService = async (userId: any) => {
+  return await Transaction.find({ userId: userId });
 };
 
 const verifyToken = async (userBody: any) => {
@@ -91,4 +96,5 @@ export default {
   fetchEspekroIdService,
   addReferralCodeService,
   updatePrizeWinnerService,
+  getTransactionByUserIdService,
 };
