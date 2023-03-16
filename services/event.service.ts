@@ -12,7 +12,7 @@ const getAllEventsService = async (
   dpp: number,
 ) => {
   return await paginate(Event, query, page, dpp, {
-    startTime: 1,
+    createdAt: -1
   });
 };
 
