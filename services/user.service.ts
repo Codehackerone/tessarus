@@ -106,6 +106,7 @@ const createTransactionService = async (
   const body: any = { ...transactionBody };
   body.paymentId = response.data.id;
   body.transactionId = refId;
+  body.status = response.data.status === "paid" ? "success" : "pending";
   return {
     transaction: await Transaction.create(body),
     razorpayData: response.data,
@@ -143,10 +144,7 @@ const updateTransactionFromRazorpayService = async (transactionId: any) => {
   if (!transaction.paymentId) {
     return;
   }
-  if (
-    transaction.status === "authorized" ||
-    transaction.status === "captured"
-  ) {
+  if (transaction.status === "success") {
     return;
   }
   const config: any = {

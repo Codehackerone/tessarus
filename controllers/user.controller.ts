@@ -641,7 +641,7 @@ const createTransaction = async (req: any, res: any) => {
         description:
           "Payment for adding " + req.body.amount + " coins to wallet",
       },
-      callback_url: String(process.env.FRONTEND_HOSTED_URL + "/userwallet"),
+      callback_url: String(process.env.FRONTEND_HOSTED_URL + "/my-wallet"),
       callback_method: "get",
     });
 
