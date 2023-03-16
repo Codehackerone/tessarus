@@ -132,7 +132,7 @@ const refreshTransactionService = async (transactionId: any) => {
   const transaction: any = await Transaction.findOne({
     transactionId: transactionId,
   });
-  if (transaction.paymentId) {
+  if (transaction && transaction.paymentId) {
     await updateTransactionFromRazorpayService(transactionId);
   }
 };
