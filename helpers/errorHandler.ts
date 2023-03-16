@@ -29,17 +29,19 @@ export const handleError = async (req: any, res: any, err: any) => {
       "There was an error uploading the image. Either the image is too large or the image is not in the correct format. Please try again.",
       "ValidationError",
     );
-  } else if (
-    err.name === "AxiosError" &&
-    req.originalUrl == "/api/users/transaction"
-  ) {
-    messageError(
-      res,
-      BAD_REQUEST,
-      "Possible error because of wrong paymentId",
-      "RazorpayError",
-    );
-  } else {
+  }
+  // } else if (
+  //   err.name === "AxiosError" &&
+  //   req.originalUrl == "/api/users/transaction"
+  // ) {
+  //   messageError(
+  //     res,
+  //     BAD_REQUEST,
+  //     "Possible error because of wrong paymentId",
+  //     "RazorpayError",
+  //   );
+  // }
+  else {
     console.log(err);
     alert(req.originalUrl, JSON.stringify(err));
     messageError(res, SERVER_ERROR, err.message, err.name);

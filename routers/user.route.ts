@@ -70,7 +70,7 @@ Router.route("/inviteuser").post(
 
 Router.route("/transaction")
   .post(authorize(), userController.createTransaction)
-  .put(authorize(), userController.updateTransaction)
+  //.put(authorize(), userController.updateTransaction)
   .patch(authorize(), userController.refreshTransaction);
 
 Router.route("/addprizetouser").post(

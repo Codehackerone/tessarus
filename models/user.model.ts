@@ -90,8 +90,13 @@ const userSchema = new Schema(
 
 const transactionSchema = new Schema(
   {
+    transactionId: {
+      type: String,
+      required: true,
+    },
     paymentId: {
       type: String,
+      required: true,
     },
     userId: {
       type: Schema.Types.ObjectId,
