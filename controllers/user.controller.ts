@@ -618,16 +618,44 @@ const createTransaction = async (req: any, res: any) => {
         type: "ValidationError",
       };
     }
-    const transactionBody = {
+
+    const refId = "esp_payment_" + getRandomId(10);
+    const data = JSON.stringify({
+      amount: req.body.amount * 100,
+      currency: "INR",
+      accept_partial: false,
+      reference_id: refId,
+      description: "Payment for adding " + req.body.amount + " coins to wallet",
+      customer: {
+        name: req.user.name,
+        contact: String("+91" + req.user.phone),
+        email: req.user.email,
+      },
+      notify: {
+        sms: true,
+        email: true,
+      },
+      reminder_enable: true,
+      notes: {
+        address: "Espektro KGEC",
+        description:
+          "Payment for adding " + req.body.amount + " coins to wallet",
+      },
+      callback_url: String(process.env.FRONTEND_HOSTED_URL + "/userwallet"),
+      callback_method: "get",
+    });
+
+    // eslint-disable-next-line prefer-const
+    let transactionBody: any = {
       userId: req.user._id,
       amount: req.body.amount,
       coins: req.body.amount * Number(process.env.COIN_RUPEE_RATIO),
       description: "Added Coins to wallet",
       type: "credit",
     };
-    const transaction: any = await userService.createTransactionService(
-      transactionBody,
-    );
+
+    const { transaction, razorpayData } =
+      await userService.createTransactionService(transactionBody, data, refId);
     if (!transaction) {
       throw {
         statusObj: BAD_REQUEST,
@@ -637,6 +665,7 @@ const createTransaction = async (req: any, res: any) => {
     }
     const return_object: any = {
       transaction: transaction,
+      razorpayData: razorpayData,
     };
     messageCustom(res, OK, "Transaction created successfully", return_object);
   } catch (err) {

@@ -87,8 +87,29 @@ const getTransactionByUserIdService = async (userId: any) => {
   return await Transaction.find({ userId: userId });
 };
 
-const createTransactionService = async (transactionBody: any) => {
-  return await Transaction.create(transactionBody);
+const createTransactionService = async (
+  transactionBody: any,
+  razorpayData: any,
+  refId: any,
+) => {
+  const config = {
+    method: "post",
+    maxBodyLength: Infinity,
+    url: "https://api.razorpay.com/v1/payment_links/",
+    headers: {
+      "Content-type": "application/json",
+      Authorization: `Basic ${process.env.RAZORPAY_KEY}`,
+    },
+    data: razorpayData,
+  };
+  const response: any = await axios(config);
+  const body: any = { ...transactionBody };
+  body.paymentId = response.data.id;
+  body.transactionId = refId;
+  return {
+    transaction: await Transaction.create(body),
+    razorpayData: response.data,
+  };
 };
 
 const updateTransactionService = async (
@@ -107,14 +128,18 @@ const updateTransactionService = async (
 };
 
 const refreshTransactionService = async (transactionId: any) => {
-  const transaction: any = await Transaction.findById(transactionId);
+  const transaction: any = await Transaction.findOne({
+    transactionId: transactionId,
+  });
   if (transaction.paymentId) {
     await updateTransactionFromRazorpayService(transactionId);
   }
 };
 
 const updateTransactionFromRazorpayService = async (transactionId: any) => {
-  const transaction: any = await Transaction.findById(transactionId);
+  const transaction: any = await Transaction.findOne({
+    transactionId: transactionId,
+  });
   if (!transaction.paymentId) {
     return;
   }
@@ -126,19 +151,16 @@ const updateTransactionFromRazorpayService = async (transactionId: any) => {
   }
   const config: any = {
     method: "get",
-    url: `https://api.razorpay.com/v1/payments/${transaction.paymentId}`,
+    url: `https://api.razorpay.com/v1/payment_links/${transaction.paymentId}`,
     headers: {
       Authorization: `Basic ${process.env.RAZORPAY_KEY}`,
     },
   };
   const response: any = await axios(config);
-  if (
-    response.data.status === "authorized" ||
-    response.data.status === "captured"
-  ) {
+  if (response.data.status === "paid") {
     const user = await User.findById(transaction.userId);
     if (user) {
-      transaction.status = response.data.status;
+      transaction.status = "success";
       await transaction.save();
       await User.findByIdAndUpdate(transaction.userId, {
         coins: user.coins + Number(transaction.coins),
@@ -146,8 +168,7 @@ const updateTransactionFromRazorpayService = async (transactionId: any) => {
     }
     return;
   }
-
-  transaction.status = response.data.status;
+  transaction.status = "failed";
   return await transaction.save();
 };
 
