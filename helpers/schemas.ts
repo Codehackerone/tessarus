@@ -37,7 +37,7 @@ const userSignUpSchema = Joi.object({
   year: Joi.string().valid("1", "2", "3", "4", "5", "Alumni"),
   stream: Joi.string(),
   profileImageUrl: Joi.string().escapeHTML(),
-  rcode: Joi.string().escapeHTML(),
+  rcode: Joi.string().escapeHTML().empty(""),
 });
 
 const userLoginSchema = Joi.object({
