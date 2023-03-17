@@ -166,7 +166,7 @@ export const inviteParticipantTemplate = (
     </h3><br>
 
     Please use the following link to register for events at Espektro 2023.<br>
-    <b>Link: ${url}?referralcode=${referralCode} </b><br>
+    <b>Link: ${url}/register?referralcode=${referralCode} </b><br>
     or use the following referral code to register.<br>
     <b>Referral Code: ${referralCode}</b><br>
   <br>
