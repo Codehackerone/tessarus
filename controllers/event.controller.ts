@@ -580,11 +580,15 @@ const registerEvent = async (req: any, res: any) => {
       coinsSpent: toPayForEvent,
     };
 
+    await userService.updateUserService(req.user._id, {
+      coins: req.user.coins - toPayForEvent,
+    });
+
     await createPaymentLogService({
       logType: "COINS_USED",
       userId: new ObjectId(req.user._id),
       coins: event.eventPrice,
-      description: `${req.user.name} used 0 coins to register for event ${event.title}`,
+      description: `${req.user.name} used ${toPayForEvent} coins to register for event ${event.title}`,
     });
 
     await createLogService({
