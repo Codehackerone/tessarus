@@ -360,13 +360,27 @@ const userProfile = async (req: any, res: any) => {
     if (!user.referralCode) {
       await userService.addReferralCodeService(user._id, getRandomId(10));
     }
-    const return_object: any = {};
+
+    // eslint-disable-next-line prefer-const
+    let return_object: any = {};
     return_object.user = Object.assign({}, user)["_doc"];
     return_object.user.qrText = req.user._id + "-" + user.espektroId;
     delete return_object.user.password;
 
+    const transactions: any = await userService.getTransactionByUserIdService(
+      user._id,
+    );
+    for (let i = 0; i < transactions.length; i++) {
+      // eslint-disable-next-line prefer-const
+      let transaction: any = transactions[i];
+      if (transaction.status === "pending") {
+        await userService.refreshTransactionService(transaction._id);
+      }
+    }
+
     return_object.user.transactions =
       await userService.getTransactionByUserIdService(user._id);
+
     messageCustom(res, OK, "User Profile fetched successfully", return_object);
   } catch (err: any) {
     await handleError(req, res, err);
@@ -633,7 +647,8 @@ const createTransaction = async (req: any, res: any) => {
       },
       notify: {
         sms: true,
-        email: true,
+        email: false,
+        whatsapp: true,
       },
       reminder_enable: true,
       notes: {
@@ -643,6 +658,12 @@ const createTransaction = async (req: any, res: any) => {
       },
       callback_url: String(process.env.FRONTEND_HOSTED_URL + "/my-wallet"),
       callback_method: "get",
+      options: {
+        checkout: {
+          name: "KGEC Students Association",
+          logo: "https://tessarus.s3.ap-south-1.amazonaws.com/e470226ceb67e9afe17967ba06014883",
+        },
+      },
     });
 
     // eslint-disable-next-line prefer-const
