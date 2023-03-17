@@ -144,7 +144,7 @@ const updateTransactionFromRazorpayService = async (transactionId: any) => {
   if (!transaction.paymentId) {
     return;
   }
-  if (transaction.status === "success") {
+  if (transaction.status === "success" || transaction.status === "failed") {
     return;
   }
   const config: any = {
@@ -159,15 +159,18 @@ const updateTransactionFromRazorpayService = async (transactionId: any) => {
     const user = await User.findById(transaction.userId);
     if (user) {
       transaction.status = "success";
-      await transaction.save();
       await User.findByIdAndUpdate(transaction.userId, {
         coins: user.coins + Number(transaction.coins),
       });
     }
-    return;
+    return await transaction.save();
+  } else if (
+    response.data.status === "expired" ||
+    response.data.status === "cancelled"
+  ) {
+    transaction.status = "failed";
+    return await transaction.save();
   }
-  transaction.status = "failed";
-  return await transaction.save();
 };
 
 export default {
