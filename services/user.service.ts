@@ -1,7 +1,9 @@
+import { ObjectId } from "mongodb";
 import User from "../models/user.model";
 import Event from "../models/event.model";
 import { Transaction } from "../models/user.model";
 import axios from "axios";
+import { createPaymentLogService } from "./log.service";
 
 const signUpService = async (userBody: any) => {
   const user = await User.create(userBody);
@@ -159,8 +161,19 @@ const updateTransactionFromRazorpayService = async (transactionId: any) => {
     const user = await User.findById(transaction.userId);
     if (user) {
       transaction.status = "success";
-      await User.findByIdAndUpdate(transaction.userId, {
-        coins: user.coins + Number(transaction.coins),
+      await User.findByIdAndUpdate(
+        transaction.userId,
+        {
+          coins: user.coins + Number(transaction.coins),
+        },
+        { new: true },
+      );
+      await createPaymentLogService({
+        logType: "COINS_ADDED",
+        userId: new ObjectId(user._id),
+        amount: transaction.amount,
+        coins: transaction.coins,
+        description: `${user.name} successfully added ${transaction.coins} coins to his account via Razorpay`,
       });
     }
     return await transaction.save();

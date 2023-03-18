@@ -98,18 +98,19 @@ const getAllEvents = async (req: any, res: any) => {
         eventTicketDict[ticket.eventId] = ticket;
       }
 
-      for (let event of events.documents) {
-        event = event.toObject();
-        if (eventTicketDict[event._id]) {
-          event.isRegistered = true;
-          event.ticketId = eventTicketDict[event._id]._id;
-          newEventDocs.push(event);
-        } else {
-          event.isRegistered = false;
-          newEventDocs.push(event);
+      if (events.documents) {
+        for (let event of events.documents) {
+          event = event.toObject();
+          if (eventTicketDict[event._id]) {
+            event.isRegistered = true;
+            event.ticketId = eventTicketDict[event._id]._id;
+            newEventDocs.push(event);
+          } else {
+            event.isRegistered = false;
+            newEventDocs.push(event);
+          }
         }
       }
-
       events.documents = newEventDocs;
     }
 
