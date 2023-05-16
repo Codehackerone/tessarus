@@ -3,6 +3,9 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+// webhooks alerts for discord
+
+// alert notification
 export const alert = (route: any, err: any) => {
   try {
     if (process.env.ENABLE_WEBHOOK_ALERT === "false") return;
@@ -46,6 +49,7 @@ export const alert = (route: any, err: any) => {
   }
 };
 
+// deploy/restart notification
 export const deploy = () => {
   try {
     if (process.env.ENABLE_WEBHOOK_ALERT === "false") return;
