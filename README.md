@@ -2,14 +2,20 @@
 
 Backend for Expectro'23 Ticketing System
 
+# Features
+
+- Attendees can easily book tickets and pay securely using multiple payment methods.
+- Has features for admins to create, update, and delete events, and for volunteers to quickly scan tickets and check-in participants using generated QR codes.
+- Implemented a unique password generation system for individual event participants at check-in, streamlining the registration process while also improving event security
+
 # Deployment URLs
 
-- https://tessarus.gdsckgec.in/
+- https://tessarus.gdsckgec.in/ (Link may be broken)
 - https://tessarus-staging.gdsckgec.in/
 
 # Documentation
 
-Click [here](https://documenter.getpostman.com/view/15506921/2s8ZDczzci) to view the documentation.
+Click [here](https://documenter.getpostman.com/view/15506921/2s8ZDczzci) to view the POSTMAN documentation.
 
 # Install and Start
 
