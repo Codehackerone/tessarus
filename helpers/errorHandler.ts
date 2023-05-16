@@ -1,11 +1,16 @@
+// Import messageError, alert, and messageType modules.
 import { messageError } from "../helpers/message";
 import { alert } from "../helpers/webhookAlert";
 import { BAD_REQUEST, CONFLICT, SERVER_ERROR } from "../helpers/messageTypes";
 
+// Define handleError function with async/await parameters.
 export const handleError = async (req: any, res: any, err: any) => {
+  // Check for validation error - if found, use messageError function to send appropriate error message.
   if (err.error === "ValidationError") {
     messageError(res, BAD_REQUEST, err.message, err.name);
-  } else if (err.code && Number(err.code) === 11000) {
+  }
+  // Check for duplicate key error - if found, use messageError function to send appropriate error message.
+  else if (err.code && Number(err.code) === 11000) {
     messageError(
       res,
       CONFLICT,
@@ -14,15 +19,25 @@ export const handleError = async (req: any, res: any, err: any) => {
       }' already exists.`,
       err.name,
     );
-  } else if (err.statusObj !== undefined) {
+  }
+  // Check for error status object - if found, use messageError function to send appropriate error message.
+  else if (err.statusObj !== undefined) {
     messageError(res, err.statusObj, err.name, err.type);
-  } else if (err.name === "BSONTypeError") {
+  }
+  // Check for BSONTypeError - if found, use messageError function to send appropriate error message.
+  else if (err.name === "BSONTypeError") {
     messageError(res, BAD_REQUEST, err.message, "MongoError");
-  } else if (err.name === "CastError") {
+  }
+  // Check for CastError - if found, use messageError function to send appropriate error message.
+  else if (err.name === "CastError") {
     messageError(res, BAD_REQUEST, err.message, "MongoError");
-  } else if (err.errorTag === "otp") {
+  }
+  // Check for otp error - if found, use messageError function to send appropriate error message.
+  else if (err.errorTag === "otp") {
     messageError(res, BAD_REQUEST, err.message, "ValidationError");
-  } else if (req.originalUrl == "/api/utils/uploadimages") {
+  }
+  // Check for image upload error - if found, use messageError function to send appropriate error message.
+  else if (req.originalUrl == "/api/utils/uploadimages") {
     messageError(
       res,
       BAD_REQUEST,
@@ -30,17 +45,7 @@ export const handleError = async (req: any, res: any, err: any) => {
       "ValidationError",
     );
   }
-  // } else if (
-  //   err.name === "AxiosError" &&
-  //   req.originalUrl == "/api/users/transaction"
-  // ) {
-  //   messageError(
-  //     res,
-  //     BAD_REQUEST,
-  //     "Possible error because of wrong paymentId",
-  //     "RazorpayError",
-  //   );
-  // }
+  // Send other errors that do not match above conditions to webhook and send SERVER_ERROR response using messageError function.
   else {
     console.log(err);
     alert(req.originalUrl, JSON.stringify(err));

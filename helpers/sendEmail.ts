@@ -14,6 +14,8 @@ aws.config.update({
 });
 const ses = new aws.SES();
 
+//  sendgrid email sender 
+
 // async function sendMail(to: string, subject: string, emailContent: string) {
 //   let dataToSend = {
 //     personalizations: [
@@ -66,6 +68,7 @@ const ses = new aws.SES();
 //     });
 // }
 
+// aws ses email sender function
 async function sendMail(to: string, subject: string, emailContent: string) {
   const sender = "Espektro 2023 <espektro@gdsckgec.in>";
   const charset = "UTF-8";
