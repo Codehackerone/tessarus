@@ -13,11 +13,12 @@ import { uploadFile } from "../helpers/s3";
 import fs from "fs";
 import { handleError } from "../helpers/errorHandler";
 
-moment.suppressDeprecationWarnings = true;
+moment.suppressDeprecationWarnings = true; // To remove moment deprecation warnings
 
-const addEvent = async (req: any, res: any) => {
-  try {
+const addEvent = async (req: any, res: any) => { // add an event
+  try {    
     req.body.createdBy = req.volunteer._id;
+    // converting event price to coins
     req.body.eventPrice = Number(
       req.body.eventPrice * Number(process.env.COIN_RUPEE_RATIO),
     );
@@ -25,6 +26,7 @@ const addEvent = async (req: any, res: any) => {
       req.body.eventPriceForKGEC * Number(process.env.COIN_RUPEE_RATIO),
     );
 
+    // basic time validation
     if (new Date(req.body.startTime) >= new Date(req.body.endTime)) {
       throw {
         statusObj: BAD_REQUEST,
@@ -33,6 +35,7 @@ const addEvent = async (req: any, res: any) => {
       };
     }
 
+    // basic team validation
     if (req.body.eventType === "group") {
       if (!req.body.eventMaxParticipants || !req.body.eventMinParticipants) {
         throw {
@@ -45,6 +48,7 @@ const addEvent = async (req: any, res: any) => {
       const maxParticipants = req.body.eventMaxParticipants;
       const minParticipants = req.body.eventMinParticipants;
 
+      // checking if max participants is greater than min participants
       if (maxParticipants <= minParticipants) {
         throw {
           statusObj: BAD_REQUEST,
@@ -54,7 +58,9 @@ const addEvent = async (req: any, res: any) => {
       }
     }
 
+    // creating event
     const event: any = await eventService.addEventService(req.body);
+    // creating log
     await createLogService({
       logType: "EVENT_CREATED",
       volunteer: new ObjectId(req.volunteer._id),
@@ -71,12 +77,14 @@ const addEvent = async (req: any, res: any) => {
   }
 };
 
-const getAllEvents = async (req: any, res: any) => {
+const getAllEvents = async (req: any, res: any) => { // get all events
   try {
-    const page = !req.query.page ? 1 : req.query.page;
-    const dpp = !req.query.dpp ? 200 : req.query.dpp;
+    // pagination and search params
+    const page = !req.query.page ? 1 : req.query.page; // page number
+    const dpp = !req.query.dpp ? 200 : req.query.dpp; // documents per page
 
     const searchParams = req.query;
+    // removing pagination and dpp params from searchParams
     if (searchParams.page) delete searchParams.page;
     if (searchParams.dpp) delete searchParams.dpp;
 
@@ -87,17 +95,21 @@ const getAllEvents = async (req: any, res: any) => {
       dpp,
     );
 
+    // if user is logged in, add isRegistered and ticketId to event object
     if (req.user) {
       const newEventDocs: any = [];
 
+      // getting all tickets of user
       const tickets: any = await ticketService.getTicketService({
         userId: new ObjectId(req.user._id),
       });
       const eventTicketDict: any = {};
+      // creating a dictionary of event id and ticket object
       for (const ticket of tickets) {
         eventTicketDict[ticket.eventId] = ticket;
       }
 
+      // adding isRegistered and ticketId to event object
       if (events.documents) {
         for (let event of events.documents) {
           event = event.toObject();
@@ -124,7 +136,7 @@ const getAllEvents = async (req: any, res: any) => {
   }
 };
 
-const searchEvents = async (req: any, res: any) => {
+const searchEvents = async (req: any, res: any) => { // search events
   try {
     const events: any = await eventService.findEventByNameService(req.query.q);
 
@@ -154,6 +166,7 @@ const getEvent = async (req: any, res: any) => {
 
     event = event[0].toObject();
 
+    // if user is logged in, add isRegistered and ticketId to event object
     if (req.user) {
       const tickets: any = await ticketService.getTicketService({
         userId: new ObjectId(req.user._id),
@@ -181,12 +194,13 @@ const getEvent = async (req: any, res: any) => {
   }
 };
 
-export const updateEvent = async (req: any, res: any) => {
+export const updateEvent = async (req: any, res: any) => { // update event
   try {
     const event: any = await eventService.getEventService({
       _id: req.params.id,
     });
 
+    // converting event price to coins
     req.body.eventPrice = Number(
       req.body.eventPrice * Number(process.env.COIN_RUPEE_RATIO),
     );
@@ -202,6 +216,7 @@ export const updateEvent = async (req: any, res: any) => {
       };
     }
 
+    // checking if user is authorized to update event
     if (
       req.volunteer.accessLevel <= 3 &&
       event[0].createdBy.toString() !== req.volunteer._id.toString()
@@ -213,6 +228,7 @@ export const updateEvent = async (req: any, res: any) => {
       };
     }
 
+    // checking if event is already started
     if (new Date(req.body.startTime) >= new Date(req.body.endTime)) {
       throw {
         statusObj: BAD_REQUEST,
@@ -221,6 +237,7 @@ export const updateEvent = async (req: any, res: any) => {
       };
     }
 
+    // checking if event is group event
     if (req.body.eventType === "group") {
       if (!req.body.eventMaxParticipants || !req.body.eventMinParticipants) {
         throw {
@@ -229,10 +246,11 @@ export const updateEvent = async (req: any, res: any) => {
           type: "ValidationError",
         };
       }
-
+      
       const maxParticipants = req.body.eventMaxParticipants;
       const minParticipants = req.body.eventMinParticipants;
 
+      // checking if max participants is less than or equal to min participants
       if (maxParticipants <= minParticipants) {
         throw {
           statusObj: BAD_REQUEST,
@@ -250,6 +268,7 @@ export const updateEvent = async (req: any, res: any) => {
       req.body,
     );
 
+    // creating log
     await createLogService({
       logType: "EVENT_UPDATED",
       volunteer: new ObjectId(req.volunteer._id),
@@ -266,8 +285,9 @@ export const updateEvent = async (req: any, res: any) => {
   }
 };
 
-export const deleteEvent = async (req: any, res: any) => {
+export const deleteEvent = async (req: any, res: any) => {// delete event
   try {
+    // checking if environment is production and throwing error if it is
     if (process.env.ENV === "prod") {
       throw {
         statusObj: FORBIDDEN,
@@ -288,6 +308,7 @@ export const deleteEvent = async (req: any, res: any) => {
       };
     }
 
+    // checking if user is authorized to delete event
     if (
       req.volunteer.accessLevel <= 3 &&
       event[0].createdBy.toString() !== req.volunteer._id.toString()
@@ -299,6 +320,7 @@ export const deleteEvent = async (req: any, res: any) => {
       };
     }
 
+    // checking if users have already registered for the event
     const tickets: any = await ticketService.getTicketService({
       eventId: req.params.id,
     });
@@ -313,6 +335,7 @@ export const deleteEvent = async (req: any, res: any) => {
 
     await eventService.deleteEventByIdService(req.params.id);
 
+    // creating log
     await createLogService({
       logType: "EVENT_DELETED",
       volunteer: new ObjectId(req.volunteer._id),
@@ -325,7 +348,8 @@ export const deleteEvent = async (req: any, res: any) => {
   }
 };
 
-const addImages = async (req: any, res: any) => {
+// deprecated
+const addImages = async (req: any, res: any) => { /// add images to event
   try {
     let event: any = await eventService.getEventService({
       _id: req.params.id,
@@ -339,6 +363,7 @@ const addImages = async (req: any, res: any) => {
       };
     }
 
+    // checking if user is authorized to add images to event
     if (
       req.volunteer.accessLevel <= 3 &&
       event[0].createdBy.toString() !== req.volunteer._id.toString()
@@ -351,6 +376,7 @@ const addImages = async (req: any, res: any) => {
     }
     event = event[0];
 
+    // 
     const imagesArray: any = event.eventImages;
 
     for (const file of req.files) {
