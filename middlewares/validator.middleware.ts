@@ -2,15 +2,23 @@ import joiSchemas from "../helpers/schemas";
 import { BAD_REQUEST } from "../helpers/messageTypes";
 import { messageError } from "../helpers/message";
 
+// Export a function named 'validateSignUp' that returns a middleware function for routes.
 export const validateSignUp = () => {
   return async (req: any, res: any, next: any) => {
+
+    // Extracts schema error if exists or passes on to next middleware if no error found.
     const { error } = joiSchemas.userSignUpSchema.validate(req.body);
     if (error) {
+
+      // If there is an error, maps error messages from each detailed issue in the schema and joins with comma.
       const msg = error.details.map((el: any) => el.message).join(",");
+
+      // Sends BAD_REQUEST statusObj error response via messageError function
       messageError(res, BAD_REQUEST, msg, "ValidationError");
     } else next();
   };
 };
+
 
 export const validateLogin = () => {
   return async (req: any, res: any, next: any) => {

@@ -2,10 +2,14 @@ import { BAD_REQUEST, UNAUTHORIZED } from "../helpers/messageTypes";
 import { config } from "dotenv";
 import { handleError } from "../helpers/errorHandler";
 
+// Loads the environment variables into 'process.env'.
 config();
 
+// Export a function named 'authorize' that returns a function to be used as middleware for routes.
 export const authorize = () => {
   return async (req: any, res: any, next: any) => {
+
+    // Middleware logic for verifying UTILS-API-KEY presence and validity with appropriate statusObj error messages set in response object.
     try {
       if (req.headers["utils-api-key"] === undefined) {
         throw {
@@ -34,6 +38,8 @@ export const authorize = () => {
         }
       }
     } catch (err) {
+
+      // If there is any error while authorizing the request, pass it on to the 'handleError' function to handle.
       await handleError(req, res, err);
     }
   };

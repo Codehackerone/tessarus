@@ -12,10 +12,13 @@ import {
 
 const Router = express.Router();
 
+// all events
 Router.route("/all").get(userAuthorize(true), eventController.getAllEvents);
 
+// search events
 Router.route("/search").get(eventController.searchEvents);
 
+// add event (level 3)
 Router.route("/add").post(
   volunteerAuthorize(3),
   validateAddEvent(),
@@ -26,22 +29,26 @@ Router.route("/add").post(
 //   .put(volunteerAuthorize(3), upload.array("images"), eventController.addImages)
 //   .delete(volunteerAuthorize(3), eventController.deleteEventImages);
 
+// register for event(user)
 Router.route("/register").post(
   userAuthorize(),
   validateRegisterEvent(),
   eventController.registerEvent,
 );
 
+// checkin for individual event with password(user)
 Router.route("/checkin").post(
   validateEventCheckIn(),
   eventController.eventCheckIn,
 );
 
+// get all participants from event (volunteer)
 Router.route("/getparticipants/:id").get(
   volunteerAuthorize(1),
   eventController.getParticipantsfromEvent,
 );
 
+// get, update, delete event (level 3)
 Router.route("/:id")
   .get(userAuthorize(true), eventController.getEvent)
   .put(volunteerAuthorize(3), validateAddEvent(), eventController.updateEvent)

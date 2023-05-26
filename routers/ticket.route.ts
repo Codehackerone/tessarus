@@ -5,8 +5,10 @@ import { authorize as volunteerAuthorize } from "../middlewares/volunteer.author
 
 const Router = express.Router();
 
+// get all tickets for user
 Router.route("/allforusers").get(userAuthorize(), ticketController.allTickets);
 
+// get all tickets for event (volunteer)
 Router.route("/allforusers/:id").get(
   volunteerAuthorize(4),
   ticketController.allTicketsForUser,
@@ -18,11 +20,13 @@ Router.route("/allforusers/:id").get(
 
 // get all tickets for a user for an event - /user/:id/event/:id - GET
 
+// Checkin users for an event (volunteer 1)
 Router.route("/checkin/:id").post(
   volunteerAuthorize(1),
   ticketController.checkIn,
 );
 
+// get ticket 
 Router.route("/:id").get(ticketController.getTicket);
 
 export default Router;

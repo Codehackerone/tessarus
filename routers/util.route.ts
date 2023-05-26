@@ -6,6 +6,7 @@ const upload = multer({ dest: "./uploads/" });
 
 const router = Router();
 
+// upload images  
 router
   .route("/uploadimages")
   .put(utilAuthorize(), upload.array("images"), utilsController.uploadImages);

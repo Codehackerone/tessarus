@@ -5,6 +5,7 @@ import userService from "../services/user.service";
 import { handleError } from "../helpers/errorHandler";
 
 // Defining an authentication middleware function called 'authorize'
+// softpass - allows the user to pass through the middleware without a token if set to true
 export const authorize = (softPass = false) => {
   return async (req: any, res: any, next: any) => {
     try {
