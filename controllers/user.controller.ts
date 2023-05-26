@@ -21,27 +21,35 @@ import eventService from "../services/event.service";
 import ticketService from "../services/ticket.service";
 import { handleError } from "../helpers/errorHandler";
 
+// jwt config
 const expiry_length = 30 * 86400;
 const jwt_headers: any = {
   algorithm: "HS256",
   expiresIn: expiry_length,
 };
 
+// User sign up
 const signUp = async (req: any, res: any) => {
   try {
+    // create espektroId
     req.body.espektroId = "E" + getRandomId(10);
     req.body.referralCode = getRandomId(10);
+
     const user: any = await userService.signUpService(req.body);
+    // create jwt token
     const access_token = jwt.sign(
       { email: user.email, user_id: user._id },
       String(process.env.JWT_SECRET),
       jwt_headers,
     );
 
+    // if user has been referred by someone
     if (req.body.rcode) {
       const userReferral: any = await userService.findUserService({
         referralCode: req.body.rcode,
       });
+
+      // if user exists update coins
       if (userReferral) {
         await userService.updateUserService(userReferral._id, {
           coins: userReferral.coins + Number(process.env.REFERRAL_BONUS),
@@ -76,6 +84,7 @@ const signUp = async (req: any, res: any) => {
   }
 };
 
+// User login
 const login = async (req: any, res: any) => {
   try {
     const email = req.body.email;
@@ -89,6 +98,8 @@ const login = async (req: any, res: any) => {
       };
       throw err;
     }
+
+    // check if password matches
     if (!bcrypt.compareSync(password, user.password)) {
       const err: any = {
         statusObj: BAD_REQUEST,
@@ -97,6 +108,8 @@ const login = async (req: any, res: any) => {
       };
       throw err;
     }
+
+    // create jwt token
     const access_token = jwt.sign(
       { email: user.email, user_id: user._id },
       String(process.env.JWT_SECRET),
@@ -104,8 +117,12 @@ const login = async (req: any, res: any) => {
     );
     const return_object: any = {};
     return_object.auth_token = access_token;
+
+    // delete password from user object
     return_object.user = Object.assign({}, user)["_doc"];
     delete return_object.user.password;
+
+
     await createLogService({
       logType: "USER_LOGIN",
       userId: new ObjectId(user._id),
@@ -117,6 +134,8 @@ const login = async (req: any, res: any) => {
   }
 };
 
+// Send verification mail to user - (deprecated)
+/**** deprecated ****/
 const sendVerificationMail = async (req: any, res: any) => {
   try {
     const email = req.user.email;
@@ -141,15 +160,20 @@ const sendVerificationMail = async (req: any, res: any) => {
     await handleError(req, res, err);
   }
 };
+/**** deprecated ****/
 
+// Send otp to user
 const sendOTP = async (req: any, res: any) => {
   try {
     const email = req.user.email;
     const name = req.user.name;
+
+    // generate otp
     const otp: any = (Math.floor(Math.random() * 10000) + 10000)
       .toString()
       .substring(1);
 
+    // send otp
     const otpResponse: any = await otpService.createAndSendOtp(
       name,
       "Espektro KGEC - OTP for your account",
@@ -176,10 +200,12 @@ const sendOTP = async (req: any, res: any) => {
   }
 };
 
+// Verify otp for user verification
 const verifyOTPForUserVerification = async (req: any, res: any) => {
   try {
     const otp_token = req.body.otp_token;
     const otp = req.body.otp;
+    // verify otp
     const otpResponse: any = await otpService.verifyOtp(otp_token, otp);
     if ("error" in otpResponse && otpResponse.error === true)
       throw {
@@ -204,6 +230,7 @@ const verifyOTPForUserVerification = async (req: any, res: any) => {
     const subject: any =
       "Espektro KGEC - Ready to get started with Espektro KGEC?";
 
+    // send mail for completed registration
     const resMail: any = await sendMail(
       user.email,
       subject,
@@ -218,6 +245,7 @@ const verifyOTPForUserVerification = async (req: any, res: any) => {
   }
 };
 
+// Send otp for reset password
 const sendOTPForReset = async (req: any, res: any) => {
   try {
     if (!req.body.email) {
@@ -266,6 +294,7 @@ const sendOTPForReset = async (req: any, res: any) => {
   }
 };
 
+// Verify otp for reset password
 const verifyOTPForResetPassword = async (req: any, res: any) => {
   try {
     const password = req.body.password;
@@ -317,6 +346,7 @@ const verifyOTPForResetPassword = async (req: any, res: any) => {
   }
 };
 
+// Verify token for user verification (decprecated)
 const verifyToken = async (req: any, res: any) => {
   try {
     if (req.user.verified) {
@@ -335,6 +365,7 @@ const verifyToken = async (req: any, res: any) => {
   }
 };
 
+// Update user profile
 const updateUser = async (req: any, res: any) => {
   try {
     const user: any = await userService.updateUserService(
@@ -353,10 +384,12 @@ const updateUser = async (req: any, res: any) => {
   }
 };
 
+// Get user profile
 const userProfile = async (req: any, res: any) => {
   try {
     const user: any = req.user;
 
+    // set referral code if not set (added for old users)
     if (!user.referralCode) {
       await userService.addReferralCodeService(user._id, getRandomId(10));
     }
@@ -367,9 +400,12 @@ const userProfile = async (req: any, res: any) => {
     return_object.user.qrText = req.user._id + "-" + user.espektroId;
     delete return_object.user.password;
 
+    // get transactions
     const transactions: any = await userService.getTransactionByUserIdService(
       user._id,
     );
+
+    // refresh pending transactions
     for (let i = 0; i < transactions.length; i++) {
       // eslint-disable-next-line prefer-const
       let transaction: any = transactions[i];
@@ -387,6 +423,8 @@ const userProfile = async (req: any, res: any) => {
   }
 };
 
+// Update user profile picture (deprecated)
+/*** deprecated */
 const updateProfilePic = async (req: any, res: any) => {
   try {
     const result = await uploadFile(req.file);
@@ -415,7 +453,10 @@ const updateProfilePic = async (req: any, res: any) => {
     await handleError(req, res, err);
   }
 };
+/*** deprecated */
 
+// Forgot password (deprecated)
+/*** deprecated */
 const forgotPassword = async (req: any, res: any) => {
   try {
     if (!req.body.email)
@@ -458,7 +499,9 @@ const forgotPassword = async (req: any, res: any) => {
     await handleError(req, res, err);
   }
 };
+/*** deprecated */
 
+/*** deprecated */
 const resetPassword = async (req: any, res: any) => {
   try {
     const resetToken: any = req.body.resetToken;
@@ -488,7 +531,9 @@ const resetPassword = async (req: any, res: any) => {
     await handleError(req, res, err);
   }
 };
+/*** deprecated */
 
+// Verify whether user exists by espektroId and is registered for an event
 const verifyEspektroId = async (req: any, res: any) => {
   try {
     const espektroId: string = req.params.id;
@@ -539,6 +584,7 @@ const verifyEspektroId = async (req: any, res: any) => {
   }
 };
 
+// invite other users by email and referral code
 const inviteUser = async (req: any, res: any) => {
   try {
     if (!req.body.email) {
@@ -589,6 +635,7 @@ const inviteUser = async (req: any, res: any) => {
   }
 };
 
+// add Prize winner to an event (for admin)
 const addPrizeWinner = async (req: any, res: any) => {
   try {
     const { userId, eventId, position, prize } = req.body;
@@ -623,6 +670,7 @@ const addPrizeWinner = async (req: any, res: any) => {
   }
 };
 
+// Create a razorpay transaction for adding coins to wallet
 const createTransaction = async (req: any, res: any) => {
   try {
     if (!req.body.amount) {
@@ -633,7 +681,10 @@ const createTransaction = async (req: any, res: any) => {
       };
     }
 
+    // create a razorpay transaction id
     const refId = "esp_payment_" + getRandomId(10);
+
+    // create a razorpay order
     const data = JSON.stringify({
       amount: req.body.amount * 100,
       currency: "INR",
@@ -666,6 +717,7 @@ const createTransaction = async (req: any, res: any) => {
       },
     });
 
+    // create a transaction body
     // eslint-disable-next-line prefer-const
     let transactionBody: any = {
       userId: req.user._id,
@@ -694,6 +746,7 @@ const createTransaction = async (req: any, res: any) => {
   }
 };
 
+// update razorpay transaction id after successful payment
 const updateTransaction = async (req: any, res: any) => {
   try {
     if (!req.body.transactionId || !req.body.paymentId) {
@@ -724,6 +777,7 @@ const updateTransaction = async (req: any, res: any) => {
   }
 };
 
+// refresh razorpay transaction id after failed or successful payment
 const refreshTransaction = async (req: any, res: any) => {
   try {
     if (!req.body.transactionId) {

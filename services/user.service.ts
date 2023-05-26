@@ -89,11 +89,13 @@ const getTransactionByUserIdService = async (userId: any) => {
   return await Transaction.find({ userId: userId });
 };
 
+// create transaction for payment - razorpay
 const createTransactionService = async (
   transactionBody: any,
   razorpayData: any,
   refId: any,
 ) => {
+  // config for axios
   const config = {
     method: "post",
     maxBodyLength: Infinity,
@@ -104,6 +106,7 @@ const createTransactionService = async (
     },
     data: razorpayData,
   };
+  // create transaction in razorpay api
   const response: any = await axios(config);
   const body: any = { ...transactionBody };
   body.paymentId = response.data.id;
@@ -139,7 +142,9 @@ const refreshTransactionService = async (transactionId: any) => {
   }
 };
 
+// update pending transaction from razorpay api
 const updateTransactionFromRazorpayService = async (transactionId: any) => {
+  // get transaction from db if exists (return if success or failed)
   const transaction: any = await Transaction.findOne({
     transactionId: transactionId,
   });
@@ -149,6 +154,8 @@ const updateTransactionFromRazorpayService = async (transactionId: any) => {
   if (transaction.status === "success" || transaction.status === "failed") {
     return;
   }
+
+  // config for axios
   const config: any = {
     method: "get",
     url: `https://api.razorpay.com/v1/payment_links/${transaction.paymentId}`,
@@ -157,6 +164,8 @@ const updateTransactionFromRazorpayService = async (transactionId: any) => {
     },
   };
   const response: any = await axios(config);
+
+  // update transaction status in db if paid
   if (response.data.status === "paid") {
     const user = await User.findById(transaction.userId);
     if (user) {

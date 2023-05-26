@@ -10,8 +10,11 @@ import { handleError } from "../helpers/errorHandler";
  * @accessLevel: 4 - Super Admin
  */
 
+// Export a function named 'authorize' that returns middleware function for routes.
 export const authorize = (accessLevel: number) => {
   return async (req: any, res: any, next: any) => {
+
+    // Check if an Authorization token is present in the request headers. 
     try {
       if (req.headers["authorization"] === undefined) {
         throw {
@@ -19,9 +22,14 @@ export const authorize = (accessLevel: number) => {
           name: "No authorization token found",
           type: "AuthenticationError",
         };
-      } else {
+      } 
+
+      // If Authorization token exists,
+      else {
         try {
           let decoded: any = "";
+
+          // check for Bearer token in header and validate token using JWT.
           const authorizationHeaderArray =
             req.headers["authorization"].split(" ");
           if (authorizationHeaderArray[0] !== "Bearer") {
@@ -31,6 +39,8 @@ export const authorize = (accessLevel: number) => {
               type: "ValidationError",
             };
           }
+
+          // Extract email from decoded token payload and validate accessLevel of logged-in Volunteer.
           decoded = jwt.verify(
             authorizationHeaderArray[1],
             String(process.env.JWT_SECRET),
@@ -38,6 +48,8 @@ export const authorize = (accessLevel: number) => {
           const volunteer: any = await volunteerService.findVolunteerService({
             email: decoded.email,
           });
+
+          // Check if Volunteer has sufficient access level to perform requested action.
           if (volunteer.accessLevel < accessLevel) {
             throw {
               statusObj: FORBIDDEN,
@@ -47,6 +59,8 @@ export const authorize = (accessLevel: number) => {
           }
           req.volunteer = volunteer;
           next();
+
+        // Catch exceptions when token cannot be validated or expired.
         } catch (err) {
           throw {
             statusObj: UNAUTHORIZED,
@@ -55,6 +69,8 @@ export const authorize = (accessLevel: number) => {
           };
         }
       }
+
+    // In case of exceptions, handleError middleware is called.  
     } catch (err) {
       await handleError(req, res, err);
     }

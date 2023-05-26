@@ -1,24 +1,39 @@
 import { config } from "dotenv";
 config();
 
+// This function adds a custom matcher to Jest's expect API.
 expect.extend({
+
+  // Defines the matcher called 'toBeOneOf'.
   toBeOneOf(received: any, items: Array<any>) {
+
+    // Check if the received value is included in the list of expected values.
     const pass = items.includes(received);
+    
+    // Sets a fail message when the received value is not present in the expected list.
     const message = () =>
       `expected ${received} to be contained in array [${items}]`;
+
+    // Return an object with two properties: a message and a boolean indicating whether the test has passed.
+    // If 'pass' is true, the test has passed. Otherwise, it has failed.
     if (pass) {
       return {
         message,
         pass: true,
       };
+    } else {
+      return {
+        message,
+        pass: false,
+      };
     }
-    return {
-      message,
-      pass: false,
-    };
   },
 });
 
+
+// defines a new interface called Matchers which extends an existing interface 
+// with the generic type parameter <R>. The extended interface includes a single method 
+// toBeOneOf that takes an array of strings as its argument and returns a custom matcher result.
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace jest {

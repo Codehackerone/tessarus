@@ -8,6 +8,7 @@ import { OK, BAD_REQUEST, FORBIDDEN } from "../helpers/messageTypes";
 import { createLogService } from "../services/log.service";
 import { handleError } from "../helpers/errorHandler";
 
+// Get all tickets of a user (for users - headers)
 const allTickets = async (req: any, res: any) => {
   try {
     const tickets = await ticketService.getAllTicketsService({
@@ -24,6 +25,7 @@ const allTickets = async (req: any, res: any) => {
   }
 };
 
+// Get all tickets of a user (for volunteers/admin - headers)
 const allTicketsForUser = async (req: any, res: any) => {
   try {
     if (!req.params.id) {
@@ -47,6 +49,7 @@ const allTicketsForUser = async (req: any, res: any) => {
   }
 };
 
+// Get a ticket 
 const getTicket = async (req: any, res: any) => {
   try {
     const ticket = await ticketService.getTicketService({ _id: req.params.id });
@@ -78,8 +81,10 @@ const getTicket = async (req: any, res: any) => {
   }
 };
 
+// Check in a ticket for an event (for volunteers/admin)
 const checkIn = async (req: any, res: any) => {
   try {
+    // Check if ticket exists
     const ticket = await ticketService.getTicketService({ _id: req.params.id });
     if (ticket.length === 0) {
       throw {
@@ -96,6 +101,7 @@ const checkIn = async (req: any, res: any) => {
       };
     }
 
+    // Check if volunteer is permitted to check in for this event
     const eventsPermitted = req.volunteer.events;
     const eventPermitted = (eventsPermitted as Array<ObjectId>).find(
       (event: ObjectId) => event.equals(ticket[0].eventId),
@@ -108,6 +114,7 @@ const checkIn = async (req: any, res: any) => {
       };
     }
 
+    // add ticket number and checked in at
     const ticketNo = getRandomId(8);
     const updatedTicket: any = await ticketService.updateTicketService(
       { _id: req.params.id },

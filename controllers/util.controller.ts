@@ -5,6 +5,7 @@ import fs from "fs";
 import { createLogService } from "../services/log.service";
 import { handleError } from "../helpers/errorHandler";
 
+// Upload images or any files to S3
 const uploadImages = async (req: any, res: any) => {
   try {
     // eslint-disable-next-line prefer-const
@@ -18,6 +19,7 @@ const uploadImages = async (req: any, res: any) => {
       };
     }
 
+    // take all the files and upload them to S3
     for (const file of req.files) {
       const result = await uploadFile(file);
       imagesArray.push(result.Location);

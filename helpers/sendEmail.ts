@@ -70,6 +70,8 @@ const ses = new aws.SES();
 
 // aws ses email sender function
 async function sendMail(to: string, subject: string, emailContent: string) {
+
+  // Set the sender email, email charset type and create a new SES email object with appropriate parameters set.
   const sender = "Espektro 2023 <espektro@gdsckgec.in>";
   const charset = "UTF-8";
   const params = {
@@ -90,14 +92,22 @@ async function sendMail(to: string, subject: string, emailContent: string) {
       },
     },
   };
+
   try {
+
+    // Call the SES service to send the message asynchronously and wait for the promise to resolve.
     const data = await ses.sendEmail(params).promise();
+
+    // Print success message with recipient email in console log and return an object with 'hasError' false and the response data.
     console.log("Email sent: " + to);
     return {
       hasError: false,
       response: data,
     };
+    
   } catch (err) {
+
+    // If there is any error while sending the email, print error details in console log and return an object with 'hasError' true and the error data.
     console.log("Email not sent: " + to);
     console.error(err);
     return {
@@ -106,5 +116,6 @@ async function sendMail(to: string, subject: string, emailContent: string) {
     };
   }
 }
+
 
 export default sendMail;
