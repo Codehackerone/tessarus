@@ -15,7 +15,8 @@ import { handleError } from "../helpers/errorHandler";
 
 moment.suppressDeprecationWarnings = true; // To remove moment deprecation warnings
 
-const addEvent = async (req: any, res: any) => { // add an event
+// add an event
+const addEvent = async (req: any, res: any) => { 
   try {    
     req.body.createdBy = req.volunteer._id;
     // converting event price to coins
@@ -77,7 +78,8 @@ const addEvent = async (req: any, res: any) => { // add an event
   }
 };
 
-const getAllEvents = async (req: any, res: any) => { // get all events
+// get all events, if user is logged in, add isRegistered and ticketId to event object
+const getAllEvents = async (req: any, res: any) => { 
   try {
     // pagination and search params
     const page = !req.query.page ? 1 : req.query.page; // page number
@@ -136,7 +138,8 @@ const getAllEvents = async (req: any, res: any) => { // get all events
   }
 };
 
-const searchEvents = async (req: any, res: any) => { // search events
+// search events
+const searchEvents = async (req: any, res: any) => { 
   try {
     const events: any = await eventService.findEventByNameService(req.query.q);
 
@@ -194,7 +197,8 @@ const getEvent = async (req: any, res: any) => {
   }
 };
 
-export const updateEvent = async (req: any, res: any) => { // update event
+// update event
+export const updateEvent = async (req: any, res: any) => { 
   try {
     const event: any = await eventService.getEventService({
       _id: req.params.id,
@@ -285,6 +289,7 @@ export const updateEvent = async (req: any, res: any) => { // update event
   }
 };
 
+// delete event (not allowed in production)
 export const deleteEvent = async (req: any, res: any) => {// delete event
   try {
     // checking if environment is production and throwing error if it is
@@ -348,7 +353,7 @@ export const deleteEvent = async (req: any, res: any) => {// delete event
   }
 };
 
-// deprecated
+// add images to event - deprecated(cloudinary)
 const addImages = async (req: any, res: any) => { /// add images to event
   try {
     let event: any = await eventService.getEventService({
@@ -410,6 +415,7 @@ const addImages = async (req: any, res: any) => { /// add images to event
   }
 };
 
+// delete images from event - deprecated(cloudinary)
 const deleteEventImages = async (req: any, res: any) => {
   try {
     let event: any = await eventService.getEventService({
@@ -475,12 +481,14 @@ const deleteEventImages = async (req: any, res: any) => {
   }
 };
 
+// user register to event
 const registerEvent = async (req: any, res: any) => {
   try {
     let event: any = await eventService.getEventService({
       _id: req.body.eventId,
     });
 
+    // check event exists
     if (event.length === 0) {
       throw {
         statusObj: BAD_REQUEST,
@@ -491,6 +499,7 @@ const registerEvent = async (req: any, res: any) => {
 
     event = event[0];
 
+    // check event is registered on another platform
     if (event.otherPlatformUrl && event.otherPlatformUrl !== "") {
       throw {
         statusObj: BAD_REQUEST,
@@ -513,6 +522,7 @@ const registerEvent = async (req: any, res: any) => {
       };
     }
 
+    // check event has already ended
     if (
       new Date(event.endTime) < new Date(moment("YYYY-MM-DD HH:mm:ss").format())
     ) {
@@ -523,6 +533,7 @@ const registerEvent = async (req: any, res: any) => {
       };
     }
 
+    // check event type - group or individual
     if (event.eventType === "group") {
       const teamMembersArray: any = [];
       teamMembersArray.push({
@@ -531,6 +542,7 @@ const registerEvent = async (req: any, res: any) => {
         designation: "Team Leader",
       });
 
+      // check if team is present in request
       if (!req.body.team) {
         throw {
           statusObj: BAD_REQUEST,
@@ -539,6 +551,7 @@ const registerEvent = async (req: any, res: any) => {
         };
       }
 
+      // check if enough team members are present in request
       if (req.body.team.members.length + 1 > event.eventMaxParticipants) {
         throw {
           statusObj: BAD_REQUEST,
@@ -554,6 +567,7 @@ const registerEvent = async (req: any, res: any) => {
         };
       }
 
+      // check if the team member espektroId is valid
       for (const teamMember of req.body.team.members) {
         const user: any = await userService.findUserService({
           espektroId: teamMember.espektroId,
@@ -565,6 +579,7 @@ const registerEvent = async (req: any, res: any) => {
             type: "NotFoundError",
           };
         }
+        // final team members array
         teamMembersArray.push({
           name: user.name,
           espektroId: user.espektroId,
@@ -575,6 +590,7 @@ const registerEvent = async (req: any, res: any) => {
       req.body.team.members = teamMembersArray;
     }
 
+    // check college
     const college = req.user.college;
     const kgecNames = [
       "kalyani government engineering college",
@@ -586,12 +602,14 @@ const registerEvent = async (req: any, res: any) => {
 
     let toPayForEvent = 0;
 
+    // check if user is from kgec
     if (kgecNames.includes(college.toLowerCase().trim())) {
       toPayForEvent = !event.eventPriceForKGEC ? 0 : event.eventPriceForKGEC;
     } else {
       toPayForEvent = event.eventPrice;
     }
 
+    // check if user has enough coins
     if (toPayForEvent > 0 && req.user.coins < toPayForEvent) {
       throw {
         statusObj: BAD_REQUEST,
@@ -607,10 +625,12 @@ const registerEvent = async (req: any, res: any) => {
       coinsSpent: toPayForEvent,
     };
 
+    // update user coins
     await userService.updateUserService(req.user._id, {
       coins: req.user.coins - toPayForEvent,
     });
 
+    // create payment log
     await createPaymentLogService({
       logType: "COINS_USED",
       userId: new ObjectId(req.user._id),
@@ -618,6 +638,7 @@ const registerEvent = async (req: any, res: any) => {
       description: `${req.user.name} used ${toPayForEvent} coins to register for event ${event.title}`,
     });
 
+    // create log
     await createLogService({
       logType: "EVENT_REGISTERED",
       userId: new ObjectId(req.user._id),
@@ -630,8 +651,10 @@ const registerEvent = async (req: any, res: any) => {
   }
 };
 
+// password checkin for individual event
 const eventCheckIn = async (req: any, res: any) => {
   try {
+    // check if event exists
     const user: any = await userService.findUserService({
       espektroId: req.body.espektroId,
     });
@@ -644,6 +667,7 @@ const eventCheckIn = async (req: any, res: any) => {
       };
     }
 
+    // check if user has registered for the event
     let ticket: any = await ticketService.getTicketService({
       eventId: new ObjectId(req.body.eventId),
       userId: new ObjectId(user._id),
@@ -659,6 +683,7 @@ const eventCheckIn = async (req: any, res: any) => {
 
     ticket = ticket[0];
 
+    // check if user checkin is already done
     if (!ticket.checkedIn) {
       throw {
         statusObj: BAD_REQUEST,
@@ -670,6 +695,7 @@ const eventCheckIn = async (req: any, res: any) => {
       };
     }
 
+    // check if password matches
     if (String(req.body.password) !== String(ticket.ticketNumber)) {
       throw {
         statusObj: BAD_REQUEST,
@@ -691,6 +717,7 @@ const eventCheckIn = async (req: any, res: any) => {
   }
 };
 
+// get participants from event
 const getParticipantsfromEvent = async (req: any, res: any) => {
   try {
     const events: any = await ticketService.getParticipantsfromEventService(

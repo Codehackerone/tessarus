@@ -26,18 +26,21 @@ import { handleError } from "../helpers/errorHandler";
 
 config();
 
+// JWT configs
 const expiry_length = 30 * 86400;
 const jwt_headers: any = {
   algorithm: "HS256",
   expiresIn: expiry_length,
 };
 
+// Add a volunteer
 const addVolunteer = async (req: any, res: any) => {
   try {
     const password = getRandomId(8);
 
     req.body.password = password;
 
+    // if event ids are provided, check if they exist
     if (req.body.events) {
       for (const eventId of req.body.events) {
         const event: any = await eventService.getEventService({
@@ -62,6 +65,7 @@ const addVolunteer = async (req: any, res: any) => {
       req.volunteer.name,
     );
 
+    // Send email to volunteer to login with password
     const resMail: any = await sendMail(
       volunteer.email,
       "Espektro KGEC - Added as a volunteer!",
@@ -88,6 +92,7 @@ const addVolunteer = async (req: any, res: any) => {
   }
 };
 
+// Resend credentials to a volunteer
 const resendCredentials = async (req: any, res: any) => {
   try {
     const volunteer: any = await volunteerService.findVolunteerService({
@@ -132,6 +137,7 @@ const resendCredentials = async (req: any, res: any) => {
   }
 };
 
+// Login for a volunteer
 const login = async (req: any, res: any) => {
   try {
     const email = req.body.email;
@@ -147,6 +153,7 @@ const login = async (req: any, res: any) => {
       };
       throw err;
     }
+    // Check if password matches
     if (!bcrypt.compareSync(password, volunteer.password)) {
       const err: any = {
         statusObj: BAD_REQUEST,
@@ -155,6 +162,8 @@ const login = async (req: any, res: any) => {
       };
       throw err;
     }
+
+    // Create JWT token
     const access_token = jwt.sign(
       { email: volunteer.email, user_id: volunteer._id },
       String(process.env.JWT_SECRET),
@@ -162,8 +171,11 @@ const login = async (req: any, res: any) => {
     );
     const return_object: any = {};
     return_object.auth_token = access_token;
+
+    // Remove password from return object
     return_object.volunteer = Object.assign({}, volunteer)["_doc"];
     delete return_object.volunteer.password;
+
     await createLogService({
       logType: "VOLUNTEER_LOGIN",
       userId: new ObjectId(volunteer._id),
@@ -175,6 +187,7 @@ const login = async (req: any, res: any) => {
   }
 };
 
+// get all volunteers 
 const getAllVolunteers = async (req: any, res: any) => {
   try {
     const volunteers: any = await volunteerService.findAllVolunteersService();
@@ -196,6 +209,7 @@ const getAllVolunteers = async (req: any, res: any) => {
   }
 };
 
+// get a volunteer by id
 const getVolunteer = async (req: any, res: any) => {
   try {
     const volunteerId = req.params.id;
@@ -222,6 +236,7 @@ const getVolunteer = async (req: any, res: any) => {
   }
 };
 
+// update a volunteer by id
 const updateVolunteer = async (req: any, res: any) => {
   try {
     const volunteerId = req.params.id;
@@ -273,6 +288,7 @@ const updateVolunteer = async (req: any, res: any) => {
   }
 };
 
+// get all users 
 const getAllUsers = async (req: any, res: any) => {
   try {
     const users: any = await userService.getAllUsersService();
@@ -292,6 +308,7 @@ const getAllUsers = async (req: any, res: any) => {
   }
 };
 
+// get all general logs in the system
 const getAllLogs = async (req: any, res: any) => {
   try {
     const logType = !req.query.logType ? {} : { logType: req.query.logType };
@@ -315,6 +332,7 @@ const getAllLogs = async (req: any, res: any) => {
   }
 };
 
+// get all payment logs in the system
 const getAllPaymentLogs = async (req: any, res: any) => {
   try {
     const logType = !req.query.logType ? {} : { logType: req.query.logType };
@@ -338,6 +356,7 @@ const getAllPaymentLogs = async (req: any, res: any) => {
   }
 };
 
+// delete a volunteer by id
 const deleteVolunteer = async (req: any, res: any) => {
   try {
     const volunteerId = req.params.id;
@@ -379,6 +398,7 @@ const deleteVolunteer = async (req: any, res: any) => {
   }
 };
 
+// find a user by QR scan text
 const userQRScan = async (req: any, res: any) => {
   try {
     const qrText = req.body.qrText;
@@ -403,6 +423,7 @@ const userQRScan = async (req: any, res: any) => {
   }
 };
 
+// add coins to a user by volunteer
 const addCoins = async (req: any, res: any) => {
   try {
     const userId = req.body.userId;
