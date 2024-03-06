@@ -13,8 +13,7 @@ import { handleError } from "../helpers/errorHandler";
 // Export a function named 'authorize' that returns middleware function for routes.
 export const authorize = (accessLevel: number) => {
   return async (req: any, res: any, next: any) => {
-
-    // Check if an Authorization token is present in the request headers. 
+    // Check if an Authorization token is present in the request headers.
     try {
       if (req.headers["authorization"] === undefined) {
         throw {
@@ -22,7 +21,7 @@ export const authorize = (accessLevel: number) => {
           name: "No authorization token found",
           type: "AuthenticationError",
         };
-      } 
+      }
 
       // If Authorization token exists,
       else {
@@ -60,7 +59,7 @@ export const authorize = (accessLevel: number) => {
           req.volunteer = volunteer;
           next();
 
-        // Catch exceptions when token cannot be validated or expired.
+          // Catch exceptions when token cannot be validated or expired.
         } catch (err) {
           throw {
             statusObj: UNAUTHORIZED,
@@ -70,7 +69,7 @@ export const authorize = (accessLevel: number) => {
         }
       }
 
-    // In case of exceptions, handleError middleware is called.  
+      // In case of exceptions, handleError middleware is called.
     } catch (err) {
       await handleError(req, res, err);
     }

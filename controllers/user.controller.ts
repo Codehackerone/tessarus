@@ -122,7 +122,6 @@ const login = async (req: any, res: any) => {
     return_object.user = Object.assign({}, user)["_doc"];
     delete return_object.user.password;
 
-
     await createLogService({
       logType: "USER_LOGIN",
       userId: new ObjectId(user._id),

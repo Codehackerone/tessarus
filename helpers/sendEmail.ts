@@ -16,7 +16,7 @@ dotenv.config();
 // });
 // const ses = new aws.SES();
 
-//  sendgrid email sender 
+//  sendgrid email sender
 
 // async function sendMail(to: string, subject: string, emailContent: string) {
 //   let dataToSend = {
@@ -121,8 +121,13 @@ dotenv.config();
 
 async function sendMail(to: string, subject: string, emailContent: string) {
   const mailgun = new Mailgun(FormData);
-  const mg = mailgun.client({ username: "api", key: process.env.MAILGUN_API_KEY || "", url: "https://api.eu.mailgun.net" });
-  const base_domain = process.env.MAILGUN_SENDER_EMAIL_DOMAIN || "communications.espektro.in";
+  const mg = mailgun.client({
+    username: "api",
+    key: process.env.MAILGUN_API_KEY || "",
+    url: "https://api.eu.mailgun.net",
+  });
+  const base_domain =
+    process.env.MAILGUN_SENDER_EMAIL_DOMAIN || "communications.espektro.in";
   const email_user = process.env.MAILGUN_SENDER_EMAIL_USER || "no-reply";
   try {
     const res = await mg.messages.create(base_domain, {
@@ -145,6 +150,5 @@ async function sendMail(to: string, subject: string, emailContent: string) {
     };
   }
 }
-
 
 export default sendMail;

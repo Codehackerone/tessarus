@@ -23,7 +23,7 @@ const s3 = new S3({
 export const uploadFile = async (file: any) => {
   // Creating a stream of the file to be uploaded
   const fileStream = fs.createReadStream(file.path);
-  
+
   // Configuring parameters for the upload request
   const uploadParams: any = {
     Bucket: bucketName,
@@ -32,7 +32,7 @@ export const uploadFile = async (file: any) => {
     ContentType: file.mimetype,
     ACL: "public-read",
   };
-  
+
   // "promise()" method is used as S3.upload() returns a promise.
   // Uploading the file to AWS S3 using the configured S3 client
   return s3.upload(uploadParams).promise();

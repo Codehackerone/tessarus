@@ -187,7 +187,7 @@ const login = async (req: any, res: any) => {
   }
 };
 
-// get all volunteers 
+// get all volunteers
 const getAllVolunteers = async (req: any, res: any) => {
   try {
     const volunteers: any = await volunteerService.findAllVolunteersService();
@@ -288,7 +288,7 @@ const updateVolunteer = async (req: any, res: any) => {
   }
 };
 
-// get all users 
+// get all users
 const getAllUsers = async (req: any, res: any) => {
   try {
     const users: any = await userService.getAllUsersService();

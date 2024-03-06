@@ -26,7 +26,7 @@ Router.route("/checkin/:id").post(
   ticketController.checkIn,
 );
 
-// get ticket 
+// get ticket
 Router.route("/:id").get(ticketController.getTicket);
 
 export default Router;

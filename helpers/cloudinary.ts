@@ -18,4 +18,17 @@ export const storage: any = new CloudinaryStorage({
   } as any,
 });
 
-export { cloudinary };
+export const uploadFile = async (file: any) => {
+  try {
+    const result = await cloudinary.uploader.upload(file.path, {
+      folder: "Tessarus",
+    });
+    return result;
+  } catch (err: any) {
+    throw {
+      statusObj: { status: 400, message: "Bad Request" },
+      name: "Error uploading file",
+      type: "ValidationError",
+    };
+  }
+};

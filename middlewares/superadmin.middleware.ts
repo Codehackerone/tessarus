@@ -18,16 +18,19 @@ export const issuperadmin = () => {
   return async (req: any, res: any, next: any) => {
     try {
       if (req.body.accessLevel < 4) next(); // Checking access level
-      else if (req.headers["admin_secret"] === undefined) { // Checking if an admin secret is present in headers
+      else if (req.headers["admin_secret"] === undefined) {
+        // Checking if an admin secret is present in headers
         throw {
           statusObj: UNAUTHORIZED,
           name: "You cant create a superadmin",
           type: "AuthorizationError",
         };
-      } else { // Validating admin secret
+      } else {
+        // Validating admin secret
         try {
           const admin_secret = req.headers["admin_secret"];
-          if (admin_secret !== String(process.env.ADMIN_SECRET)) { // If not matched, throwing an error
+          if (admin_secret !== String(process.env.ADMIN_SECRET)) {
+            // If not matched, throwing an error
             throw {
               statusObj: BAD_REQUEST,
               name: "Incorrect admin secret",
@@ -39,7 +42,7 @@ export const issuperadmin = () => {
           throw {
             statusObj: BAD_REQUEST,
             name: "Expired or invalid token",
-            type: "JWTError", 
+            type: "JWTError",
           };
         }
       }

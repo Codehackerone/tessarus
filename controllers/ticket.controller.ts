@@ -49,7 +49,7 @@ const allTicketsForUser = async (req: any, res: any) => {
   }
 };
 
-// Get a ticket 
+// Get a ticket
 const getTicket = async (req: any, res: any) => {
   try {
     const ticket = await ticketService.getTicketService({ _id: req.params.id });

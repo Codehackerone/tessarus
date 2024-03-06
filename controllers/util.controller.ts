@@ -1,11 +1,11 @@
 import { messageCustom } from "../helpers/message";
 import { CREATED, BAD_REQUEST } from "../helpers/messageTypes";
-import { uploadFile } from "../helpers/s3";
+// import { uploadFile } from "../helpers/s3";
+import { uploadFile as uploadCloudinary } from "../helpers/cloudinary";
 import fs from "fs";
 import { createLogService } from "../services/log.service";
 import { handleError } from "../helpers/errorHandler";
 
-// Upload images or any files to S3
 const uploadImages = async (req: any, res: any) => {
   try {
     // eslint-disable-next-line prefer-const
@@ -18,11 +18,11 @@ const uploadImages = async (req: any, res: any) => {
         type: "ValidationError",
       };
     }
-
-    // take all the files and upload them to S3
     for (const file of req.files) {
-      const result = await uploadFile(file);
-      imagesArray.push(result.Location);
+      // const result = await uploadFile(file);
+      // imagesArray.push(result.Location);
+      const result = await uploadCloudinary(file);
+      imagesArray.push(result.secure_url);
       fs.unlinkSync("./uploads/" + file.filename);
     }
 
@@ -37,6 +37,7 @@ const uploadImages = async (req: any, res: any) => {
 
     messageCustom(res, CREATED, "Images added successfully", return_object);
   } catch (err: any) {
+    console.log(err);
     await handleError(req, res, err);
   }
 };

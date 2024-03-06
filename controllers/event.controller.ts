@@ -16,8 +16,8 @@ import { handleError } from "../helpers/errorHandler";
 moment.suppressDeprecationWarnings = true; // To remove moment deprecation warnings
 
 // add an event
-const addEvent = async (req: any, res: any) => { 
-  try {    
+const addEvent = async (req: any, res: any) => {
+  try {
     req.body.createdBy = req.volunteer._id;
     // converting event price to coins
     req.body.eventPrice = Number(
@@ -79,7 +79,7 @@ const addEvent = async (req: any, res: any) => {
 };
 
 // get all events, if user is logged in, add isRegistered and ticketId to event object
-const getAllEvents = async (req: any, res: any) => { 
+const getAllEvents = async (req: any, res: any) => {
   try {
     // pagination and search params
     const page = !req.query.page ? 1 : req.query.page; // page number
@@ -139,7 +139,7 @@ const getAllEvents = async (req: any, res: any) => {
 };
 
 // search events
-const searchEvents = async (req: any, res: any) => { 
+const searchEvents = async (req: any, res: any) => {
   try {
     const events: any = await eventService.findEventByNameService(req.query.q);
 
@@ -198,7 +198,7 @@ const getEvent = async (req: any, res: any) => {
 };
 
 // update event
-export const updateEvent = async (req: any, res: any) => { 
+export const updateEvent = async (req: any, res: any) => {
   try {
     const event: any = await eventService.getEventService({
       _id: req.params.id,
@@ -250,7 +250,7 @@ export const updateEvent = async (req: any, res: any) => {
           type: "ValidationError",
         };
       }
-      
+
       const maxParticipants = req.body.eventMaxParticipants;
       const minParticipants = req.body.eventMinParticipants;
 
@@ -290,7 +290,8 @@ export const updateEvent = async (req: any, res: any) => {
 };
 
 // delete event (not allowed in production)
-export const deleteEvent = async (req: any, res: any) => {// delete event
+export const deleteEvent = async (req: any, res: any) => {
+  // delete event
   try {
     // checking if environment is production and throwing error if it is
     if (process.env.ENV === "prod") {
@@ -354,7 +355,8 @@ export const deleteEvent = async (req: any, res: any) => {// delete event
 };
 
 // add images to event - deprecated(cloudinary)
-const addImages = async (req: any, res: any) => { /// add images to event
+const addImages = async (req: any, res: any) => {
+  /// add images to event
   try {
     let event: any = await eventService.getEventService({
       _id: req.params.id,
@@ -381,7 +383,7 @@ const addImages = async (req: any, res: any) => { /// add images to event
     }
     event = event[0];
 
-    // 
+    //
     const imagesArray: any = event.eventImages;
 
     for (const file of req.files) {
