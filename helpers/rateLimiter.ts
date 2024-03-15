@@ -18,7 +18,7 @@ const apiLimiter = rateLimit({
 
 const mailLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  max: 500,
+  max: 50,
   message: "Too many requests from this IP, please try again after an hour",
   standardHeaders: true,
   legacyHeaders: false,
