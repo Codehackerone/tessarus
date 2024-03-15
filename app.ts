@@ -9,6 +9,7 @@ import { createStream } from "rotating-file-stream";
 import path from "path";
 import { router } from "./router";
 import { deploy } from "./helpers/webhookAlert";
+import requestIp from "request-ip";
 
 // Initialize dotenv.
 config();
@@ -47,6 +48,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // Apply limiter middleware to "/api" route.
 app.use("/api", apiLimiter);
+
+app.use(requestIp.mw());
 
 // Create a rotating file stream for logging.
 const logStream: any = createStream("access.log", {

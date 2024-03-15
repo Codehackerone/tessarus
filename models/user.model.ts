@@ -44,7 +44,7 @@ const userSchema = new Schema(
     },
     degree: {
       type: String,
-      enum: ["B.Tech", "M.Tech", "MCA", "Others"],
+      enum: ["B.Tech", "M.Tech", "MCA", "B.Sc", "BA", "MA", "M.Sc", "Other"],
     },
     year: {
       type: String,

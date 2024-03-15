@@ -6,6 +6,7 @@ import volunterRouter from "./routers/volunteer.route";
 import eventRouter from "./routers/event.route";
 import ticketRouter from "./routers/ticket.route";
 import utilRouter from "./routers/util.route";
+import analyticsRouter from "./routers/analytics.route";
 
 export const router = Router();
 
@@ -18,6 +19,7 @@ router.use("/api/volunteers", volunterRouter);
 router.use("/api/events", eventRouter);
 router.use("/api/tickets", ticketRouter);
 router.use("/api/utils", utilRouter);
+router.use("/api/analytics", analyticsRouter);
 
 router.all("*", (req: Request, res: Response) => {
   message(res, NOT_FOUND, "Route does not exist");
