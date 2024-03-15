@@ -9,15 +9,22 @@ const apiLimiter = rateLimit({
     "Too many requests from this IP, please try again after an 15 minutes", // Sending this error message when the limit is breached
   standardHeaders: true, // Enabling standard headers
   legacyHeaders: false, // Disabling legacy headers
+  keyGenerator: (req: any) => {
+    return req.clientIp; 
+  },
 });
 
 // for mails
+
 const mailLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // Setting a 60 minute (1 hour) limit
-  max: 10, // Allowing only up to 10 requests in this time period
-  message: "Too many requests from this IP, please try again after an hour", // Sending this error message when the limit is breached
-  standardHeaders: true, // Enabling standard headers
-  legacyHeaders: false, // Disabling legacy headers
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  message: "Too many requests from this IP, please try again after an hour",
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req: any) => {
+    return req.clientIp; 
+  },
 });
 
 // Exporting the configured rate limiters to be used by other modules
