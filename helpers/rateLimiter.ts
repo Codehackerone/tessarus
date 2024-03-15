@@ -10,7 +10,7 @@ const apiLimiter = rateLimit({
   standardHeaders: true, // Enabling standard headers
   legacyHeaders: false, // Disabling legacy headers
   keyGenerator: (req: any) => {
-    return req.clientIp; 
+    return req.clientIp;
   },
 });
 
@@ -23,7 +23,7 @@ const mailLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req: any) => {
-    return req.clientIp; 
+    return req.clientIp;
   },
 });
 
