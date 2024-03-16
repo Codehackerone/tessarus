@@ -535,6 +535,14 @@ const registerEvent = async (req: any, res: any) => {
       };
     }
 
+    if (event.eventClosed) {
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "Event registration is full. Please come again next time",
+        type: "ValidationError",
+      };
+    }
+
     // check event type - group or individual
     if (event.eventType === "group") {
       const teamMembersArray: any = [];
