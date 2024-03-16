@@ -62,6 +62,10 @@ const eventSchema = new Schema(
       type: Number,
       default: 0,
     },
+    eventClosed: {
+      type: Boolean,
+      default: false,
+    },
     eventOrganiserClub: {
       name: {
         type: String,
