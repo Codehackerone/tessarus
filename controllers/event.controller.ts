@@ -524,10 +524,11 @@ const registerEvent = async (req: any, res: any) => {
       };
     }
 
-    const inTeam = await ticketService.checkWhetherUserIsRegisteredInEventService(
-      req.user.espektroId,
-      new ObjectId(req.body.eventId),    
-    );
+    const inTeam =
+      await ticketService.checkWhetherUserIsRegisteredInEventService(
+        req.user.espektroId,
+        new ObjectId(req.body.eventId),
+      );
 
     if (inTeam.length > 0) {
       throw {
@@ -602,15 +603,19 @@ const registerEvent = async (req: any, res: any) => {
             type: "NotFoundError",
           };
         }
-        const inTeam:any = await ticketService.checkWhetherUserIsRegisteredInEventService(
-          teamMember.espektroId,
-          new ObjectId(req.body.eventId),
-        );
+        const inTeam: any =
+          await ticketService.checkWhetherUserIsRegisteredInEventService(
+            teamMember.espektroId,
+            new ObjectId(req.body.eventId),
+          );
 
         if (inTeam.length > 0) {
           throw {
             statusObj: BAD_REQUEST,
-            name: "User of Espektro ID " + teamMember.espektroId + " already registered for this event",
+            name:
+              "User of Espektro ID " +
+              teamMember.espektroId +
+              " already registered for this event",
             type: "ValidationError",
           };
         }
