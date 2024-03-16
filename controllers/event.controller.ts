@@ -524,6 +524,19 @@ const registerEvent = async (req: any, res: any) => {
       };
     }
 
+    const inTeam = await ticketService.checkWhetherUserIsRegisteredInEventService(
+      req.user.espektroId,
+      new ObjectId(req.body.eventId),    
+    );
+
+    if (inTeam.length > 0) {
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "You have already registered for this event",
+        type: "ValidationError",
+      };
+    }
+
     // check event has already ended
     if (
       new Date(event.endTime) < new Date(moment("YYYY-MM-DD HH:mm:ss").format())
@@ -587,6 +600,18 @@ const registerEvent = async (req: any, res: any) => {
             statusObj: BAD_REQUEST,
             name: "User of Espektro ID " + teamMember.espektroId + "not found",
             type: "NotFoundError",
+          };
+        }
+        const inTeam:any = await ticketService.checkWhetherUserIsRegisteredInEventService(
+          teamMember.espektroId,
+          new ObjectId(req.body.eventId),
+        );
+
+        if (inTeam.length > 0) {
+          throw {
+            statusObj: BAD_REQUEST,
+            name: "User of Espektro ID " + teamMember.espektroId + " already registered for this event",
+            type: "ValidationError",
           };
         }
         // final team members array
