@@ -86,7 +86,7 @@ const updatePrizeWinnerService = async (
 };
 
 const getTransactionByUserIdService = async (userId: any) => {
-  return await Transaction.find({ userId: userId });
+  return await Transaction.find({ userId: userId }).sort({ createdAt: -1 });
 };
 
 // create transaction for payment - razorpay

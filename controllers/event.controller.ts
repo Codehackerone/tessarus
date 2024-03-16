@@ -524,6 +524,19 @@ const registerEvent = async (req: any, res: any) => {
       };
     }
 
+    const inTeam = await ticketService.checkWhetherUserIsRegisteredInEventService(
+      req.user.espektroId,
+      new ObjectId(req.body.eventId),    
+    );
+
+    if (inTeam.length > 0) {
+      throw {
+        statusObj: BAD_REQUEST,
+        name: "You have already registered for this event",
+        type: "ValidationError",
+      };
+    }
+
     // check event has already ended
     if (
       new Date(event.endTime) < new Date(moment("YYYY-MM-DD HH:mm:ss").format())

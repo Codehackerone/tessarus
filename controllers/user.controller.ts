@@ -711,7 +711,7 @@ const createTransaction = async (req: any, res: any) => {
       options: {
         checkout: {
           name: "KGEC Students Association",
-          logo: "https://res.cloudinary.com/codehackerone/image/upload/v1710504267/nestxz4wf3jqvez5h3vh.jpg",
+          logo: "https://tessarus.s3.ap-south-1.amazonaws.com/e470226ceb67e9afe17967ba06014883",
         },
       },
     });
