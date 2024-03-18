@@ -222,7 +222,7 @@ export const updateEvent = async (req: any, res: any) => {
 
     // checking if user is authorized to update event
     if (
-      req.volunteer.accessLevel <= 3 &&
+      req.volunteer.accessLevel < 3 &&
       event[0].createdBy.toString() !== req.volunteer._id.toString()
     ) {
       throw {
